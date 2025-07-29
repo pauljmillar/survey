@@ -1,15 +1,21 @@
-import { StackProvider, StackTheme } from "@stackframe/stack";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { stackServerApp } from "../stack";
+import { Geist, Geist_Mono } from "next/font/google";
+import { ClerkProvider } from '@clerk/nextjs'
 import "./globals.css";
-import { Provider } from "./provider";
 
-const inter = Inter({ subsets: ["latin"] });
+const geist = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
-  title: "Stack Template",
-  description: "A Multi-tenant Next.js Starter Template",
+  title: "Panelist Rewards Platform",
+  description: "Earn points by completing surveys and redeem them for rewards",
 };
 
 export default function RootLayout({
@@ -18,14 +24,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        <Provider>
-          <StackProvider app={stackServerApp}>
-            <StackTheme>{children}</StackTheme>
-          </StackProvider>
-        </Provider>
-      </body>
-    </html>
+    <ClerkProvider
+      appearance={{
+        elements: {
+          formButtonPrimary: 'bg-slate-900 hover:bg-slate-800 text-sm',
+          card: 'bg-white',
+        },
+      }}
+    >
+      <html lang="en">
+        <body
+          className={`${geist.variable} ${geistMono.variable} antialiased`}
+        >
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
