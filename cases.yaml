@@ -1,0 +1,291 @@
+cases:
+  # Panelist Role Cases (UC01-UC08)
+  - id: 1
+    title: "Panelist Registration and Authentication"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Implement panelist registration and authentication using Clerk. Include role assignment,
+      profile creation, and landing page with registration flow. Handle email verification
+      and initial profile setup.
+    related_use_case: UC01
+    last_updated: "2025-01-27T10:00:00"
+    comments: []
+
+  - id: 2
+    title: "Points Balance Display Component"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Create reusable PointsDisplay component that shows current balance prominently
+      throughout the app. Include real-time updates and proper formatting.
+    related_use_case: UC02
+    last_updated: "2025-01-27T10:01:00"
+    comments: []
+
+  - id: 3
+    title: "Available Surveys List"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Build SurveyList component that displays qualified surveys sorted by newest first.
+      Include points reward, estimated time, and completion button. Handle filtering
+      and pagination.
+    related_use_case: UC03
+    last_updated: "2025-01-27T10:02:00"
+    comments: []
+
+  - id: 4
+    title: "Survey Completion and Points Awarding"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Implement survey completion flow with automatic points awarding. Include
+      completion validation, points calculation, balance updates, and activity logging.
+      Handle both internal and external survey types.
+    related_use_case: UC04
+    last_updated: "2025-01-27T10:03:00"
+    comments: []
+
+  - id: 5
+    title: "Redemption Options Browser"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Create RedemptionCenter component to display available merchant offers and cash
+      conversion options. Include filtering, sorting, and detailed offer information.
+    related_use_case: UC05
+    last_updated: "2025-01-27T10:04:00"
+    comments: []
+
+  - id: 6
+    title: "Points Redemption System"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Implement points redemption flow with balance validation, transaction safety,
+      and error handling for insufficient balance. Include redemption confirmation
+      and receipt generation.
+    related_use_case: UC06
+    last_updated: "2025-01-27T10:05:00"
+    comments: []
+
+  - id: 7
+    title: "Activity Log and History"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Build ActivityFeed component showing complete transaction history including
+      surveys completed, points earned, and redemptions made. Include filtering
+      and chronological sorting.
+    related_use_case: UC07
+    last_updated: "2025-01-27T10:06:00"
+    comments: []
+
+  - id: 8
+    title: "Panelist Profile Management"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Create ProfileManager component for viewing and updating profile information,
+      preferences, and account settings. Include form validation and real-time updates.
+    related_use_case: UC08
+    last_updated: "2025-01-27T10:07:00"
+    comments: []
+
+  # Survey Admin Role Cases (UC09-UC12)
+  - id: 9
+    title: "Survey Admin Authentication"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Implement role-based authentication for survey admins using Clerk. Include
+      proper permission checks and dashboard access control.
+    related_use_case: UC09
+    last_updated: "2025-01-27T10:08:00"
+    comments: []
+
+  - id: 10
+    title: "Survey Creation System"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Build SurveyCreator component for creating new surveys with title, description,
+      points reward, estimated completion time, and qualification criteria. Include
+      form validation and draft saving.
+    related_use_case: UC10
+    last_updated: "2025-01-27T10:09:00"
+    comments: []
+
+  - id: 11
+    title: "Survey Qualification Management"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Create QualificationManager component for browsing panelist list and setting
+      qualification flags for specific surveys. Include bulk operations and search
+      functionality.
+    related_use_case: UC11
+    last_updated: "2025-01-27T10:10:00"
+    comments: []
+
+  - id: 12
+    title: "Survey Performance Analytics"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Implement SurveyAnalytics component showing completion rates, response quality,
+      and performance metrics for surveys. Include charts, graphs, and export functionality.
+    related_use_case: UC12
+    last_updated: "2025-01-27T10:11:00"
+    comments: []
+
+  # System Admin Role Cases (UC13-UC17)
+  - id: 13
+    title: "System Admin Authentication"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Implement role-based authentication for system admins with full administrative
+      access. Include proper permission checks and security measures.
+    related_use_case: UC13
+    last_updated: "2025-01-27T10:12:00"
+    comments: []
+
+  - id: 14
+    title: "Panelist Account Management"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Create UserManagement component for viewing, deactivating, and deleting
+      panelist accounts. Include account status management and bulk operations.
+    related_use_case: UC14
+    last_updated: "2025-01-27T10:13:00"
+    comments: []
+
+  - id: 15
+    title: "Survey Admin Account Management"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Extend UserManagement component to handle survey admin accounts including
+      creation, modification, and permission management.
+    related_use_case: UC15
+    last_updated: "2025-01-27T10:14:00"
+    comments: []
+
+  - id: 16
+    title: "Platform Analytics Dashboard"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Build PlatformAnalytics component showing platform-wide metrics including
+      total surveys completed, points distributed, redemption rates, and user
+      engagement. Include real-time data and historical trends.
+    related_use_case: UC16
+    last_updated: "2025-01-27T10:15:00"
+    comments: []
+
+  - id: 17
+    title: "Merchant Offer Management"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Create OfferManagement component for creating, editing, and deactivating
+      merchant offers. Include offer validation, status management, and bulk operations.
+    related_use_case: UC17
+    last_updated: "2025-01-27T10:16:00"
+    comments: []
+
+  # Core Infrastructure Cases
+  - id: 18
+    title: "Database Schema Implementation"
+    status: "T"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Implement all database tables and relationships as defined in TDD. Include
+      proper indexing, foreign key constraints, and data validation rules.
+    related_use_case: "Infrastructure"
+    last_updated: "2025-01-27T22:35:00"
+    comments: 
+      - "Complete schema implemented with all 8 tables, RLS policies, business logic functions, Supabase integration, TypeScript types, and comprehensive documentation. Includes migration files, seed data, and environment configuration. Ready for review."
+      - "SR: Reviewed implementation - all 8 tables implemented per TDD spec. Includes proper RLS policies, business logic functions, and comprehensive documentation. Implementation exceeds requirements. Status approved."
+
+  - id: 19
+    title: "Authentication and Authorization System"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Implement Clerk integration with role-based access control. Include permission
+      validation, route protection, and session management.
+    related_use_case: "Infrastructure"
+    last_updated: "2025-01-27T10:18:00"
+    comments: []
+
+  - id: 20
+    title: "API Routes and Services"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Create all necessary API routes for points, surveys, redemptions, and user
+      management. Include proper error handling, validation, and rate limiting.
+    related_use_case: "Infrastructure"
+    last_updated: "2025-01-27T10:19:00"
+    comments: []
+
+  - id: 21
+    title: "Real-time Updates System"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Implement real-time updates for points balance, activity feed, and survey
+      availability using Supabase subscriptions or WebSockets.
+    related_use_case: "Infrastructure"
+    last_updated: "2025-01-27T10:20:00"
+    comments: []
+
+  - id: 22
+    title: "Mobile-Responsive Layout"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Implement mobile-first responsive design with card-based layouts, proper
+      navigation, and touch-friendly interactions across all components.
+    related_use_case: "UI/UX"
+    last_updated: "2025-01-27T10:21:00"
+    comments: []
+
+  - id: 23
+    title: "Error Handling and Validation"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Implement comprehensive error handling for insufficient balance, validation
+      errors, and system failures. Include user-friendly error messages and
+      recovery mechanisms.
+    related_use_case: "Infrastructure"
+    last_updated: "2025-01-27T10:22:00"
+    comments: []
