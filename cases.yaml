@@ -247,15 +247,16 @@ cases:
 
   - id: 20
     title: "API Routes and Services"
-    status: "N"
+    status: "R"
     created_by: SR
     assigned_to: ENG
     description: >
       Create all necessary API routes for points, surveys, redemptions, and user
       management. Include proper error handling, validation, and rate limiting.
     related_use_case: "Infrastructure"
-    last_updated: "2025-01-27T10:19:00"
-    comments: []
+    last_updated: "2025-01-28T00:00:00"
+    comments: 
+      - "Complete API infrastructure implemented with 8 endpoint groups, comprehensive authentication integration, Zod validation schemas, rate limiting system, standardized error handling, and extensive documentation. Includes all CRUD operations for surveys, points management, redemptions, offers, qualifications, and activity logging with proper role-based access control."
 
   - id: 21
     title: "Real-time Updates System"
