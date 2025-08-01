@@ -1,189 +1,223 @@
-import { FeatureGrid } from "@/components/features";
-import { Hero } from "@/components/hero";
-import { PricingGrid } from "@/components/pricing";
-import { stackServerApp } from "@/stack";
-import { GitHubLogoIcon } from "@radix-ui/react-icons";
-import { ComponentIcon, Users } from "lucide-react";
+'use client'
 
-export default async function IndexPage() {
-  const project = await stackServerApp.getProject();
-  if (!project.config.clientTeamCreationEnabled) {
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton, useAuth } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
+import { Hero } from '@/components/hero'
+import { Features } from '@/components/features'
+import { Pricing } from '@/components/pricing'
+import { Footer } from '@/components/footer'
+import { LandingPageHeader } from '@/components/landing-page-header'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+
+export default function LandingPage() {
+  const { isSignedIn, isLoaded } = useAuth()
+  const router = useRouter()
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.push('/dashboard')
+    }
+  }, [isLoaded, isSignedIn, router])
+
+  // Show loading state while auth is loading
+  if (!isLoaded) {
     return (
-      <div className="w-full min-h-96 flex items-center justify-center">
-        <div className="max-w-xl gap-4">
-          <p className="font-bold text-xl">Setup Required</p>
-          <p className="">
-            {
-              "To start using this project, please enable client-side team creation in the Stack Auth dashboard (Project > Team Settings). This message will disappear once the feature is enabled."
-            }
-          </p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
       </div>
-    );
+    )
   }
 
   return (
-    <>
-      <Hero
-        capsuleText="100% Open-source & Free"
-        capsuleLink="https://stacktemplate.com"
-        title="A Multi-tenant Next.js Starter Template"
-        subtitle="Built for developers, by developers. Next.js + Shadcn UI + Stack Auth."
-        primaryCtaText="Get Started"
-        primaryCtaLink={stackServerApp.urls.signUp}
-        secondaryCtaText="GitHub"
-        secondaryCtaLink="https://github.com/stack-auth/stack-template"
-        credits={
-          <>
-            Crafted with ❤️ by{" "}
-            <a
-              href="https://stack-auth.com"
-              target="_blank"
-              rel="noreferrer"
-              className="underline"
-            >
-              Stack Auth
-            </a>
-          </>
-        }
-      />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <LandingPageHeader />
+      
+      <main>
+        <SignedOut>
+          {/* Hero Section with Registration CTA */}
+          <section className="relative overflow-hidden">
+            <div className="max-w-7xl mx-auto">
+              <div className="relative z-10 pb-8 bg-transparent sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                  <div className="sm:text-center lg:text-left pt-8 sm:pt-12 lg:pt-16">
+                    <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+                      <span className="block xl:inline">Earn Points for Your</span>{' '}
+                      <span className="block text-blue-600 xl:inline">Opinions</span>
+                    </h1>
+                    <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                      Join thousands of panelists earning points by completing surveys. 
+                      Share your thoughts and redeem rewards from top merchants.
+                    </p>
+                    
+                    {/* Registration Cards */}
+                    <div className="mt-8 sm:mt-12">
+                      <div className="grid gap-6 md:grid-cols-2 max-w-2xl mx-auto lg:mx-0">
+                        {/* Sign Up Card */}
+                        <Card className="p-6 bg-white/90 backdrop-blur-sm border-blue-200 hover:shadow-lg transition-all duration-200">
+                          <div className="text-center">
+                            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                              </svg>
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">New Panelist</h3>
+                            <p className="text-sm text-gray-600 mb-4">
+                              Create your account and start earning points immediately
+                            </p>
+                            <SignUpButton mode="modal">
+                              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                                Sign Up Free
+                              </Button>
+                            </SignUpButton>
+                          </div>
+                        </Card>
 
-      <div id="features" />
-      <FeatureGrid
-        title="Features"
-        subtitle="Unlock powerful capabilities for your project."
-        items={[
-          {
-            icon: (
-              <svg viewBox="0 0 24 24" className="h-12 w-12 fill-current">
-                <path d="M11.572 0c-.176 0-.31.001-.358.007a19.76 19.76 0 0 1-.364.033C7.443.346 4.25 2.185 2.228 5.012a11.875 11.875 0 0 0-2.119 5.243c-.096.659-.108.854-.108 1.747s.012 1.089.108 1.748c.652 4.506 3.86 8.292 8.209 9.695.779.25 1.6.422 2.534.525.363.04 1.935.04 2.299 0 1.611-.178 2.977-.577 4.323-1.264.207-.106.247-.134.219-.158-.02-.013-.9-1.193-1.955-2.62l-1.919-2.592-2.404-3.558a338.739 338.739 0 0 0-2.422-3.556c-.009-.002-.018 1.579-.023 3.51-.007 3.38-.01 3.515-.052 3.595a.426.426 0 0 1-.206.214c-.075.037-.14.044-.495.044H7.81l-.108-.068a.438.438 0 0 1-.157-.171l-.05-.106.006-4.703.007-4.705.072-.092a.645.645 0 0 1 .174-.143c.096-.047.134-.051.54-.051.478 0 .558.018.682.154.035.038 1.337 1.999 2.895 4.361a10760.433 10760.433 0 0 0 4.735 7.17l1.9 2.879.096-.063a12.317 12.317 0 0 0 2.466-2.163 11.944 11.944 0 0 0 2.824-6.134c.096-.66.108-.854.108-1.748 0-.893-.012-1.088-.108-1.747-.652-4.506-3.859-8.292-8.208-9.695a12.597 12.597 0 0 0-2.499-.523A33.119 33.119 0 0 0 11.573 0zm4.069 7.217c.347 0 .408.005.486.047a.473.473 0 0 1 .237.277c.018.06.023 1.365.018 4.304l-.006 4.218-.744-1.14-.746-1.14v-3.066c0-1.982.01-3.097.023-3.15a.478.478 0 0 1 .233-.296c.096-.05.13-.054.5-.054z" />
-              </svg>
-            ),
-            title: "Next.js 14",
-            description:
-              "Utilize the latest features: App Router, Layouts, Suspense.",
-          },
-          {
-            icon: (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 256 256"
-                className="h-12 w-12 fill-current"
-              >
-                <rect width="256" height="256" fill="none"></rect>
-                <line
-                  x1="208"
-                  y1="128"
-                  x2="128"
-                  y2="208"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="22"
-                ></line>
-                <line
-                  x1="192"
-                  y1="40"
-                  x2="40"
-                  y2="192"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="22"
-                ></line>
-              </svg>
-            ),
-            title: "Shadcn UI",
-            description:
-              "Modern and fully customizable UI components based on Tailwind CSS.",
-          },
-          {
-            icon: (
-              <svg
-                width="201"
-                height="242"
-                viewBox="0 0 201 242"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-12 w-12 fill-current"
-              >
-                <path d="M104.004 1.78785C101.751 0.662376 99.1002 0.663161 96.8483 1.78998L4.9201 47.7892C2.21103 49.1448 0.5 51.9143 0.5 54.9436V130.526C0.5 133.556 2.2123 136.327 4.92292 137.682L96.9204 183.67C99.1725 184.796 101.823 184.796 104.075 183.67L168.922 151.246C174.242 148.587 180.5 152.455 180.5 158.402V168.855C180.5 171.885 178.788 174.655 176.078 176.01L104.077 212.011C101.825 213.137 99.1745 213.137 96.9224 212.012L12.0771 169.598C6.75791 166.939 0.5 170.807 0.5 176.754V187.048C0.5 190.083 2.21689 192.856 4.93309 194.209L97.0051 240.072C99.2529 241.191 101.896 241.191 104.143 240.07L196.071 194.21C198.785 192.857 200.5 190.084 200.5 187.052V119.487C200.5 113.54 194.242 109.672 188.922 112.332L132.078 140.754C126.758 143.414 120.5 139.546 120.5 133.599V123.145C120.5 120.115 122.212 117.345 124.922 115.99L196.078 80.4124C198.788 79.0573 200.5 76.2872 200.5 73.257V54.9468C200.5 51.9158 198.787 49.1451 196.076 47.7904L104.004 1.78785Z" />
-              </svg>
-            ),
-            title: "Stack Auth",
-            description:
-              "Comprehensive Authentication: OAuth, User Management, and more.",
-          },
-          {
-            icon: <Users className="h-12 w-12" />,
-            title: "Multi-tenancy & RBAC",
-            description: "Built-in Teams and Permissions.",
-          },
-          {
-            icon: <GitHubLogoIcon className="h-12 w-12" />,
-            title: "100% Open-source",
-            description: "Open-source and self-hostable codebase.",
-          },
-          {
-            icon: <ComponentIcon className="h-12 w-12" />,
-            title: "Modular Design",
-            description: "Easily extend and customize. No spaghetti code.",
-          },
-        ]}
-      />
+                        {/* Sign In Card */}
+                        <Card className="p-6 bg-white/90 backdrop-blur-sm border-gray-200 hover:shadow-lg transition-all duration-200">
+                          <div className="text-center">
+                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                              </svg>
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">Returning Panelist</h3>
+                            <p className="text-sm text-gray-600 mb-4">
+                              Welcome back! Access your dashboard and available surveys
+                            </p>
+                            <SignInButton mode="modal">
+                              <Button variant="outline" className="w-full border-gray-300 hover:bg-gray-50">
+                                Sign In
+                              </Button>
+                            </SignInButton>
+                          </div>
+                        </Card>
+                      </div>
+                    </div>
 
-      <div id="pricing" />
-      <PricingGrid
-        title="Pricing"
-        subtitle="Flexible plans for every team."
-        items={[
-          {
-            title: "Basic",
-            price: "Free",
-            description: "For individuals and small projects.",
-            features: [
-              "Full source code",
-              "100% Open-source",
-              "Community support",
-              "Free forever",
-              "No credit card required",
-            ],
-            buttonText: "Get Started",
-            buttonHref: stackServerApp.urls.signUp,
-          },
-          {
-            title: "Pro",
-            price: "$0.00",
-            description: "Ideal for growing teams and businesses.",
-            features: [
-              "Full source code",
-              "100% Open-source",
-              "Community support",
-              "Free forever",
-              "No credit card required",
-            ],
-            buttonText: "Upgrade to Pro",
-            isPopular: true,
-            buttonHref: stackServerApp.urls.signUp,
-          },
-          {
-            title: "Enterprise",
-            price: "Still Free",
-            description: "For large organizations.",
-            features: [
-              "Full source code",
-              "100% Open-source",
-              "Community support",
-              "Free forever",
-              "No credit card required",
-            ],
-            buttonText: "Contact Us",
-            buttonHref: stackServerApp.urls.signUp,
-          },
-        ]}
-      />
-    </>
-  );
+                    {/* Quick Stats */}
+                    <div className="mt-8 sm:mt-12">
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                          <div className="text-2xl font-bold text-blue-600">10K+</div>
+                          <div className="text-sm text-gray-600">Active Panelists</div>
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-blue-600">50+</div>
+                          <div className="text-sm text-gray-600">Survey Partners</div>
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-blue-600">$2M+</div>
+                          <div className="text-sm text-gray-600">Rewards Earned</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Hero Image */}
+              <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
+                <div className="h-56 w-full bg-gradient-to-r from-blue-400 to-purple-500 sm:h-72 md:h-96 lg:w-full lg:h-full flex items-center justify-center">
+                  <div className="text-center text-white">
+                    <div className="text-6xl mb-4">📊</div>
+                    <div className="text-xl font-semibold">Your Voice Matters</div>
+                    <div className="text-sm opacity-90">Help shape products and services</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Features Section */}
+          <Features />
+          
+          {/* Pricing/Benefits Section */}
+          <section className="py-16 bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center">
+                <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+                  How It Works
+                </h2>
+                <p className="mt-4 text-lg text-gray-600">
+                  Start earning points in three simple steps
+                </p>
+              </div>
+              
+              <div className="mt-12 grid gap-8 md:grid-cols-3">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-blue-600">1</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Sign Up</h3>
+                  <p className="text-gray-600">
+                    Create your free account and complete your profile to get matched with relevant surveys
+                  </p>
+                </div>
+                
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-green-600">2</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Complete Surveys</h3>
+                  <p className="text-gray-600">
+                    Share your opinions on topics you care about. Each survey takes 5-15 minutes
+                  </p>
+                </div>
+                
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-purple-600">3</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Earn Rewards</h3>
+                  <p className="text-gray-600">
+                    Redeem your points for gift cards, cashback, and exclusive offers from top brands
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+          
+          {/* Final CTA Section */}
+          <section className="py-16 bg-blue-600">
+            <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+              <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
+                Ready to Start Earning?
+              </h2>
+              <p className="mt-4 text-xl text-blue-100">
+                Join our community of panelists and turn your opinions into rewards
+              </p>
+              <div className="mt-8">
+                <SignUpButton mode="modal">
+                  <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-50 font-semibold px-8 py-3">
+                    Get Started Today
+                  </Button>
+                </SignUpButton>
+              </div>
+              <p className="mt-4 text-sm text-blue-200">
+                Free to join • No credit card required • Instant approval
+              </p>
+            </div>
+          </section>
+        </SignedOut>
+
+        <SignedIn>
+          {/* Redirect authenticated users - this shouldn't show due to useEffect redirect */}
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">Welcome back!</h1>
+              <p className="text-gray-600 mb-4">Redirecting you to your dashboard...</p>
+              <Button onClick={() => router.push('/dashboard')}>
+                Go to Dashboard
+              </Button>
+            </div>
+          </div>
+        </SignedIn>
+      </main>
+
+      <Footer />
+    </div>
+  )
 }

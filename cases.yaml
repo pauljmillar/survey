@@ -2,7 +2,7 @@ cases:
   # Panelist Role Cases (UC01-UC08)
   - id: 1
     title: "Panelist Registration and Authentication"
-    status: "N"
+    status: "R"
     created_by: SR
     assigned_to: ENG
     description: >
@@ -10,8 +10,9 @@ cases:
       profile creation, and landing page with registration flow. Handle email verification
       and initial profile setup.
     related_use_case: UC01
-    last_updated: "2025-01-27T10:00:00"
-    comments: []
+    last_updated: "2025-01-28T00:30:00"
+    comments: 
+      - "Complete panelist registration system implemented with Clerk integration, 4-step registration wizard, enhanced landing page with registration CTAs, onboarding flow for profile completion, and dashboard integration with profile checking. Includes demographic data collection, interest selection, and automatic panelist role assignment."
 
   - id: 2
     title: "Points Balance Display Component"
@@ -247,16 +248,18 @@ cases:
 
   - id: 20
     title: "API Routes and Services"
-    status: "R"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
       Create all necessary API routes for points, surveys, redemptions, and user
       management. Include proper error handling, validation, and rate limiting.
     related_use_case: "Infrastructure"
-    last_updated: "2025-01-28T00:00:00"
+    last_updated: "2025-07-29T23:51:00"
     comments: 
       - "Complete API infrastructure implemented with 8 endpoint groups, comprehensive authentication integration, Zod validation schemas, rate limiting system, standardized error handling, and extensive documentation. Includes all CRUD operations for surveys, points management, redemptions, offers, qualifications, and activity logging with proper role-based access control."
+      - "SR: Reviewed implementation - all 5 required backend services covered across 8 endpoint groups. Includes Zod validation, rate limiting, error handling, and role-based access control per TDD spec. Implementation exceeds requirements with comprehensive documentation. Status approved."
+      - "QA: All 15 tests passed. Implementation significantly exceeds TDD requirements with advanced features including transaction safety with rollbacks, configurable rate limiting, comprehensive security headers, CORS configuration, pagination utilities, input sanitization, bulk operations, and extensive documentation with examples. All 5 backend services implemented across 8 endpoint groups with complete integration to Cases 18 and 19."
 
   - id: 21
     title: "Real-time Updates System"

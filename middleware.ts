@@ -1,54 +1,38 @@
-import { authMiddleware } from '@clerk/nextjs'
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
-export default authMiddleware({
-  // Routes that can be accessed while signed out
-  publicRoutes: [
-    '/',
-    '/sign-in(.*)',
-    '/sign-up(.*)',
-    '/api/webhooks(.*)',
-  ],
-  
-  // Routes that require authentication
-  ignoredRoutes: [
-    '/api/webhooks(.*)',
-  ],
+const isPublicRoute = createRouteMatcher([
+  '/',
+  '/api/offers',
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/api/auth/user-role',
+])
 
-  // After auth middleware runs
-  afterAuth(auth, req, evt) {
-    // Handle unauthenticated users
-    if (!auth.userId && !auth.isPublicRoute) {
-      return NextResponse.redirect(new URL('/sign-in', req.url))
-    }
+export default clerkMiddleware((auth, req) => {
+  // If user is not authenticated and trying to access protected route
+  if (!auth().userId && !isPublicRoute(req)) {
+    return NextResponse.redirect(new URL('/', req.url))
+  }
 
-    // Handle authenticated users accessing auth pages
-    if (auth.userId && (req.nextUrl.pathname.startsWith('/sign-in') || req.nextUrl.pathname.startsWith('/sign-up'))) {
-      return NextResponse.redirect(new URL('/dashboard', req.url))
-    }
+  // If user is authenticated but trying to access auth pages, redirect to dashboard
+  if (auth().userId && (req.nextUrl.pathname === '/sign-in' || req.nextUrl.pathname === '/sign-up')) {
+    return NextResponse.redirect(new URL('/dashboard', req.url))
+  }
 
-    // Role-based route protection
-    if (auth.userId) {
-      const { pathname } = req.nextUrl
+  // If user is authenticated and on home page, redirect to dashboard
+  if (auth().userId && req.nextUrl.pathname === '/') {
+    return NextResponse.redirect(new URL('/dashboard', req.url))
+  }
 
-      // System admin only routes
-      if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/survey')) {
-        // Will be checked by AuthGuard component
-      }
-
-      // Survey admin routes
-      if (pathname.startsWith('/admin/survey') || pathname.startsWith('/surveys/manage')) {
-        // Will be checked by AuthGuard component
-      }
-
-      // Panelist only routes
-      if (pathname.startsWith('/dashboard') || pathname.startsWith('/surveys/available') || pathname.startsWith('/redemptions')) {
-        // Will be checked by AuthGuard component
-      }
-    }
-
+  // Handle onboarding flow - new users should complete profile setup
+  if (auth().userId && req.nextUrl.pathname === '/dashboard') {
+    // We'll let the dashboard component handle checking if profile exists
+    // and redirect to onboarding if needed
     return NextResponse.next()
-  },
+  }
+
+  return NextResponse.next()
 })
 
 export const config = {
