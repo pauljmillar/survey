@@ -127,6 +127,34 @@ System admins can create, edit, or deactivate merchant offers available for rede
 - **Card-Based Layout:** Survey and redemption options displayed as cards
 - **Prominent Points Display:** Current point balance clearly visible throughout the app
 - **Activity Feed:** Chronological list of user activities and transactions
+- **Graceful Empty States:** All list views (e.g., surveys, offers, activity logs) must display a friendly message when no data is available, rather than an error. This ensures a positive user experience even when the database is empty.
+
+### Collapsible Left Navigation (Sidebar)
+- **Sidebar Visibility:**
+  - The left navigation (sidebar) is visible for all logged-in users (panelists and admins).
+  - The sidebar is collapsible: it can be expanded or collapsed by the user.
+  - When expanded, clicking anywhere outside the sidebar (on the main content or overlay) will collapse the sidebar again.
+- **Menu Options (Role-Based):**
+  - **Panelist Menu:**
+    - Dashboard
+    - Earn
+      - Surveys
+      - Live Surveys
+      - Panels
+    - Redeem
+    - Profile
+  - **Admin Menu:**
+    - Dashboard
+    - Panelists
+    - Surveys
+    - Live Surveys
+    - Panels
+    - Rewards
+- **Navigation Behavior:**
+  - Menu options are clearly grouped and labeled.
+  - Submenus (e.g., under "Earn") are expandable/collapsible.
+  - The sidebar is accessible and keyboard-navigable.
+  - Sidebar state (expanded/collapsed) is preserved during navigation.
 
 ---
 

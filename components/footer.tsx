@@ -49,7 +49,7 @@ export function Footer(props: {
             ] as const
           ).map((link, index) => (
             <Link
-              href={link.href}
+              href={link.href || '/'}
               className={buttonVariants({ variant: "ghost", size: "icon" })}
               key={index}
             >

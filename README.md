@@ -65,3 +65,56 @@ A minimalistic multi-tenant Next.js starter template with minimal setup and a mo
 
 - [Shadcn UI](https://github.com/shadcn-ui/ui)
 - [Shadcn Taxonomy](https://github.com/shadcn-ui/taxonomy)
+
+# TopNavBar Component
+
+## Overview
+
+The `TopNavBar` component provides a minimalist, accessible, and responsive navigation bar for the app, matching the original repo's black/white design. It includes:
+- Dark/light theme selector
+- Menu options: About, Earn Points, Redeem Points
+- Profile dropdown (Account settings, Toggle theme, Sign out)
+- Auth buttons (Sign in/up) when logged out
+- Mobile-optimized menu
+
+## Usage
+
+The `TopNavBar` is imported and rendered globally in `app/layout.tsx`:
+
+```tsx
+import { TopNavBar } from '@/components/top-nav-bar'
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        <TopNavBar />
+        <div className="pt-16">{children}</div>
+      </body>
+    </html>
+  )
+}
+```
+
+## Accessibility
+- All nav/menu elements are keyboard navigable and ARIA-labeled.
+- Profile dropdown and mobile menu are accessible via keyboard and screen readers.
+
+## Customization
+- To add or change menu options, edit the `MENU_OPTIONS` array in `components/top-nav-bar.tsx`.
+- The component uses Tailwind CSS for styling and is fully responsive.
+- The theme selector uses the `ColorModeSwitcher` component.
+
+## Mobile Support
+- The mobile menu is accessible via a hamburger button and includes all menu/auth/profile options.
+
+## Auth Integration
+- Uses Clerk.dev for authentication, sign in/up, and profile dropdown.
+
+## Minimalist Design
+- Black/white color scheme with subtle transitions and focus states.
+- Consistent with the original repo's minimalist look and feel.
+
+---
+
+For further customization or to add new menu items, update the `MENU_OPTIONS` array and adjust the JSX as needed.

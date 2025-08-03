@@ -2,7 +2,7 @@
 
 import { useAuth as useClerkAuth, useUser } from '@clerk/nextjs'
 import { useEffect, useState } from 'react'
-import { UserRole, Permission, hasPermission, hasAnyPermission, hasAllPermissions } from '@/lib/auth'
+import { UserRole, Permission, hasPermission, hasAnyPermission, hasAllPermissions } from '@/lib/auth-client'
 
 interface UseAuthReturn {
   // Clerk auth state

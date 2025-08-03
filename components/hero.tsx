@@ -17,7 +17,7 @@ export function Hero(props: {
     <section className="space-y-6 py-32 md:py-48 lg:py-52">
       <div className="container flex max-w-[64rem] flex-col items-center gap-4 text-center">
         <Link
-          href={props.capsuleLink}
+          href={props.capsuleLink || '/'}
           className="rounded-2xl bg-muted px-4 py-1.5 text-sm font-medium"
           target="_blank"
         >
@@ -31,14 +31,14 @@ export function Hero(props: {
         </p>
         <div className="flex gap-4 flex-wrap justify-center">
           <Link
-            href={props.primaryCtaLink}
+            href={props.primaryCtaLink || '/'}
             className={cn(buttonVariants({ size: "lg" }))}
           >
             {props.primaryCtaText}
           </Link>
 
           <Link
-            href={props.secondaryCtaLink}
+            href={props.secondaryCtaLink || '/'}
             target="_blank"
             rel="noreferrer"
             className={cn(buttonVariants({ variant: "outline", size: "lg" }))}

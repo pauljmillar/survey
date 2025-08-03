@@ -48,7 +48,7 @@ export function PricingCard(props: PricingCardProps) {
       </CardContent>
       <CardFooter>
         <Link
-          href={props.buttonHref}
+          href={props.buttonHref || '/'}
           className={buttonVariants({
             variant: props.isPopular ? "default" : "outline",
           })}

@@ -215,6 +215,7 @@ interface Permission {
 - **Prominent points display** on all pages
 - **Minimal, clean interface** focusing on functionality
 - **Real-time updates** for points and activity
+- **Graceful empty state handling** for all list views (surveys, offers, activity logs, etc.): display a friendly message when no data is available, never an error.
 
 ### Key UI Components
 - **Points Header** - Always visible current balance
@@ -222,6 +223,7 @@ interface Permission {
 - **Activity Feed** - Chronological transaction history
 - **Redemption Grid** - Visual offer browsing
 - **Progress Indicators** - Survey completion status
+- **Empty State Message** - Friendly, informative message for all list views when no data is available
 
 ---
 

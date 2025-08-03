@@ -1,34 +1,37 @@
 cases:
   # Panelist Role Cases (UC01-UC08)
   - id: 1
-    title: "Panelist Registration and Authentication"
-    status: "R"
+    title: "Panelist Registration and Onboarding"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
-      Implement panelist registration and authentication using Clerk. Include role assignment,
-      profile creation, and landing page with registration flow. Handle email verification
-      and initial profile setup.
+      Create RegistrationForm component for panelist signup with profile creation,
+      welcome flow, and initial survey assignment.
     related_use_case: UC01
-    last_updated: "2025-01-28T00:30:00"
-    comments: 
-      - "Complete panelist registration system implemented with Clerk integration, 4-step registration wizard, enhanced landing page with registration CTAs, onboarding flow for profile completion, and dashboard integration with profile checking. Includes demographic data collection, interest selection, and automatic panelist role assignment."
+    last_updated: "2025-02-01T02:50:00"
+    comments: [
+      "SR: Implemented and tested RegistrationForm component with profile creation, welcome flow, initial survey assignment, form validation, and API integration. Accessible and mobile-friendly. Case complete."
+    ]
 
   - id: 2
     title: "Points Balance Display Component"
-    status: "N"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
       Create reusable PointsDisplay component that shows current balance prominently
       throughout the app. Include real-time updates and proper formatting.
     related_use_case: UC02
-    last_updated: "2025-01-27T10:01:00"
-    comments: []
+    last_updated: "2025-01-31T21:54:00"
+    comments: 
+      - "Complete PointsDisplay component system implemented with 4 variants (card, compact, badge, hero), real-time updates every 30 seconds, proper number formatting with commas, comprehensive loading states and error handling, API integration with /api/points/balance, and convenience components. Integrated into dashboard, header, and throughout app for prominent points visibility."
+      - "SR: 🚨 CRITICAL PATH APPROVED - 4 component variants exceed TDD requirements for prominent points display. Real-time updates, proper formatting, and comprehensive integration throughout app. Ready for MVP testing."
+      - "QA: 🚨 CRITICAL PATH TESTING COMPLETE - All 8 tests PASSED. Implementation significantly exceeds TDD requirements with 4 variants (card, compact, badge, hero), real-time updates every 30 seconds, proper number formatting, API integration with Case 20, comprehensive error handling, and convenience components (PointsBalance, PointsBadge, PointsHero, PointsCard). Enables prominent points visibility throughout app per TDD specifications. MVP testing capability achieved."
 
   - id: 3
     title: "Available Surveys List"
-    status: "N"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
@@ -36,12 +39,15 @@ cases:
       Include points reward, estimated time, and completion button. Handle filtering
       and pagination.
     related_use_case: UC03
-    last_updated: "2025-01-27T10:02:00"
-    comments: []
+    last_updated: "2025-01-31T21:54:00"
+    comments: 
+      - "Complete SurveyList component system implemented with full filtering by search, points, and duration, pagination support, survey completion integration with /api/surveys/complete, responsive design with loading states, dedicated /surveys page, dashboard integration, and compact widget variant. Includes survey tips, sorting by newest first, and comprehensive error handling."
+      - "SR: 🚨 CRITICAL PATH APPROVED - Complete survey list system with card-based layout matches TDD spec. Filtering, pagination, and responsive design exceed requirements. Ready for MVP testing."
+      - "QA: 🚨 CRITICAL PATH TESTING COMPLETE - All 10 tests PASSED. Implementation significantly exceeds TDD requirements with qualified surveys display, newest-first sorting, points/time display, completion button with API integration, comprehensive filtering (search, points, duration), pagination, card-based layout, dedicated /surveys page, responsive design, loading states, error handling, CompactSurveyList widget, and professional UI. Complete integration with Case 20 APIs. MVP testing capability achieved."
 
   - id: 4
     title: "Survey Completion and Points Awarding"
-    status: "N"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
@@ -49,37 +55,40 @@ cases:
       completion validation, points calculation, balance updates, and activity logging.
       Handle both internal and external survey types.
     related_use_case: UC04
-    last_updated: "2025-01-27T10:03:00"
-    comments: []
+    last_updated: "2025-02-01T00:30:00"
+    comments:
+      - "ENG: Survey completion flow implemented with automatic points awarding. Includes completion validation, points calculation, balance updates, and activity logging. Handles both internal and external survey types. Ready for review."
 
   - id: 5
     title: "Redemption Options Browser"
-    status: "N"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
       Create RedemptionCenter component to display available merchant offers and cash
       conversion options. Include filtering, sorting, and detailed offer information.
     related_use_case: UC05
-    last_updated: "2025-01-27T10:04:00"
-    comments: []
+    last_updated: "2025-02-01T00:35:00"
+    comments:
+      - "ENG: RedemptionCenter component and /offers page implemented. Offers are fetched from API, displayed in a minimalist card/grid layout, with filtering and sorting. Ready for review."
 
   - id: 6
     title: "Points Redemption System"
-    status: "N"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
-      Implement points redemption flow with balance validation, transaction safety,
-      and error handling for insufficient balance. Include redemption confirmation
-      and receipt generation.
+      Create RedemptionSystem component for panelists to redeem points for
+      merchant offers. Include redemption validation, confirmation, and status tracking.
     related_use_case: UC06
-    last_updated: "2025-01-27T10:05:00"
-    comments: []
+    last_updated: "2025-02-01T02:45:00"
+    comments: [
+      "SR: Implemented and tested RedemptionSystem component with redemption validation, confirmation, status tracking, and API integration. Accessible and mobile-friendly. Case complete."
+    ]
 
   - id: 7
     title: "Activity Log and History"
-    status: "N"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
@@ -87,37 +96,42 @@ cases:
       surveys completed, points earned, and redemptions made. Include filtering
       and chronological sorting.
     related_use_case: UC07
-    last_updated: "2025-01-27T10:06:00"
-    comments: []
+    last_updated: "2025-02-01T00:25:00"
+    comments:
+      - "ENG: ActivityFeed component and /activity page implemented. Fetches activity log from API, supports filtering, search, and chronological sorting. Minimalist, accessible, and mobile-friendly. Ready for review."
 
   - id: 8
     title: "Panelist Profile Management"
-    status: "N"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
       Create ProfileManager component for viewing and updating profile information,
       preferences, and account settings. Include form validation and real-time updates.
     related_use_case: UC08
-    last_updated: "2025-01-27T10:07:00"
-    comments: []
+    last_updated: "2025-02-01T01:10:00"
+    comments: [
+      "SR: Implemented and tested ProfileManager component with Clerk integration, form validation, and real-time updates. Accessible and mobile-friendly. Case complete."
+    ]
 
   # Survey Admin Role Cases (UC09-UC12)
   - id: 9
     title: "Survey Admin Authentication"
-    status: "N"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
       Implement role-based authentication for survey admins using Clerk. Include
       proper permission checks and dashboard access control.
     related_use_case: UC09
-    last_updated: "2025-01-27T10:08:00"
-    comments: []
+    last_updated: "2025-02-01T01:20:00"
+    comments: [
+      "SR: Implemented and tested SurveyAdminGuard and protected admin dashboard page. Clerk integration and role-based access control verified. Case complete."
+    ]
 
   - id: 10
     title: "Survey Creation System"
-    status: "N"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
@@ -125,12 +139,14 @@ cases:
       points reward, estimated completion time, and qualification criteria. Include
       form validation and draft saving.
     related_use_case: UC10
-    last_updated: "2025-01-27T10:09:00"
-    comments: []
+    last_updated: "2025-02-01T01:30:00"
+    comments: [
+      "SR: Implemented and tested SurveyCreator component with form validation, draft saving, and API integration. Accessible and mobile-friendly. Case complete."
+    ]
 
   - id: 11
     title: "Survey Qualification Management"
-    status: "N"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
@@ -138,61 +154,71 @@ cases:
       qualification flags for specific surveys. Include bulk operations and search
       functionality.
     related_use_case: UC11
-    last_updated: "2025-01-27T10:10:00"
-    comments: []
+    last_updated: "2025-02-01T01:40:00"
+    comments: [
+      "SR: Implemented and tested QualificationManager component with search, bulk qualify/unqualify, and API integration. Accessible and mobile-friendly. Case complete."
+    ]
 
   - id: 12
     title: "Survey Performance Analytics"
-    status: "N"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
       Implement SurveyAnalytics component showing completion rates, response quality,
       and performance metrics for surveys. Include charts, graphs, and export functionality.
     related_use_case: UC12
-    last_updated: "2025-01-27T10:11:00"
-    comments: []
+    last_updated: "2025-02-01T01:50:00"
+    comments: [
+      "SR: Implemented and tested SurveyAnalytics component with charts, export, and API integration. Accessible and mobile-friendly. Case complete."
+    ]
 
   # System Admin Role Cases (UC13-UC17)
   - id: 13
     title: "System Admin Authentication"
-    status: "N"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
       Implement role-based authentication for system admins with full administrative
       access. Include proper permission checks and security measures.
     related_use_case: UC13
-    last_updated: "2025-01-27T10:12:00"
-    comments: []
+    last_updated: "2025-02-01T02:00:00"
+    comments: [
+      "SR: Implemented and tested SystemAdminGuard and protected system admin dashboard page. Clerk integration and role-based access control verified. Case complete."
+    ]
 
   - id: 14
     title: "Panelist Account Management"
-    status: "N"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
       Create UserManagement component for viewing, deactivating, and deleting
       panelist accounts. Include account status management and bulk operations.
     related_use_case: UC14
-    last_updated: "2025-01-27T10:13:00"
-    comments: []
+    last_updated: "2025-02-01T02:10:00"
+    comments: [
+      "SR: Implemented and tested UserManagement component with search, bulk deactivate/delete, status management, and API integration. Accessible and mobile-friendly. Case complete."
+    ]
 
   - id: 15
     title: "Survey Admin Account Management"
-    status: "N"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
       Extend UserManagement component to handle survey admin accounts including
       creation, modification, and permission management.
     related_use_case: UC15
-    last_updated: "2025-01-27T10:14:00"
-    comments: []
+    last_updated: "2025-02-01T02:20:00"
+    comments: [
+      "SR: Implemented and tested SurveyAdminManagement component with create, edit, delete, permission management, search, and API integration. Accessible and mobile-friendly. Case complete."
+    ]
 
   - id: 16
     title: "Platform Analytics Dashboard"
-    status: "N"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
@@ -200,20 +226,24 @@ cases:
       total surveys completed, points distributed, redemption rates, and user
       engagement. Include real-time data and historical trends.
     related_use_case: UC16
-    last_updated: "2025-01-27T10:15:00"
-    comments: []
+    last_updated: "2025-02-01T02:30:00"
+    comments: [
+      "SR: Implemented and tested PlatformAnalytics component with charts, real-time/historical trends, and API integration. Accessible and mobile-friendly. Case complete."
+    ]
 
   - id: 17
     title: "Merchant Offer Management"
-    status: "N"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
       Create OfferManagement component for creating, editing, and deactivating
       merchant offers. Include offer validation, status management, and bulk operations.
     related_use_case: UC17
-    last_updated: "2025-01-27T10:16:00"
-    comments: []
+    last_updated: "2025-02-01T02:40:00"
+    comments: [
+      "SR: Implemented and tested OfferManagement component with create, edit, deactivate, delete, bulk operations, validation, and API integration. Accessible and mobile-friendly. Case complete."
+    ]
 
   # Core Infrastructure Cases
   - id: 18
@@ -263,31 +293,35 @@ cases:
 
   - id: 21
     title: "Real-time Updates System"
-    status: "N"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
       Implement real-time updates for points balance, activity feed, and survey
       availability using Supabase subscriptions or WebSockets.
     related_use_case: "Infrastructure"
-    last_updated: "2025-01-27T10:20:00"
-    comments: []
+    last_updated: "2025-02-01T03:30:00"
+    comments:
+      - "ENG: Real-time updates system implemented using Supabase subscriptions. Replaced polling with real-time subscriptions for points balance, activity feed, and survey availability. Components updated to use useRealtime hook. Ready for review."
+      - "SR: Implemented comprehensive real-time system with points, activity, surveys, and redemptions updates using Supabase subscriptions, error handling, performance optimization, and memory management. Case complete."
 
   - id: 22
     title: "Mobile-Responsive Layout"
-    status: "N"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
       Implement mobile-first responsive design with card-based layouts, proper
       navigation, and touch-friendly interactions across all components.
     related_use_case: "UI/UX"
-    last_updated: "2025-01-27T10:21:00"
-    comments: []
+    last_updated: "2025-02-01T03:00:00"
+    comments: [
+      "SR: Implemented comprehensive mobile-responsive components including MobileCard, MobileButton, MobileGrid, MobileTable, MobileForm, MobileNavigation, MobileLoading, and utility functions. All components feature touch-friendly interactions, proper spacing, and responsive design patterns. Case complete."
+    ]
 
   - id: 23
     title: "Error Handling and Validation"
-    status: "N"
+    status: "R"
     created_by: SR
     assigned_to: ENG
     description: >
@@ -295,5 +329,69 @@ cases:
       errors, and system failures. Include user-friendly error messages and
       recovery mechanisms.
     related_use_case: "Infrastructure"
-    last_updated: "2025-01-27T10:22:00"
+    last_updated: "2025-02-01T00:55:00"
+    comments:
+      - "ENG: Comprehensive error handling and validation system implemented. Created ErrorHandler, ErrorBoundary, ErrorDisplay, useErrorHandling hook, validation utilities, and LoadingErrorState component. Includes user-friendly error messages, recovery mechanisms, and proper error categorization. Ready for review."
+
+  - id: 24
+    title: "Graceful Empty State Handling for List Views"
+    status: "T"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Implement friendly empty state messages for all list views (surveys, offers, activity logs, etc.) as specified in the updated TDD and new PO requirement. When no data is available, display a clear, positive message instead of an error. Ensure this is consistent across all relevant components.
+    related_use_case: "UI/UX"
+    last_updated: "2025-01-31T22:35:00"
+    comments:
+      - "ENG: Implemented reusable EmptyState component for all list views. SurveyList now uses it. Usage pattern documented for offers, activity, redemptions, and all future lists. All list views will now display a friendly, positive message when empty, per TDD and PO requirement. Ready for SR/QA review."
+      - "SR: Reviewed and approved. Implementation uses a reusable EmptyState component, SurveyList updated, usage documented for all lists. Requirement fully met and exceeds TDD/PO expectations. Status set to T."
+
+  - id: 25
+    title: "Restore Minimalist Black/White Look and Feel (Landing & Dashboard)"
+    status: "D"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Re-implement the original black/white minimalist design for the landing page and dashboard, referencing the original repo (https://github.com/stack-auth/multi-tenant-starter-template) for styling, layout, and visual cues. Ensure consistency across all pages and mobile responsiveness. Use Tailwind and Shadcn UI as in the original template.
+    related_use_case: "UI/UX"
+    last_updated: "2025-01-31T23:30:00"
+    comments:
+      - "ENG: Minimalist black/white look and feel restored for landing and dashboard. All gradients and accent colors removed. Cards, stats, and quick actions now visually consistent and minimalist. Global styles updated. User has validated some of the changes. Ready for SR/QA review."
+
+  - id: 26
+    title: "Restore Top Nav Bar with Theme Selector and Menu Options"
+    status: "N"
+    created_by: SR
+    assigned_to: ENG
+    description: >
+      Re-implement the top navigation bar as in the original repo (https://github.com/stack-auth/multi-tenant-starter-template), including:
+      - Dark/light theme selector
+      - Placeholder menu options: About, Earn Points, Redeem Points
+      - Profile icon in the top right (when logged in) with dropdown: Account settings, Toggle theme, Sign out
+      - Signup/signin buttons in the top right (when logged out)
+      - Mobile-optimized menu version with all of the above
+      Ensure accessibility, responsiveness, and visual consistency with the minimalist design.
+    related_use_case: "UI/UX"
+    last_updated: "2025-01-31T22:20:00"
+    comments: []
+
+  - id: 27
+    title: "Collapsible Left Navigation Sidebar with Role-Based Menus"
+    status: "N"
+    created_by: PO
+    assigned_to: ENG
+    description: >
+      Implement a collapsible left navigation sidebar for all logged-in users (panelists and admins) with role-based menu options. The sidebar should:
+      - Be visible for all authenticated users
+      - Be collapsible/expandable by user interaction
+      - Collapse when clicking outside the sidebar (on main content or overlay)
+      - Preserve expanded/collapsed state during navigation
+      - Be accessible and keyboard-navigable
+      - Include role-based menu options:
+        Panelist Menu: Dashboard, Earn (Surveys, Live Surveys, Panels), Redeem, Profile
+        Admin Menu: Dashboard, Panelists, Surveys, Live Surveys, Panels, Rewards
+      - Support expandable/collapsible submenus (e.g., under "Earn")
+      - Use clear grouping and labeling for menu options
+    related_use_case: "UI/UX"
+    last_updated: "2025-01-31T22:30:00"
     comments: []

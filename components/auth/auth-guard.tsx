@@ -3,7 +3,7 @@
 import { useAuth, useUser } from '@clerk/nextjs'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { UserRole, Permission, hasPermission, hasAnyPermission } from '@/lib/auth'
+import { UserRole, Permission, hasPermission, hasAnyPermission } from '@/lib/auth-client'
 import { Loader2 } from 'lucide-react'
 
 interface AuthGuardProps {
