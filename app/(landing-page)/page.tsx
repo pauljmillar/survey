@@ -37,92 +37,77 @@ export default function LandingPage() {
         <SignedOut>
           {/* Hero Section with Registration CTA */}
           <section className="relative overflow-hidden">
-            <div className="max-w-7xl mx-auto">
-              <div className="relative z-10 pb-8 bg-transparent sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                  <div className="sm:text-center lg:text-left pt-8 sm:pt-12 lg:pt-16">
-                    <h1 className="text-4xl tracking-tight font-extrabold text-foreground sm:text-5xl md:text-6xl">
-                      <span className="block xl:inline">Earn Points for Your</span>{' '}
-                      <span className="block text-foreground xl:inline">Opinions</span>
-                    </h1>
-                    <p className="mt-3 text-base text-muted-foreground sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                      Join thousands of panelists earning points by completing surveys. 
-                      Share your thoughts and redeem rewards from top merchants.
-                    </p>
-                    
-                    {/* Registration Cards */}
-                    <div className="mt-8 sm:mt-12">
-                      <div className="grid gap-6 md:grid-cols-2 max-w-2xl mx-auto lg:mx-0">
-                        {/* Sign Up Card */}
-                        <Card className="p-6 bg-card border-border hover:shadow-lg transition-all duration-200">
-                          <div className="text-center">
-                            <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                              <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                              </svg>
-                            </div>
-                            <h3 className="text-lg font-semibold text-foreground mb-2">New Panelist</h3>
-                            <p className="text-sm text-muted-foreground mb-4">
-                              Create your account and start earning points immediately
-                            </p>
-                            <SignUpButton mode="modal">
-                              <Button className="w-full bg-background hover:bg-muted text-foreground">
-                                Sign Up Free
-                              </Button>
-                            </SignUpButton>
-                          </div>
-                        </Card>
-
-                        {/* Sign In Card */}
-                        <Card className="p-6 bg-card border-border hover:shadow-lg transition-all duration-200">
-                          <div className="text-center">
-                            <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                              <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                              </svg>
-                            </div>
-                            <h3 className="text-lg font-semibold text-foreground mb-2">Returning Panelist</h3>
-                            <p className="text-sm text-muted-foreground mb-4">
-                              Welcome back! Access your dashboard and available surveys
-                            </p>
-                            <SignInButton mode="modal">
-                              <Button variant="outline" className="w-full border-border hover:bg-muted">
-                                Sign In
-                              </Button>
-                            </SignInButton>
-                          </div>
-                        </Card>
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                                   <div className="text-center pt-48 pb-16">
+        <h1 className="text-4xl tracking-tight font-extrabold text-foreground sm:text-5xl md:text-6xl">
+          <span className="block xl:inline">Earn Points for Your</span>{' '}
+          <span className="block text-foreground xl:inline">Opinions</span>
+        </h1>
+                <p className="mt-6 text-base text-muted-foreground sm:mt-8 sm:text-lg sm:max-w-2xl sm:mx-auto md:mt-8 md:text-xl">
+                  Join thousands of panelists earning points by completing surveys. 
+                  Share your thoughts and redeem rewards from top merchants.
+                </p>
+                
+                {/* Registration Cards */}
+                <div className="mt-12 sm:mt-16">
+                  <div className="grid gap-6 md:grid-cols-2 max-w-2xl mx-auto">
+                    {/* Sign Up Card */}
+                    <Card className="p-6 bg-card border-border hover:shadow-lg transition-all duration-200">
+                      <div className="text-center">
+                        <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                          <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                          </svg>
+                        </div>
+                        <h3 className="text-lg font-semibold text-foreground mb-2">New Panelist</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Create your account and start earning points immediately
+                        </p>
+                        <SignUpButton mode="modal">
+                          <Button className="w-full bg-background hover:bg-muted text-foreground">
+                            Sign Up Free
+                          </Button>
+                        </SignUpButton>
                       </div>
-                    </div>
+                    </Card>
 
-                    {/* Quick Stats */}
-                    <div className="mt-8 sm:mt-12">
-                      <div className="grid grid-cols-3 gap-4 text-center">
-                        <div>
-                          <div className="text-2xl font-bold text-foreground">10K+</div>
-                          <div className="text-sm text-muted-foreground">Active Panelists</div>
+                    {/* Sign In Card */}
+                    <Card className="p-6 bg-card border-border hover:shadow-lg transition-all duration-200">
+                      <div className="text-center">
+                        <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                          <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                          </svg>
                         </div>
-                        <div>
-                          <div className="text-2xl font-bold text-foreground">50+</div>
-                          <div className="text-sm text-muted-foreground">Survey Partners</div>
-                        </div>
-                        <div>
-                          <div className="text-2xl font-bold text-foreground">$2M+</div>
-                          <div className="text-sm text-muted-foreground">Rewards Earned</div>
-                        </div>
+                        <h3 className="text-lg font-semibold text-foreground mb-2">Returning Panelist</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Welcome back! Access your dashboard and available surveys
+                        </p>
+                        <SignInButton mode="modal">
+                          <Button variant="outline" className="w-full border-border hover:bg-muted">
+                            Sign In
+                          </Button>
+                        </SignInButton>
                       </div>
-                    </div>
+                    </Card>
                   </div>
                 </div>
-              </div>
-              
-              {/* Hero Image */}
-              <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
-                <div className="h-56 w-full bg-muted sm:h-72 md:h-96 lg:w-full lg:h-full flex items-center justify-center">
-                  <div className="text-center text-foreground">
-                    <div className="text-6xl mb-4">📊</div>
-                    <div className="text-xl font-semibold">Your Voice Matters</div>
-                    <div className="text-sm opacity-90">Help shape products and services</div>
+
+                {/* Quick Stats */}
+                <div className="mt-12 sm:mt-16">
+                  <div className="grid grid-cols-3 gap-4 text-center max-w-md mx-auto">
+                    <div>
+                      <div className="text-2xl font-bold text-foreground">10K+</div>
+                      <div className="text-sm text-muted-foreground">Active Panelists</div>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-foreground">50+</div>
+                      <div className="text-sm text-muted-foreground">Survey Partners</div>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-foreground">$2M+</div>
+                      <div className="text-sm text-muted-foreground">Rewards Earned</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -215,13 +200,7 @@ export default function LandingPage() {
         </SignedIn>
       </main>
 
-      <Footer 
-        builtBy="Your Company"
-        builtByLink="https://example.com"
-        githubLink="https://github.com"
-        twitterLink="https://twitter.com"
-        linkedinLink="https://linkedin.com"
-      />
+
     </div>
   )
 }

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/use-auth'
 import { PanelistGuard } from '@/components/auth/auth-guard'
-import { PointsCard, PointsHero } from '@/components/panelist/points-display'
+
 import { CompactSurveyList } from '@/components/panelist/survey-list'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -88,68 +88,41 @@ export default function DashboardClient() {
     <PanelistGuard>
       <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Welcome Header with Points Hero */}
-          <div className="mb-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-              <div>
-                <h1 className="text-3xl font-bold text-foreground">
-                  Welcome back, {user?.firstName || 'Panelist'}!
-                </h1>
-                <p className="text-muted-foreground">Here's your dashboard overview</p>
-              </div>
-              
-              {/* Points Hero Display */}
-              <div className="mt-4 md:mt-0">
-                <PointsHero 
-                  showDetails={true}
-                  showTrends={true}
-                  className="md:text-right"
-                />
-              </div>
-            </div>
+                {/* Welcome Header with Last Updated Timestamp */}
+      <div className="mb-8 pt-32 pb-16">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">
+              Welcome back, {user?.firstName || 'Panelist'}!
+            </h1>
+            <p className="text-muted-foreground">
+              Last updated: {new Date().toLocaleTimeString()}
+            </p>
           </div>
+        </div>
+      </div>
 
-          {/* Points Overview Cards */}
-          <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-3 mb-8">
-            {/* Main Points Card */}
+          {/* Main Dashboard Layout - 5 Panels */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Available Surveys - Takes ~2/3 width */}
             <div className="lg:col-span-2">
-              <PointsCard 
-                showDetails={true}
-                showTrends={true}
-                refreshInterval={30000}
-                className="h-full"
-              />
+              <Card className="p-6 h-full">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-semibold text-foreground">Available Surveys</h2>
+                  <Link href="/surveys">
+                    <Button variant="outline" size="sm">
+                      View All
+                    </Button>
+                  </Link>
+                </div>
+                
+                <CompactSurveyList limit={5} />
+              </Card>
             </div>
 
-            {/* Quick Stats */}
+            {/* Right Side - 4 Smaller Panels */}
             <div className="space-y-4">
-              <Card className="p-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-foreground mb-1">
-                    {profile ? Math.floor(profile.total_points_earned / 100) : 0}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Surveys Completed</div>
-                </div>
-              </Card>
-              
-              <Card className="p-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-foreground mb-1">
-                    {profile ? Math.floor(profile.total_points_redeemed / 200) : 0}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Rewards Claimed</div>
-                </div>
-              </Card>
-
-              <Card className="p-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-foreground mb-1">
-                    ${profile ? (profile.total_points_earned / 100).toFixed(2) : '0.00'}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Total $ Earned</div>
-                </div>
-              </Card>
-
+              {/* Available Points */}
               <Card className="p-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-foreground mb-1">
@@ -158,23 +131,37 @@ export default function DashboardClient() {
                   <div className="text-sm text-muted-foreground">Available Points</div>
                 </div>
               </Card>
-            </div>
-          </div>
 
-          {/* Available Surveys */}
-          <div className="mb-8">
-            <Card className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-foreground">Available Surveys</h2>
-                <Link href="/surveys">
-                  <Button variant="outline" size="sm">
-                    View All
-                  </Button>
-                </Link>
-              </div>
-              
-              <CompactSurveyList limit={3} />
-            </Card>
+              {/* Total Earned */}
+              <Card className="p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-foreground mb-1">
+                    {profile ? profile.total_points_earned.toLocaleString() : '0'}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Total Earned</div>
+                </div>
+              </Card>
+
+              {/* Total Redeemed */}
+              <Card className="p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-foreground mb-1">
+                    {profile ? profile.total_points_redeemed.toLocaleString() : '0'}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Total Redeemed</div>
+                </div>
+              </Card>
+
+              {/* Surveys Completed */}
+              <Card className="p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-foreground mb-1">
+                    {profile ? Math.floor(profile.total_points_earned / 100) : 0}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Surveys Completed</div>
+                </div>
+              </Card>
+            </div>
           </div>
         </div>
       </div>

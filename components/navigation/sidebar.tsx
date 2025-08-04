@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
+import { useClerk } from "@clerk/nextjs"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -55,7 +56,8 @@ export function Sidebar({ className }: SidebarProps) {
   const sidebarRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const pathname = usePathname()
-  const { user, role } = useAuth()
+  const { user, userRole } = useAuth()
+  const { signOut } = useClerk()
 
   // Handle hover events
   const handleMouseEnter = () => {
@@ -64,6 +66,14 @@ export function Sidebar({ className }: SidebarProps) {
 
   const handleMouseLeave = () => {
     setIsExpanded(false)
+  }
+
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
   }
 
   const toggleGroup = (groupTitle: string) => {
@@ -145,7 +155,7 @@ export function Sidebar({ className }: SidebarProps) {
     }
   ]
 
-  const menuGroups = role === "panelist" ? panelistMenuGroups : adminMenuGroups
+  const menuGroups = userRole === "panelist" ? panelistMenuGroups : adminMenuGroups
 
   if (!user) return null
 
@@ -243,10 +253,7 @@ export function Sidebar({ className }: SidebarProps) {
         <Button
           variant="ghost"
           className="w-full justify-start h-9 px-3 text-muted-foreground hover:text-foreground"
-          onClick={() => {
-            // Handle sign out
-            console.log("Sign out clicked")
-          }}
+          onClick={handleSignOut}
         >
           <LogOut className={cn(
             "h-4 w-4",

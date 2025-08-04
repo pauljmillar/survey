@@ -4,11 +4,19 @@ import { useAuth as useClerkAuth, useUser } from '@clerk/nextjs'
 import { useEffect, useState } from 'react'
 import { UserRole, Permission, hasPermission, hasAnyPermission, hasAllPermissions } from '@/lib/auth-client'
 
+interface SerializableUser {
+  id: string
+  firstName: string | null
+  lastName: string | null
+  emailAddress: string | null
+  imageUrl: string | null
+}
+
 interface UseAuthReturn {
   // Clerk auth state
   isLoaded: boolean
   isSignedIn: boolean | undefined
-  user: any
+  user: SerializableUser | null
   
   // Our extended auth state
   userRole: UserRole | null
@@ -31,11 +39,20 @@ interface UseAuthReturn {
 
 export function useAuth(): UseAuthReturn {
   const { isLoaded, isSignedIn, userId } = useClerkAuth()
-  const { user } = useUser()
+  const { user: clerkUser } = useUser()
   const [userRole, setUserRole] = useState<UserRole | null>(null)
   const [panelistProfile, setPanelistProfile] = useState<any | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Create serializable user object
+  const user: SerializableUser | null = clerkUser ? {
+    id: clerkUser.id,
+    firstName: clerkUser.firstName,
+    lastName: clerkUser.lastName,
+    emailAddress: clerkUser.emailAddresses[0]?.emailAddress || null,
+    imageUrl: clerkUser.imageUrl,
+  } : null
 
   const fetchUserRole = async () => {
     if (!isSignedIn || !userId) {

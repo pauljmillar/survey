@@ -286,6 +286,31 @@ This file is used by all agents to record actions, status updates, and inter-age
 012800 18:30 - ENG: Completed Case 24 (Graceful Empty State Handling for List Views), status set to D
 012800 18:30 - ENG > SR: All list views now use or are ready to use the new EmptyState component for friendly empty state messages. SurveyList is updated; usage pattern is documented for offers, activity, redemptions, and all future lists. Requirement is fully implemented and ready for review.
 012800 18:35 - SR: Reviewed Case 24 (Graceful Empty State Handling for List Views), status set to T
+012800 18:40 - QA: 🔧 DASHBOARD LAYOUT FIXES APPLIED - Responding to user feedback
+012800 18:40 - QA: Fixed 4 dashboard layout issues per user requirements:
+012800 18:40 - QA:   1. Removed PointsHero text that appeared outside widgets ($0 Available Points, etc.)
+012800 18:40 - QA:   2. Removed top/left PointsCard widget (key stats now live in right-side panels)
+012800 18:40 - QA:   3. Moved Last Updated timestamp to top, replacing "Here's your dashboard overview"
+012800 18:40 - QA:   4. Reorganized layout: Available Surveys takes ~2/3 width, 4 smaller panels on right
+012800 18:40 - QA: Layout now has 5 total panels: large surveys list + 4 key stats panels (Available Points, Total Earned, Total Redeemed, Surveys Completed)
+012800 18:40 - QA: Removed unused PointsCard and PointsHero imports, cleaned up component structure
+012800 18:45 - QA: 🔧 DASHBOARD & LANDING PAGE LAYOUT IMPROVEMENTS - User feedback implemented
+012800 18:45 - QA: Dashboard changes:
+012800 18:45 - QA:   1. Removed top nav links (About, Earn Points, Redeem Points) for logged-in users
+012800 18:45 - QA:   2. Added proper spacing above/below "Welcome back, Paul" with pt-16 padding
+012800 18:45 - QA: Landing page changes:
+012800 18:45 - QA:   1. Added theme switcher icon to top nav (right side) for non-logged-in users only
+012800 18:45 - QA:   2. Removed right half split layout with placeholder content
+012800 18:45 - QA:   3. Centered hero content with modern/minimal layout using max-w-4xl container
+012800 18:45 - QA:   4. Added proper spacing (pt-24) above hero title for modern feel
+012800 18:45 - QA:   5. Improved spacing and margins throughout for consistent minimalist design
+012800 18:50 - QA: 🔧 LANDING PAGE NAVIGATION & SPACING FIXES - User feedback implemented
+012800 18:50 - QA: Landing page improvements:
+012800 18:50 - QA:   1. Increased spacing above headline from pt-24 to pt-32 for better visual balance
+012800 18:50 - QA:   2. Added navigation links for non-signed in users: Earn, Redeem, How it Works
+012800 18:50 - QA:   3. Navigation links only show for SignedOut users (not logged in)
+012800 18:50 - QA:   4. Removed duplicate footer from landing page to eliminate double footer issue
+012800 18:50 - QA: Top nav now properly shows: SurveyApp (left) + 3 links + theme switcher + Sign In/Sign Up (right)
 012800 18:35 - SR: Implementation uses a reusable EmptyState component, SurveyList updated, usage documented for all lists. Requirement fully met and exceeds TDD/PO expectations.
 012800 18:40 - ENG: Working on Case 26 (Restore Top Nav Bar with Theme Selector and Menu Options), status set to I
 012800 23:00 - ENG: Completed Case 26 (Restore Top Nav Bar with Theme Selector and Menu Options), status set to D
@@ -317,3 +342,12 @@ This file is used by all agents to record actions, status updates, and inter-age
 020124 00:55 - ENG: Completed Case 23 (Error Handling and Validation), status set to R. Implemented comprehensive error handling system with ErrorHandler, ErrorBoundary, ErrorDisplay, useErrorHandling hook, validation utilities, and LoadingErrorState component. Includes user-friendly error messages, recovery mechanisms, and proper error categorization. Ready for SR/QA review.
 
 020124 04:30 - ENG: Completed Case 27 (Collapsible Left Navigation Sidebar with Role-Based Menus), status set to D. Implemented comprehensive collapsible left navigation sidebar with role-based menus. Features include collapsible/expandable sidebar, click-outside-to-collapse, localStorage state persistence, role-based menu options (Panelist: Dashboard, Earn, Redeem, Account; Admin: Dashboard, Management, Rewards, System), expandable submenus, clear grouping, accessibility support, and responsive design. All navigation pages created with placeholder content. Ready for SR review.
+
+080425 18:20 - QA: 🔧 FINAL SPACING IMPROVEMENTS - User feedback implemented
+080425 18:20 - QA: Dashboard spacing improvements:
+080425 18:20 - QA:   1. Increased padding above "Welcome back, Paul" from pt-16 to pt-32 for much more space
+080425 18:20 - QA:   2. Added pb-16 padding below welcome header for better visual balance
+080425 18:20 - QA: Landing page spacing improvements:
+080425 18:20 - QA:   1. Increased spacing above "Earn Points for Your Opinions" headline from pt-32 to pt-48
+080425 18:20 - QA:   2. This creates much more space between nav bar and headline for modern/minimal feel
+080425 18:20 - QA: Both pages now have proper breathing room and modern spacing throughout

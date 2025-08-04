@@ -16,6 +16,7 @@ interface Survey {
   points_reward: number
   estimated_completion_time: number
   created_at: string
+  is_qualified?: boolean
 }
 
 interface SurveyListProps {
@@ -49,7 +50,7 @@ export function SurveyList({
         // Add new survey to the list if it matches current filters
         setSurveys(prev => {
           const filtered = prev.filter(s => s.id !== newSurvey.id)
-          return [newSurvey, ...filtered]
+          return [newSurvey as Survey, ...filtered]
         })
       },
       onSurveyQualificationUpdate: (qualification) => {
@@ -70,12 +71,16 @@ export function SurveyList({
 
     try {
       setLoading(true)
+      setError(null)
       const offset = (currentPage - 1) * limit
       const response = await fetch(`/api/surveys/available?limit=${limit}&offset=${offset}`)
       
       if (response.ok) {
         const data = await response.json()
         setSurveys(data.surveys || [])
+      } else if (response.status === 404) {
+        // Panelist profile not found - this is expected for new users
+        setSurveys([])
         setError(null)
       } else {
         const errorData = await response.json()
@@ -238,9 +243,9 @@ export function SurveyList({
                 className="px-3 py-2 border border-gray-300 rounded-md text-sm"
               >
                 <option value="all">All Points</option>
-                <option value="low">Low (≤50)</option>
+                <option value="low">Low (&le;50)</option>
                 <option value="medium">Medium (51-150)</option>
-                <option value="high">High (>150)</option>
+                <option value="high">High (&gt;150)</option>
               </select>
             </div>
             
@@ -252,9 +257,9 @@ export function SurveyList({
                 className="px-3 py-2 border border-gray-300 rounded-md text-sm"
               >
                 <option value="all">All Durations</option>
-                <option value="quick">Quick (≤5 min)</option>
+                <option value="quick">Quick (&le;5 min)</option>
                 <option value="medium">Medium (6-15 min)</option>
-                <option value="long">Long (>15 min)</option>
+                <option value="long">Long (&gt;15 min)</option>
               </select>
             </div>
           </div>
@@ -281,7 +286,7 @@ export function SurveyList({
           message={
             searchTerm || pointsFilter !== 'all' || timeFilter !== 'all'
               ? 'No surveys match your current filters. Try adjusting your search criteria.'
-              : 'Check back later for new survey opportunities!'
+              : 'No surveys have been created yet. Contact your administrator to add surveys.'
           }
           actionLabel={
             searchTerm || pointsFilter !== 'all' || timeFilter !== 'all'
@@ -329,7 +334,7 @@ export function SurveyList({
                     
                     <div className="flex items-center">
                       <span className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center mr-2">
-                        <span className="text-green-600 text-xs">⏱</span>
+                        <span className="text-green-600 text-xs" role="img" aria-label="Timer">⏱</span>
                       </span>
                       <span className="text-gray-600">
                         {formatTime(survey.estimated_completion_time)}
