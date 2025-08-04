@@ -3,10 +3,10 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { SignedIn, SignedOut, UserButton, SignInButton, SignUpButton } from "@clerk/nextjs"
+import { SignedIn, SignedOut, UserButton, SignInButton, SignUpButton, useUser } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { ColorModeSwitcher } from "@/components/color-mode-switcher"
-import { Menu, X } from "lucide-react"
+import { Menu, X, Settings, LogOut, User } from "lucide-react"
 
 const MENU_OPTIONS = [
   { label: "About", href: "/about" },
@@ -16,7 +16,19 @@ const MENU_OPTIONS = [
 
 export function TopNavBar() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false)
   const pathname = usePathname()
+  const { user } = useUser()
+
+  const handleSignOut = () => {
+    // Clerk handles sign out automatically
+    setProfileDropdownOpen(false)
+  }
+
+  const handleThemeToggle = () => {
+    // Theme toggle is handled by ColorModeSwitcher
+    setProfileDropdownOpen(false)
+  }
 
   return (
     <nav aria-label="Main navigation" className="w-full border-b border-black/10 bg-white dark:bg-black/90 dark:border-white/10 fixed top-0 left-0 z-50">
@@ -32,7 +44,7 @@ export function TopNavBar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`text-sm font-medium px-2 py-1 rounded transition-colors duration-150 ${
+              className={`text-sm font-medium px-3 py-2 rounded-md transition-colors duration-150 ${
                 pathname === item.href
                   ? "bg-black text-white dark:bg-white dark:text-black"
                   : "text-black/80 dark:text-white/80 hover:bg-black/5 dark:hover:bg-white/10"
@@ -46,35 +58,76 @@ export function TopNavBar() {
         </div>
 
         {/* Right Side: Auth/Profile/Theme */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {/* Theme Switcher */}
           <ColorModeSwitcher />
+          
+          {/* Auth Buttons (when signed out) */}
           <SignedOut>
             <SignInButton mode="modal">
-              <Button variant="ghost" size="sm" className="text-black dark:text-white">
+              <Button variant="ghost" size="sm" className="text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10">
                 Sign In
               </Button>
             </SignInButton>
             <SignUpButton mode="modal">
-              <Button variant="default" size="sm" className="ml-1">
+              <Button variant="default" size="sm" className="ml-1 bg-black text-white dark:bg-white dark:text-black hover:bg-black/80 dark:hover:bg-white/80">
                 Sign Up
               </Button>
             </SignUpButton>
           </SignedOut>
+
+          {/* Profile Dropdown (when signed in) */}
           <SignedIn>
-            <UserButton
-              afterSignOutUrl="/"
-              appearance={{
-                elements: {
-                  avatarBox: "w-8 h-8 border border-black/10 dark:border-white/10",
-                  userButtonPopoverCard: "bg-white dark:bg-black border border-black/10 dark:border-white/10",
-                },
-              }}
-              aria-label="Profile menu"
-            />
+            <div className="relative">
+              <button
+                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                className="flex items-center space-x-2 p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors duration-150"
+                aria-label="Profile menu"
+                aria-expanded={profileDropdownOpen}
+              >
+                <div className="w-8 h-8 rounded-full bg-black/10 dark:bg-white/10 flex items-center justify-center">
+                  <User className="w-4 h-4 text-black dark:text-white" />
+                </div>
+                <span className="hidden sm:block text-sm font-medium text-black dark:text-white">
+                  {user?.firstName || user?.emailAddresses[0]?.emailAddress}
+                </span>
+              </button>
+
+              {/* Profile Dropdown Menu */}
+              {profileDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-black border border-black/10 dark:border-white/10 rounded-md shadow-lg z-50">
+                  <div className="py-1">
+                    <Link
+                      href="/account"
+                      className="flex items-center px-4 py-2 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10"
+                      onClick={() => setProfileDropdownOpen(false)}
+                    >
+                      <Settings className="w-4 h-4 mr-3" />
+                      Account settings
+                    </Link>
+                    <button
+                      onClick={handleThemeToggle}
+                      className="flex items-center w-full px-4 py-2 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10"
+                    >
+                      <ColorModeSwitcher />
+                      <span className="ml-3">Toggle theme</span>
+                    </button>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    >
+                      <LogOut className="w-4 h-4 mr-3" />
+                      Sign out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </SignedIn>
+
           {/* Mobile menu button */}
           <button
-            className="md:hidden ml-2 p-2 rounded focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+            className="md:hidden p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-colors duration-150"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             onClick={() => setMobileOpen((v) => !v)}
           >
@@ -87,11 +140,12 @@ export function TopNavBar() {
       {mobileOpen && (
         <div className="md:hidden fixed inset-0 top-16 z-40 bg-white/95 dark:bg-black/95 border-t border-black/10 dark:border-white/10 animate-in slide-in-from-top-10" aria-label="Mobile menu">
           <div className="flex flex-col gap-4 p-6">
+            {/* Mobile Menu Items */}
             {MENU_OPTIONS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`text-lg font-medium px-2 py-2 rounded transition-colors duration-150 ${
+                className={`text-lg font-medium px-4 py-3 rounded-md transition-colors duration-150 ${
                   pathname === item.href
                     ? "bg-black text-white dark:bg-white dark:text-black"
                     : "text-black/90 dark:text-white/90 hover:bg-black/5 dark:hover:bg-white/10"
@@ -103,35 +157,77 @@ export function TopNavBar() {
                 {item.label}
               </Link>
             ))}
-            <div className="flex items-center gap-2 mt-4">
-              <ColorModeSwitcher />
+
+            {/* Mobile Auth Section */}
+            <div className="border-t border-black/10 dark:border-white/10 pt-4 mt-4">
               <SignedOut>
-                <SignInButton mode="modal">
-                  <Button variant="ghost" size="sm" className="text-black dark:text-white">
-                    Sign In
-                  </Button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <Button variant="default" size="sm" className="ml-1">
-                    Sign Up
-                  </Button>
-                </SignUpButton>
+                <div className="flex flex-col gap-3">
+                  <SignInButton mode="modal">
+                    <Button variant="ghost" size="lg" className="w-full text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10">
+                      Sign In
+                    </Button>
+                  </SignInButton>
+                  <SignUpButton mode="modal">
+                    <Button variant="default" size="lg" className="w-full bg-black text-white dark:bg-white dark:text-black hover:bg-black/80 dark:hover:bg-white/80">
+                      Sign Up
+                    </Button>
+                  </SignUpButton>
+                </div>
               </SignedOut>
+              
               <SignedIn>
-                <UserButton
-                  afterSignOutUrl="/"
-                  appearance={{
-                    elements: {
-                      avatarBox: "w-8 h-8 border border-black/10 dark:border-white/10",
-                      userButtonPopoverCard: "bg-white dark:bg-black border border-black/10 dark:border-white/10",
-                    },
-                  }}
-                  aria-label="Profile menu"
-                />
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 p-3 bg-black/5 dark:bg-white/10 rounded-md">
+                    <div className="w-10 h-10 rounded-full bg-black/10 dark:bg-white/10 flex items-center justify-center">
+                      <User className="w-5 h-5 text-black dark:text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-black dark:text-white">
+                        {user?.firstName || 'User'}
+                      </p>
+                      <p className="text-xs text-black/60 dark:text-white/60">
+                        {user?.emailAddresses[0]?.emailAddress}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <Link
+                      href="/account"
+                      className="flex items-center px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-md"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <Settings className="w-4 h-4 mr-3" />
+                      Account settings
+                    </Link>
+                    <button
+                      onClick={handleThemeToggle}
+                      className="flex items-center w-full px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-md"
+                    >
+                      <ColorModeSwitcher />
+                      <span className="ml-3">Toggle theme</span>
+                    </button>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center w-full px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md"
+                    >
+                      <LogOut className="w-4 h-4 mr-3" />
+                      Sign out
+                    </button>
+                  </div>
+                </div>
               </SignedIn>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Click outside to close dropdown */}
+      {profileDropdownOpen && (
+        <div 
+          className="fixed inset-0 z-40" 
+          onClick={() => setProfileDropdownOpen(false)}
+        />
       )}
     </nav>
   )

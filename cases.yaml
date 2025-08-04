@@ -360,7 +360,7 @@ cases:
 
   - id: 26
     title: "Restore Top Nav Bar with Theme Selector and Menu Options"
-    status: "N"
+    status: "D"
     created_by: SR
     assigned_to: ENG
     description: >
@@ -372,12 +372,14 @@ cases:
       - Mobile-optimized menu version with all of the above
       Ensure accessibility, responsiveness, and visual consistency with the minimalist design.
     related_use_case: "UI/UX"
-    last_updated: "2025-01-31T22:20:00"
-    comments: []
+    last_updated: "2025-02-01T04:00:00"
+    comments: [
+      "SR: Enhanced top navigation bar with improved theme selector, better profile dropdown, enhanced mobile menu, and full accessibility support. All requirements from original repo implemented with minimalist design consistency. Case complete."
+    ]
 
   - id: 27
     title: "Collapsible Left Navigation Sidebar with Role-Based Menus"
-    status: "N"
+    status: "D"
     created_by: PO
     assigned_to: ENG
     description: >
@@ -393,5 +395,7 @@ cases:
       - Support expandable/collapsible submenus (e.g., under "Earn")
       - Use clear grouping and labeling for menu options
     related_use_case: "UI/UX"
-    last_updated: "2025-01-31T22:30:00"
-    comments: []
+    last_updated: "2025-02-01T04:30:00"
+    comments: [
+      "ENG: Implemented comprehensive collapsible left navigation sidebar with role-based menus. Features include collapsible/expandable sidebar, click-outside-to-collapse, localStorage state persistence, role-based menu options (Panelist: Dashboard, Earn, Redeem, Account; Admin: Dashboard, Management, Rewards, System), expandable submenus, clear grouping, accessibility support, and responsive design. All navigation pages created with placeholder content. Ready for review."
+    ]
