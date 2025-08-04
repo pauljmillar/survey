@@ -140,81 +140,41 @@ export default function DashboardClient() {
                   <div className="text-sm text-muted-foreground">Rewards Claimed</div>
                 </div>
               </Card>
+
+              <Card className="p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-foreground mb-1">
+                    ${profile ? (profile.total_points_earned / 100).toFixed(2) : '0.00'}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Total $ Earned</div>
+                </div>
+              </Card>
+
+              <Card className="p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-foreground mb-1">
+                    {profile ? profile.points_balance.toLocaleString() : '0'}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Available Points</div>
+                </div>
+              </Card>
             </div>
           </div>
 
-          {/* Main Content Grid */}
-          <div className="grid gap-8 lg:grid-cols-3">
-            {/* Available Surveys */}
-            <div className="lg:col-span-2">
-              <Card className="p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-semibold text-foreground">Available Surveys</h2>
-                  <Link href="/surveys">
-                    <Button variant="outline" size="sm">
-                      View All
-                    </Button>
-                  </Link>
-                </div>
-                
-                <CompactSurveyList limit={3} />
-              </Card>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="space-y-6">
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-card rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-foreground text-2xl">📋</span>
-                  </div>
-                  <h3 className="font-semibold text-foreground mb-2">All Surveys</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Browse and filter all available surveys</p>
-                  <Link href="/surveys">
-                    <Button className="w-full">View Surveys</Button>
-                  </Link>
-                </div>
-              </Card>
-
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-card rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-foreground text-2xl">🏪</span>
-                  </div>
-                  <h3 className="font-semibold text-foreground mb-2">Reward Store</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Redeem points for rewards</p>
-                  <Link href="/offers">
-                    <Button variant="outline" className="w-full">Browse Offers</Button>
-                  </Link>
-                </div>
-              </Card>
-
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-card rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-foreground text-2xl">📊</span>
-                  </div>
-                  <h3 className="font-semibold text-foreground mb-2">Activity</h3>
-                  <p className="text-sm text-muted-foreground mb-4">View your points history</p>
-                  <Link href="/activity">
-                    <Button variant="outline" className="w-full">View Activity</Button>
-                  </Link>
-                </div>
-              </Card>
-
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-card rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-foreground text-2xl">⚙️</span>
-                  </div>
-                  <h3 className="font-semibold text-foreground mb-2">Profile</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Update your preferences</p>
-                  <Link href="/profile">
-                    <Button variant="outline" className="w-full">Edit Profile</Button>
-                  </Link>
-                </div>
-              </Card>
-            </div>
+          {/* Available Surveys */}
+          <div className="mb-8">
+            <Card className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold text-foreground">Available Surveys</h2>
+                <Link href="/surveys">
+                  <Button variant="outline" size="sm">
+                    View All
+                  </Button>
+                </Link>
+              </div>
+              
+              <CompactSurveyList limit={3} />
+            </Card>
           </div>
         </div>
       </div>

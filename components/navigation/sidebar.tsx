@@ -50,36 +50,21 @@ interface MenuGroup {
 }
 
 export function Sidebar({ className }: SidebarProps) {
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(false)
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
   const sidebarRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const pathname = usePathname()
   const { user, role } = useAuth()
 
-  // Close sidebar when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
-        setIsExpanded(false)
-      }
-    }
+  // Handle hover events
+  const handleMouseEnter = () => {
+    setIsExpanded(true)
+  }
 
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
-  // Preserve expanded state in localStorage
-  useEffect(() => {
-    const savedState = localStorage.getItem("sidebar-expanded")
-    if (savedState !== null) {
-      setIsExpanded(JSON.parse(savedState))
-    }
-  }, [])
-
-  useEffect(() => {
-    localStorage.setItem("sidebar-expanded", JSON.stringify(isExpanded))
-  }, [isExpanded])
+  const handleMouseLeave = () => {
+    setIsExpanded(false)
+  }
 
   const toggleGroup = (groupTitle: string) => {
     setExpandedGroups(prev => {
@@ -172,6 +157,8 @@ export function Sidebar({ className }: SidebarProps) {
         isExpanded ? "w-64" : "w-16",
         className
       )}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {/* Header */}
       <div className="flex items-center justify-between h-16 px-4 border-b border-border">
@@ -183,18 +170,11 @@ export function Sidebar({ className }: SidebarProps) {
             <span className="font-semibold text-foreground">Rewards</span>
           </div>
         )}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="h-8 w-8 p-0"
-        >
-          {isExpanded ? (
-            <ChevronLeft className="h-4 w-4" />
-          ) : (
-            <ChevronRight className="h-4 w-4" />
-          )}
-        </Button>
+        {!isExpanded && (
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center mx-auto">
+            <Star className="w-5 h-5 text-primary-foreground" />
+          </div>
+        )}
       </div>
 
       {/* Navigation */}

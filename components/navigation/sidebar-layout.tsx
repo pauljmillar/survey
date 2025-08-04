@@ -9,29 +9,28 @@ interface SidebarLayoutProps {
 }
 
 export function SidebarLayout({ children, className }: SidebarLayoutProps) {
-  const [sidebarExpanded, setSidebarExpanded] = useState(true)
+  const [sidebarExpanded, setSidebarExpanded] = useState(false)
 
-  // Sync with sidebar state from localStorage
+  // Listen for mouse events on the sidebar to sync state
   useEffect(() => {
-    const savedState = localStorage.getItem("sidebar-expanded")
-    if (savedState !== null) {
-      setSidebarExpanded(JSON.parse(savedState))
-    }
+    const handleMouseEnter = () => setSidebarExpanded(true)
+    const handleMouseLeave = () => setSidebarExpanded(false)
 
-    const handleStorageChange = () => {
-      const savedState = localStorage.getItem("sidebar-expanded")
-      if (savedState !== null) {
-        setSidebarExpanded(JSON.parse(savedState))
+    const sidebar = document.querySelector('[data-sidebar]')
+    if (sidebar) {
+      sidebar.addEventListener('mouseenter', handleMouseEnter)
+      sidebar.addEventListener('mouseleave', handleMouseLeave)
+      
+      return () => {
+        sidebar.removeEventListener('mouseenter', handleMouseEnter)
+        sidebar.removeEventListener('mouseleave', handleMouseLeave)
       }
     }
-
-    window.addEventListener("storage", handleStorageChange)
-    return () => window.removeEventListener("storage", handleStorageChange)
   }, [])
 
   return (
     <div className="flex h-screen bg-background">
-      <Sidebar />
+      <Sidebar data-sidebar />
       <main 
         className={cn(
           "flex-1 transition-all duration-300 ease-in-out",

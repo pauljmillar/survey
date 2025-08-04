@@ -5,8 +5,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { SignedIn, SignedOut, UserButton, SignInButton, SignUpButton, useUser } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
-import { ColorModeSwitcher } from "@/components/color-mode-switcher"
-import { Menu, X, Settings, LogOut, User } from "lucide-react"
+import { useTheme } from "next-themes"
+import { Menu, X, Settings, LogOut, User, Sun, Moon } from "lucide-react"
 
 const MENU_OPTIONS = [
   { label: "About", href: "/about" },
@@ -19,6 +19,7 @@ export function TopNavBar() {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false)
   const pathname = usePathname()
   const { user } = useUser()
+  const { theme, setTheme } = useTheme()
 
   const handleSignOut = () => {
     // Clerk handles sign out automatically
@@ -26,7 +27,7 @@ export function TopNavBar() {
   }
 
   const handleThemeToggle = () => {
-    // Theme toggle is handled by ColorModeSwitcher
+    setTheme(theme === "light" ? "dark" : "light")
     setProfileDropdownOpen(false)
   }
 
@@ -57,11 +58,8 @@ export function TopNavBar() {
           ))}
         </div>
 
-        {/* Right Side: Auth/Profile/Theme */}
+        {/* Right Side: Auth/Profile */}
         <div className="flex items-center gap-3">
-          {/* Theme Switcher */}
-          <ColorModeSwitcher />
-          
           {/* Auth Buttons (when signed out) */}
           <SignedOut>
             <SignInButton mode="modal">
@@ -109,8 +107,12 @@ export function TopNavBar() {
                       onClick={handleThemeToggle}
                       className="flex items-center w-full px-4 py-2 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10"
                     >
-                      <ColorModeSwitcher />
-                      <span className="ml-3">Toggle theme</span>
+                      {theme === "light" ? (
+                        <Moon className="w-4 h-4 mr-3" />
+                      ) : (
+                        <Sun className="w-4 h-4 mr-3" />
+                      )}
+                      Toggle theme
                     </button>
                     <button
                       onClick={handleSignOut}
@@ -204,8 +206,12 @@ export function TopNavBar() {
                       onClick={handleThemeToggle}
                       className="flex items-center w-full px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-md"
                     >
-                      <ColorModeSwitcher />
-                      <span className="ml-3">Toggle theme</span>
+                      {theme === "light" ? (
+                        <Moon className="w-4 h-4 mr-3" />
+                      ) : (
+                        <Sun className="w-4 h-4 mr-3" />
+                      )}
+                      Toggle theme
                     </button>
                     <button
                       onClick={handleSignOut}
