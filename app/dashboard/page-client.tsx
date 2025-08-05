@@ -3,12 +3,12 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/use-auth'
-import { PanelistGuard } from '@/components/auth/auth-guard'
 
 import { CompactSurveyList } from '@/components/panelist/survey-list'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { Users, ClipboardList, Gift, BarChart3 } from 'lucide-react'
 
 interface PanelistProfile {
   id: string
@@ -27,8 +27,13 @@ export default function DashboardClient() {
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading && isSignedIn && userRole === 'panelist') {
-      checkPanelistProfile()
+    if (!loading && isSignedIn) {
+      if (userRole === 'panelist') {
+        checkPanelistProfile()
+      } else {
+        // For admin users, skip profile check and show dashboard
+        setProfileLoading(false)
+      }
     }
   }, [loading, isSignedIn, userRole])
 
@@ -85,24 +90,25 @@ export default function DashboardClient() {
   }
 
   return (
-    <PanelistGuard>
-      <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Welcome Header with Last Updated Timestamp */}
-      <div className="mb-8 pt-32 pb-16">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">
-              Welcome back, {user?.firstName || 'Panelist'}!
-            </h1>
-            <p className="text-muted-foreground">
-              Last updated: {new Date().toLocaleTimeString()}
-            </p>
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Welcome Header with Last Updated Timestamp */}
+        <div className="mb-8 pt-32 pb-16">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">
+                Welcome back, {user?.firstName || 'User'}!
+              </h1>
+              <p className="text-muted-foreground">
+                Last updated: {new Date().toLocaleTimeString()}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
-          {/* Main Dashboard Layout - 5 Panels */}
+        {/* Show different content based on user role */}
+        {userRole === 'panelist' ? (
+          // Panelist Dashboard
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Available Surveys - Takes ~2/3 width */}
             <div className="lg:col-span-2">
@@ -163,8 +169,59 @@ export default function DashboardClient() {
               </Card>
             </div>
           </div>
-        </div>
+        ) : (
+          // Admin Dashboard
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
+              <div className="space-y-3">
+                <Link href="/admin/panelists">
+                  <Button className="w-full justify-start">
+                    <Users className="w-4 h-4 mr-2" />
+                    Manage Panelists
+                  </Button>
+                </Link>
+                <Link href="/admin/surveys">
+                  <Button className="w-full justify-start">
+                    <ClipboardList className="w-4 h-4 mr-2" />
+                    Manage Surveys
+                  </Button>
+                </Link>
+                <Link href="/admin/offers">
+                  <Button className="w-full justify-start">
+                    <Gift className="w-4 h-4 mr-2" />
+                    Manage Rewards
+                  </Button>
+                </Link>
+                <Link href="/admin/analytics">
+                  <Button className="w-full justify-start">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    View Analytics
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold text-foreground mb-4">System Overview</h2>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Role:</span>
+                  <span className="font-medium text-foreground capitalize">{userRole?.replace('_', ' ')}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Email:</span>
+                  <span className="font-medium text-foreground">{user?.emailAddress}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Status:</span>
+                  <span className="text-green-600 dark:text-green-400 font-medium">Active</span>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
       </div>
-    </PanelistGuard>
+    </div>
   )
 }

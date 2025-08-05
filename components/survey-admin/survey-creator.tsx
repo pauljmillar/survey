@@ -1,181 +1,317 @@
-import { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+'use client'
 
-const DRAFT_KEY = 'survey-creator-draft';
+import { useState } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { QuestionBuilder } from './question-builder'
+import { JsonUpload } from './json-upload'
+import { CheckCircle, AlertCircle } from 'lucide-react'
+
+interface Question {
+  id?: string
+  question_text: string
+  question_type: 'multiple_choice' | 'text' | 'rating' | 'checkbox' | 'yes_no' | 'date_time'
+  question_order: number
+  is_required: boolean
+  options?: string[]
+  validation_rules?: {
+    min_length?: number
+    max_length?: number
+    min_selections?: number
+    max_selections?: number
+    min_value?: number
+    max_value?: number
+  }
+}
+
+interface SurveyData {
+  title: string
+  description: string
+  points_reward: number
+  estimated_completion_time: number
+  questions: Question[]
+}
 
 export function SurveyCreator() {
-  const [form, setForm] = useState({
+  const [surveyData, setSurveyData] = useState<SurveyData>({
     title: '',
     description: '',
-    points_reward: '',
-    estimated_completion_time: '',
-    qualification_criteria: '',
-  });
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
+    points_reward: 100,
+    estimated_completion_time: 5,
+    questions: []
+  })
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<{ success: boolean; message: string } | null>(null)
+  const [activeTab, setActiveTab] = useState('basic')
 
-  // Load draft from localStorage
-  useEffect(() => {
-    const draft = localStorage.getItem(DRAFT_KEY);
-    if (draft) {
-      setForm(JSON.parse(draft));
-    }
-  }, []);
-
-  // Save draft to localStorage
-  useEffect(() => {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
-  }, [form]);
-
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleQuestionsChange = (questions: Question[]) => {
+    setSurveyData(prev => ({ ...prev, questions }))
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setSuccess('');
-    setError('');
-    
-    // Basic validation
-    if (!form.title || !form.description || !form.points_reward || !form.estimated_completion_time) {
-      setError('All fields except qualification criteria are required.');
-      setLoading(false);
-      return;
+  const handleJsonImport = (importedData: SurveyData) => {
+    setSurveyData(importedData)
+    setActiveTab('questions')
+    setResult({ success: true, message: 'Survey imported successfully! You can now review and edit the questions.' })
+  }
+
+  const validateSurvey = (): string | null => {
+    if (!surveyData.title.trim()) {
+      return 'Survey title is required'
     }
+    if (!surveyData.description.trim()) {
+      return 'Survey description is required'
+    }
+    if (surveyData.points_reward <= 0) {
+      return 'Points reward must be greater than 0'
+    }
+    if (surveyData.estimated_completion_time <= 0) {
+      return 'Estimated completion time must be greater than 0'
+    }
+    if (surveyData.questions.length === 0) {
+      return 'At least one question is required'
+    }
+
+    // Validate each question
+    for (let i = 0; i < surveyData.questions.length; i++) {
+      const question = surveyData.questions[i]
+      if (!question.question_text.trim()) {
+        return `Question ${i + 1}: Question text is required`
+      }
+      if ((question.question_type === 'multiple_choice' || question.question_type === 'checkbox') && 
+          (!question.options || question.options.length < 2)) {
+        return `Question ${i + 1}: At least 2 options are required for ${question.question_type} questions`
+      }
+    }
+
+    return null
+  }
+
+  const createSurvey = async () => {
+    const validationError = validateSurvey()
+    if (validationError) {
+      setResult({ success: false, message: validationError })
+      return
+    }
+
+    setLoading(true)
+    setResult(null)
 
     try {
-      const surveyData = {
-        title: form.title,
-        description: form.description,
-        points_reward: Number(form.points_reward),
-        estimated_completion_time: Number(form.estimated_completion_time),
-        qualification_criteria: form.qualification_criteria ? 
-          JSON.parse(form.qualification_criteria) : {},
-        status: 'active'
-      };
-
-      const res = await fetch('/api/surveys', {
+      // Create the survey first
+      const surveyResponse = await fetch('/api/surveys', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(surveyData),
-      });
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: surveyData.title,
+          description: surveyData.description,
+          points_reward: surveyData.points_reward,
+          estimated_completion_time: surveyData.estimated_completion_time,
+          status: 'draft'
+        }),
+      })
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to create survey');
+      if (!surveyResponse.ok) {
+        const errorData = await surveyResponse.json()
+        throw new Error(errorData.error || 'Failed to create survey')
       }
 
-      setSuccess('Survey created successfully!');
-      localStorage.removeItem(DRAFT_KEY);
-      setForm({ 
-        title: '', 
-        description: '', 
-        points_reward: '', 
-        estimated_completion_time: '', 
-        qualification_criteria: '' 
-      });
-    } catch (err) {
-      console.error('Error creating survey:', err);
-      setError(err instanceof Error ? err.message : 'Could not create survey.');
-    } finally {
-      setLoading(false);
-    }
-  }
+      const survey = await surveyResponse.json()
 
-  function handleSaveDraft() {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
-    setSuccess('Draft saved!');
+      // Create the questions
+      const questionsResponse = await fetch(`/api/surveys/${survey.id}/questions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          questions: surveyData.questions
+        }),
+      })
+
+      if (!questionsResponse.ok) {
+        const errorData = await questionsResponse.json()
+        throw new Error(errorData.error || 'Failed to create questions')
+      }
+
+      setResult({ 
+        success: true, 
+        message: `Survey "${surveyData.title}" created successfully with ${surveyData.questions.length} questions!` 
+      })
+
+      // Reset form
+      setSurveyData({
+        title: '',
+        description: '',
+        points_reward: 100,
+        estimated_completion_time: 5,
+        questions: []
+      })
+      setActiveTab('basic')
+
+    } catch (error) {
+      console.error('Error creating survey:', error)
+      setResult({ 
+        success: false, 
+        message: error instanceof Error ? error.message : 'Failed to create survey' 
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Survey Title *
-          </label>
-          <Input 
-            name="title" 
-            value={form.title} 
-            onChange={handleChange} 
-            required 
-            placeholder="Enter survey title"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Points Reward *
-          </label>
-          <Input 
-            name="points_reward" 
-            value={form.points_reward} 
-            onChange={handleChange} 
-            type="number" 
-            min="1" 
-            required 
-            placeholder="50"
-          />
-        </div>
-      </div>
+    <div className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="basic">Basic Info</TabsTrigger>
+          <TabsTrigger value="questions">Questions</TabsTrigger>
+          <TabsTrigger value="import">Import JSON</TabsTrigger>
+        </TabsList>
 
-      <div>
-        <label className="block text-sm font-medium mb-1">
-          Description *
-        </label>
-        <textarea 
-          name="description" 
-          value={form.description} 
-          onChange={handleChange} 
-          required 
-          className="w-full rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 min-h-[100px]" 
-          placeholder="Describe what this survey is about..."
-        />
-      </div>
+        <TabsContent value="basic" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Survey Information</CardTitle>
+              <CardDescription>
+                Enter the basic details for your survey
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="title">Survey Title</Label>
+                <Input
+                  id="title"
+                  value={surveyData.title}
+                  onChange={(e) => setSurveyData(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Enter survey title..."
+                  className="mt-1"
+                />
+              </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Estimated Time (minutes) *
-          </label>
-          <Input 
-            name="estimated_completion_time" 
-            value={form.estimated_completion_time} 
-            onChange={handleChange} 
-            type="number" 
-            min="1" 
-            required 
-            placeholder="5"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Qualification Criteria (JSON)
-          </label>
-          <Input 
-            name="qualification_criteria" 
-            value={form.qualification_criteria} 
-            onChange={handleChange} 
-            placeholder='{"age_group": "18-65"}'
-          />
-        </div>
-      </div>
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={surveyData.description}
+                  onChange={(e) => setSurveyData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Describe what this survey is about..."
+                  className="mt-1"
+                />
+              </div>
 
-      <div className="flex gap-2 pt-4">
-        <Button type="submit" disabled={loading} className="flex-1">
-          {loading ? 'Creating...' : 'Create Survey'}
-        </Button>
-        <Button type="button" variant="outline" onClick={handleSaveDraft} className="flex-1">
-          Save Draft
-        </Button>
-      </div>
-      
-      {success && <div className="text-green-600 mt-2 p-2 bg-green-50 dark:bg-green-900/20 rounded">{success}</div>}
-      {error && <div className="text-red-600 mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded">{error}</div>}
-    </form>
-  );
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="points">Points Reward</Label>
+                  <Input
+                    id="points"
+                    type="number"
+                    min="1"
+                    value={surveyData.points_reward}
+                    onChange={(e) => setSurveyData(prev => ({ ...prev, points_reward: parseInt(e.target.value) || 0 }))}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="time">Estimated Time (minutes)</Label>
+                  <Input
+                    id="time"
+                    type="number"
+                    min="1"
+                    value={surveyData.estimated_completion_time}
+                    onChange={(e) => setSurveyData(prev => ({ ...prev, estimated_completion_time: parseInt(e.target.value) || 0 }))}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button 
+                  onClick={() => setActiveTab('questions')}
+                  disabled={!surveyData.title.trim() || !surveyData.description.trim()}
+                >
+                  Next: Add Questions
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="questions" className="space-y-4">
+          <QuestionBuilder
+            questions={surveyData.questions}
+            onQuestionsChange={handleQuestionsChange}
+          />
+
+          <div className="flex justify-between">
+            <Button variant="outline" onClick={() => setActiveTab('basic')}>
+              Back to Basic Info
+            </Button>
+            <Button 
+              onClick={createSurvey}
+              disabled={loading || surveyData.questions.length === 0}
+            >
+              {loading ? 'Creating Survey...' : 'Create Survey'}
+            </Button>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="import" className="space-y-4">
+          <JsonUpload
+            onImport={handleJsonImport}
+            onCancel={() => setActiveTab('basic')}
+          />
+        </TabsContent>
+      </Tabs>
+
+      {/* Result Messages */}
+      {result && (
+        <Alert variant={result.success ? "default" : "destructive"}>
+          {result.success ? (
+            <CheckCircle className="h-4 w-4" />
+          ) : (
+            <AlertCircle className="h-4 w-4" />
+          )}
+          <AlertDescription>{result.message}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Survey Summary */}
+      {surveyData.questions.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Survey Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <Label className="text-xs font-medium">Title</Label>
+                <p className="font-medium">{surveyData.title || 'Not set'}</p>
+              </div>
+              <div>
+                <Label className="text-xs font-medium">Points</Label>
+                <p className="font-medium">{surveyData.points_reward}</p>
+              </div>
+              <div>
+                <Label className="text-xs font-medium">Time</Label>
+                <p className="font-medium">{surveyData.estimated_completion_time} min</p>
+              </div>
+              <div>
+                <Label className="text-xs font-medium">Questions</Label>
+                <p className="font-medium">{surveyData.questions.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
 } 

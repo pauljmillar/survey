@@ -10,10 +10,12 @@ import { Label } from '@/components/ui/label'
 import { z } from 'zod'
 
 const profileSchema = z.object({
+  first_name: z.string().min(1),
+  last_name: z.string().min(1),
   age: z.number().min(13).max(120),
   gender: z.enum(['male', 'female', 'other', 'prefer_not_to_say']),
   location: z.object({
-    country: z.string().min(2),
+    country: z.string().min(2).optional(),
     state: z.string().optional(),
     city: z.string().optional(),
   }),
@@ -35,19 +37,35 @@ const INTEREST_OPTIONS = [
 
 interface RegistrationWizardProps {
   onComplete: () => void
+  isEditMode?: boolean
+  existingData?: any
 }
 
-export function RegistrationWizard({ onComplete }: RegistrationWizardProps) {
+export function RegistrationWizard({ onComplete, isEditMode = false, existingData }: RegistrationWizardProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const { user } = useAuth()
   const router = useRouter()
 
-  const [formData, setFormData] = useState<Partial<ProfileData>>({
-    location: {},
-    interests: [],
-    demographics: {},
+  // Pre-populate form data if in edit mode
+  const [formData, setFormData] = useState<Partial<ProfileData>>(() => {
+    if (isEditMode && existingData) {
+      return {
+        first_name: existingData.first_name || '',
+        last_name: existingData.last_name || '',
+        age: existingData.age || undefined,
+        gender: existingData.gender || '',
+        location: existingData.location || {},
+        interests: existingData.interests || [],
+        demographics: existingData.demographics || {},
+      }
+    }
+    return {
+      location: {},
+      interests: [],
+      demographics: {},
+    }
   })
 
   const totalSteps = 4
@@ -116,28 +134,35 @@ export function RegistrationWizard({ onComplete }: RegistrationWizardProps) {
       // Validate full form data
       const validatedData = profileSchema.parse(formData)
 
+      // Get user's name from Clerk (only for create mode)
+      const userData = isEditMode ? validatedData : {
+        ...validatedData,
+        first_name: user?.firstName || 'Unknown',
+        last_name: user?.lastName || 'User'
+      }
+
       // Submit to API
       const response = await fetch('/api/auth/panelist-profile', {
-        method: 'POST',
+        method: isEditMode ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          profile_data: validatedData,
+          profileData: userData,
         }),
       })
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.error || 'Failed to create profile')
+        throw new Error(error.error || `Failed to ${isEditMode ? 'update' : 'create'} profile`)
       }
 
-      // Profile created successfully
+      // Profile created/updated successfully
       onComplete()
     } catch (error) {
-      console.error('Error creating profile:', error)
+      console.error(`Error ${isEditMode ? 'updating' : 'creating'} profile:`, error)
       setErrors({ 
-        submit: error instanceof Error ? error.message : 'Failed to create profile' 
+        submit: error instanceof Error ? error.message : `Failed to ${isEditMode ? 'update' : 'create'} profile` 
       })
     } finally {
       setLoading(false)
@@ -150,8 +175,12 @@ export function RegistrationWizard({ onComplete }: RegistrationWizardProps) {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Basic Information</h2>
-              <p className="text-gray-600">Tell us a bit about yourself</p>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {isEditMode ? 'Update Basic Information' : 'Basic Information'}
+              </h2>
+              <p className="text-gray-600">
+                {isEditMode ? 'Update your personal information' : 'Tell us a bit about yourself'}
+              </p>
             </div>
 
             <div className="space-y-4">
@@ -193,8 +222,12 @@ export function RegistrationWizard({ onComplete }: RegistrationWizardProps) {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Location</h2>
-              <p className="text-gray-600">Help us find relevant surveys for your area</p>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {isEditMode ? 'Update Location' : 'Location'}
+              </h2>
+              <p className="text-gray-600">
+                {isEditMode ? 'Update your location information' : 'Help us find relevant surveys for your area'}
+              </p>
             </div>
 
             <div className="space-y-4">
@@ -243,8 +276,12 @@ export function RegistrationWizard({ onComplete }: RegistrationWizardProps) {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Interests</h2>
-              <p className="text-gray-600">Select topics you'd like to share opinions about</p>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {isEditMode ? 'Update Interests' : 'Interests'}
+              </h2>
+              <p className="text-gray-600">
+                {isEditMode ? 'Update your topic preferences' : 'Select topics you\'d like to share opinions about'}
+              </p>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -275,8 +312,12 @@ export function RegistrationWizard({ onComplete }: RegistrationWizardProps) {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Additional Details</h2>
-              <p className="text-gray-600">Optional information to improve survey matching</p>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {isEditMode ? 'Update Additional Details' : 'Additional Details'}
+              </h2>
+              <p className="text-gray-600">
+                {isEditMode ? 'Update optional information' : 'Optional information to improve survey matching'}
+              </p>
             </div>
 
             <div className="space-y-4">
@@ -395,7 +436,7 @@ export function RegistrationWizard({ onComplete }: RegistrationWizardProps) {
                 disabled={loading}
                 className="min-w-[100px]"
               >
-                {loading ? 'Creating...' : 'Complete Setup'}
+                {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Profile' : 'Complete Setup')}
               </Button>
             )}
           </div>

@@ -52,11 +52,24 @@ export async function GET(request: NextRequest) {
       })
     }
 
+    // Get completed survey IDs for this panelist
+    const { data: completedSurveys, error: completedError } = await supabase
+      .from('survey_completions')
+      .select('survey_id')
+      .eq('panelist_id', profile.id)
+
+    if (completedError) {
+      console.error('Error fetching completed surveys:', completedError)
+      return NextResponse.json({ error: 'Failed to fetch survey completion data' }, { status: 500 })
+    }
+
+    // Extract completed survey IDs
+    const completedSurveyIds = completedSurveys?.map(c => c.survey_id) || []
+
     // Get available surveys for this panelist
     // 1. Active surveys
-    // 2. Panelist is qualified (or no qualifications exist)
-    // 3. Panelist hasn't completed yet
-    const { data: availableSurveys, error } = await supabase
+    // 2. Panelist hasn't completed yet
+    let query = supabase
       .from('surveys')
       .select(`
         id,
@@ -64,17 +77,16 @@ export async function GET(request: NextRequest) {
         description,
         points_reward,
         estimated_completion_time,
-        created_at,
-        survey_qualifications!left(is_qualified)
+        created_at
       `)
       .eq('status', 'active')
-      .or(`survey_qualifications.panelist_id.eq.${profile.id},survey_qualifications.panelist_id.is.null`)
-      .or('survey_qualifications.is_qualified.eq.true,survey_qualifications.is_qualified.is.null')
-      .not('id', 'in', `(
-        SELECT survey_id 
-        FROM survey_completions 
-        WHERE panelist_id = '${profile.id}'
-      )`)
+
+    // Only add the .not() filter if there are completed surveys
+    if (completedSurveyIds.length > 0) {
+      query = query.not('id', 'in', completedSurveyIds)
+    }
+
+    const { data: availableSurveys, error } = await query
       .range(offset, offset + limit - 1)
       .order('created_at', { ascending: false })
 

@@ -100,9 +100,8 @@ export function RedemptionCenter() {
   })
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6 text-black dark:text-white">Redeem Your Points</h1>
-      <div className="flex flex-col md:flex-row md:items-end gap-4 mb-8">
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-end gap-4">
         <Input
           placeholder="Search offers or merchants..."
           value={search}
@@ -135,20 +134,23 @@ export function RedemptionCenter() {
         </select>
         <Button variant="outline" onClick={fetchOffers}>Apply Filters</Button>
       </div>
+      
       {success && receipt && (
-        <div className="mb-6 p-4 rounded bg-green-50 border border-green-200 text-green-800 dark:bg-green-900 dark:border-green-700 dark:text-green-100">
+        <div className="p-4 rounded bg-green-50 border border-green-200 text-green-800 dark:bg-green-900 dark:border-green-700 dark:text-green-100">
           <div className="font-semibold mb-1">Redemption Successful!</div>
           <div>Points Spent: <span className="font-bold">{receipt.points_spent}</span></div>
           <div>New Balance: <span className="font-bold">{receipt.new_balance}</span></div>
           <div>Redemption ID: <span className="font-mono">{receipt.redemption_id}</span></div>
         </div>
       )}
+      
       {redeemError && (
-        <div className="mb-6 p-4 rounded bg-red-50 border border-red-200 text-red-800 dark:bg-red-900 dark:border-red-700 dark:text-red-100">
+        <div className="p-4 rounded bg-red-50 border border-red-200 text-red-800 dark:bg-red-900 dark:border-red-700 dark:text-red-100">
           <div className="font-semibold mb-1">Redemption Failed</div>
           <div>{redeemError}</div>
         </div>
       )}
+      
       {loading ? (
         <div className="flex justify-center items-center py-16">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black dark:border-white"></div>

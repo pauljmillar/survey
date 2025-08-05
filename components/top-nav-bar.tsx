@@ -7,6 +7,7 @@ import { SignedIn, SignedOut, UserButton, SignInButton, SignUpButton, useUser, u
 import { Button } from "@/components/ui/button"
 import { useTheme } from "next-themes"
 import { Menu, X, Settings, LogOut, User, Sun, Moon } from "lucide-react"
+import { useAuth } from "@/hooks/use-auth"
 
 const MENU_OPTIONS: { label: string; href: string }[] = [
   { label: "Earn", href: "/surveys" },
@@ -22,6 +23,7 @@ export function TopNavBar() {
   const { user } = useUser()
   const { signOut } = useClerk()
   const { theme, setTheme } = useTheme()
+  const { userRole } = useAuth()
 
   const handleSignOut = async () => {
     try {
@@ -313,6 +315,23 @@ export function TopNavBar() {
                     Email cannot be changed
                   </p>
                 </div>
+
+                {/* Profile Edit Link for Panelists */}
+                {userRole === 'panelist' && (
+                  <div className="pt-4 border-t border-black/10 dark:border-white/10">
+                    <Link
+                      href="/profile/edit"
+                      onClick={() => setAccountModalOpen(false)}
+                      className="flex items-center w-full px-3 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md"
+                    >
+                      <User className="w-4 h-4 mr-3" />
+                      Edit Profile & Demographics
+                    </Link>
+                    <p className="text-xs text-black/60 dark:text-white/60 mt-1 ml-7">
+                      Update your survey preferences and demographic information
+                    </p>
+                  </div>
+                )}
                 
                 <div className="flex items-center justify-between pt-4">
                   <button

@@ -1,5 +1,4 @@
 import { auth, currentUser } from '@clerk/nextjs/server'
-import { User } from '@clerk/nextjs/api'
 import { Database } from '@/types/database.types'
 import { createClient } from '@supabase/supabase-js'
 
@@ -9,21 +8,22 @@ export type UserRole = Database['public']['Enums']['user_role']
 // Permission matrix as defined in TDD
 export const PERMISSIONS = {
   // Panelist permissions
-  'view_own_profile': ['panelist', 'survey_admin', 'system_admin'],
-  'complete_surveys': ['panelist'],
-  'redeem_points': ['panelist'],
-  'view_own_activity': ['panelist', 'survey_admin', 'system_admin'],
+  'view_own_profile': ['panelist', 'survey_admin', 'system_admin'] as UserRole[],
+  'complete_surveys': ['panelist'] as UserRole[],
+  'redeem_points': ['panelist'] as UserRole[],
+  'view_own_activity': ['panelist', 'survey_admin', 'system_admin'] as UserRole[],
   
   // Survey Admin permissions
-  'create_surveys': ['survey_admin', 'system_admin'],
-  'manage_qualifications': ['survey_admin', 'system_admin'],
-  'view_survey_analytics': ['survey_admin', 'system_admin'],
+  'create_surveys': ['survey_admin', 'system_admin'] as UserRole[],
+  'manage_qualifications': ['survey_admin', 'system_admin'] as UserRole[],
+  'view_survey_analytics': ['survey_admin', 'system_admin'] as UserRole[],
+  'manage_panelists': ['survey_admin', 'system_admin'] as UserRole[],
   
   // System Admin permissions
-  'view_all_users': ['system_admin'],
-  'manage_offers': ['system_admin'],
-  'manage_user_accounts': ['system_admin'],
-  'view_platform_analytics': ['system_admin'],
+  'view_all_users': ['system_admin'] as UserRole[],
+  'manage_offers': ['system_admin'] as UserRole[],
+  'manage_user_accounts': ['system_admin'] as UserRole[],
+  'view_platform_analytics': ['system_admin'] as UserRole[],
 } as const
 
 export type Permission = keyof typeof PERMISSIONS
@@ -39,7 +39,7 @@ const supabase = createClient(
  */
 export async function getCurrentUserWithRole() {
   try {
-    const { userId } = auth()
+    const { userId } = await auth()
     if (!userId) return null
 
     const user = await currentUser()
@@ -59,7 +59,7 @@ export async function getCurrentUserWithRole() {
         .insert({
           id: userId,
           email: user.emailAddresses[0]?.emailAddress || '',
-          role: 'panelist' as UserRole
+          role: 'panelist'
         })
         .select('role')
         .single()
@@ -71,13 +71,13 @@ export async function getCurrentUserWithRole() {
 
       return {
         ...user,
-        role: newUser.role as UserRole
+        role: newUser.role
       }
     }
 
     return {
       ...user,
-      role: dbUser.role as UserRole
+      role: dbUser.role
     }
   } catch (error) {
     console.error('Error getting current user with role:', error)

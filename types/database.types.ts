@@ -6,79 +6,31 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type Database = {
+export interface Database {
   public: {
     Tables: {
-      activity_log: {
+      users: {
         Row: {
           id: string
-          user_id: string
-          activity_type: string
-          description: string
-          metadata: Json
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          activity_type: string
-          description: string
-          metadata?: Json
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          activity_type?: string
-          description?: string
-          metadata?: Json
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "activity_log_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      merchant_offers: {
-        Row: {
-          id: string
-          title: string
-          description: string | null
-          points_required: number
-          merchant_name: string
-          offer_details: Json
-          is_active: boolean
+          email: string
+          role: 'panelist' | 'survey_admin' | 'system_admin'
           created_at: string
           updated_at: string
         }
         Insert: {
-          id?: string
-          title: string
-          description?: string | null
-          points_required: number
-          merchant_name: string
-          offer_details?: Json
-          is_active?: boolean
+          id: string
+          email: string
+          role?: 'panelist' | 'survey_admin' | 'system_admin'
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
-          title?: string
-          description?: string | null
-          points_required?: number
-          merchant_name?: string
-          offer_details?: Json
-          is_active?: boolean
+          email?: string
+          role?: 'panelist' | 'survey_admin' | 'system_admin'
           created_at?: string
           updated_at?: string
         }
-        Relationships: []
       }
       panelist_profiles: {
         Row: {
@@ -114,60 +66,134 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "panelist_profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
       }
-      redemptions: {
+      surveys: {
         Row: {
           id: string
+          title: string
+          description: string | null
+          points_reward: number
+          estimated_completion_time: number
+          qualification_criteria: Json
+          status: 'draft' | 'active' | 'inactive'
+          created_by: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string | null
+          points_reward: number
+          estimated_completion_time: number
+          qualification_criteria?: Json
+          status?: 'draft' | 'active' | 'inactive'
+          created_by: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string | null
+          points_reward?: number
+          estimated_completion_time?: number
+          qualification_criteria?: Json
+          status?: 'draft' | 'active' | 'inactive'
+          created_by?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      survey_questions: {
+        Row: {
+          id: string
+          survey_id: string
+          question_text: string
+          question_type: 'multiple_choice' | 'text' | 'rating' | 'checkbox' | 'yes_no' | 'date_time'
+          question_order: number
+          is_required: boolean
+          options: Json | null
+          validation_rules: Json | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          survey_id: string
+          question_text: string
+          question_type: 'multiple_choice' | 'text' | 'rating' | 'checkbox' | 'yes_no' | 'date_time'
+          question_order: number
+          is_required?: boolean
+          options?: Json | null
+          validation_rules?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          survey_id?: string
+          question_text?: string
+          question_type?: 'multiple_choice' | 'text' | 'rating' | 'checkbox' | 'yes_no' | 'date_time'
+          question_order?: number
+          is_required?: boolean
+          options?: Json | null
+          validation_rules?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      survey_responses: {
+        Row: {
+          id: string
+          survey_id: string
           panelist_id: string
-          offer_id: string
-          points_spent: number
-          status: Database["public"]["Enums"]["redemption_status"]
-          redemption_date: string
+          question_id: string
+          response_value: string | null
+          response_metadata: Json | null
           created_at: string
         }
         Insert: {
           id?: string
+          survey_id: string
           panelist_id: string
-          offer_id: string
-          points_spent: number
-          status?: Database["public"]["Enums"]["redemption_status"]
-          redemption_date?: string
+          question_id: string
+          response_value?: string | null
+          response_metadata?: Json | null
           created_at?: string
         }
         Update: {
           id?: string
+          survey_id?: string
           panelist_id?: string
-          offer_id?: string
-          points_spent?: number
-          status?: Database["public"]["Enums"]["redemption_status"]
-          redemption_date?: string
+          question_id?: string
+          response_value?: string | null
+          response_metadata?: Json | null
           created_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "redemptions_offer_id_fkey"
-            columns: ["offer_id"]
-            isOneToOne: false
-            referencedRelation: "merchant_offers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "redemptions_panelist_id_fkey"
-            columns: ["panelist_id"]
-            isOneToOne: false
-            referencedRelation: "panelist_profiles"
-            referencedColumns: ["id"]
-          }
-        ]
+      }
+      survey_qualifications: {
+        Row: {
+          id: string
+          survey_id: string
+          panelist_id: string
+          is_qualified: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          survey_id: string
+          panelist_id: string
+          is_qualified?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          survey_id?: string
+          panelist_id?: string
+          is_qualified?: boolean
+          created_at?: string
+        }
       }
       survey_completions: {
         Row: {
@@ -194,72 +220,16 @@ export type Database = {
           completed_at?: string
           response_data?: Json
         }
-        Relationships: [
-          {
-            foreignKeyName: "survey_completions_panelist_id_fkey"
-            columns: ["panelist_id"]
-            isOneToOne: false
-            referencedRelation: "panelist_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "survey_completions_survey_id_fkey"
-            columns: ["survey_id"]
-            isOneToOne: false
-            referencedRelation: "surveys"
-            referencedColumns: ["id"]
-          }
-        ]
       }
-      survey_qualifications: {
-        Row: {
-          id: string
-          survey_id: string
-          panelist_id: string
-          is_qualified: boolean
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          survey_id: string
-          panelist_id: string
-          is_qualified?: boolean
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          survey_id?: string
-          panelist_id?: string
-          is_qualified?: boolean
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "survey_qualifications_panelist_id_fkey"
-            columns: ["panelist_id"]
-            isOneToOne: false
-            referencedRelation: "panelist_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "survey_qualifications_survey_id_fkey"
-            columns: ["survey_id"]
-            isOneToOne: false
-            referencedRelation: "surveys"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      surveys: {
+      merchant_offers: {
         Row: {
           id: string
           title: string
           description: string | null
-          points_reward: number
-          estimated_completion_time: number
-          qualification_criteria: Json
-          status: Database["public"]["Enums"]["survey_status"]
-          created_by: string
+          points_required: number
+          merchant_name: string
+          offer_details: Json
+          is_active: boolean
           created_at: string
           updated_at: string
         }
@@ -267,11 +237,10 @@ export type Database = {
           id?: string
           title: string
           description?: string | null
-          points_reward: number
-          estimated_completion_time: number
-          qualification_criteria?: Json
-          status?: Database["public"]["Enums"]["survey_status"]
-          created_by: string
+          points_required: number
+          merchant_name: string
+          offer_details?: Json
+          is_active?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -279,78 +248,81 @@ export type Database = {
           id?: string
           title?: string
           description?: string | null
-          points_reward?: number
-          estimated_completion_time?: number
-          qualification_criteria?: Json
-          status?: Database["public"]["Enums"]["survey_status"]
-          created_by?: string
+          points_required?: number
+          merchant_name?: string
+          offer_details?: Json
+          is_active?: boolean
           created_at?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "surveys_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
       }
-      users: {
+      redemptions: {
         Row: {
           id: string
-          email: string
-          role: Database["public"]["Enums"]["user_role"]
+          panelist_id: string
+          offer_id: string
+          points_spent: number
+          status: 'pending' | 'completed' | 'cancelled'
+          redemption_date: string | null
           created_at: string
-          updated_at: string
         }
         Insert: {
-          id: string
-          email: string
-          role?: Database["public"]["Enums"]["user_role"]
+          id?: string
+          panelist_id: string
+          offer_id: string
+          points_spent: number
+          status?: 'pending' | 'completed' | 'cancelled'
+          redemption_date?: string | null
           created_at?: string
-          updated_at?: string
         }
         Update: {
           id?: string
-          email?: string
-          role?: Database["public"]["Enums"]["user_role"]
+          panelist_id?: string
+          offer_id?: string
+          points_spent?: number
+          status?: 'pending' | 'completed' | 'cancelled'
+          redemption_date?: string | null
           created_at?: string
-          updated_at?: string
         }
-        Relationships: []
+      }
+      activity_log: {
+        Row: {
+          id: string
+          user_id: string
+          activity_type: string
+          description: string
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          activity_type: string
+          description: string
+          metadata?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          activity_type?: string
+          description?: string
+          metadata?: Json | null
+          created_at?: string
+        }
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      log_activity: {
-        Args: {
-          p_user_id: string
-          p_activity_type: string
-          p_description: string
-          p_metadata?: Json
-        }
-        Returns: string
-      }
-      update_panelist_points: {
-        Args: {
-          p_panelist_id: string
-          p_points_change: number
-          p_activity_description: string
-        }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
-      redemption_status: "pending" | "completed" | "cancelled"
-      survey_status: "draft" | "active" | "inactive"
-      user_role: "panelist" | "survey_admin" | "system_admin"
-    }
-    CompositeTypes: {
-      [_ in never]: never
+      user_role: 'panelist' | 'survey_admin' | 'system_admin'
+      survey_status: 'draft' | 'active' | 'inactive'
+      question_type: 'multiple_choice' | 'text' | 'rating' | 'checkbox' | 'yes_no' | 'date_time'
+      redemption_status: 'pending' | 'completed' | 'cancelled'
     }
   }
 }

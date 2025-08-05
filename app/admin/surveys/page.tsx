@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { SurveyCreator } from "@/components/survey-admin/survey-creator"
+import { SurveyList } from "@/components/survey-admin/survey-list"
 import { useState } from "react"
 
 export default function AdminSurveysPage() {
@@ -38,6 +39,9 @@ export default function AdminSurveysPage() {
           Create and manage surveys, view performance metrics.
         </p>
       </div>
+
+      {/* Existing Surveys List */}
+      <SurveyList />
 
       <Card>
         <CardHeader>

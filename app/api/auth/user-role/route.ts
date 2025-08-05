@@ -11,7 +11,7 @@ const supabase = createClient<Database>(
 export async function GET(request: NextRequest) {
   try {
     // Get user ID from Clerk auth
-    const { userId } = auth()
+    const { userId } = await auth()
     
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -26,6 +26,33 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching user role:', error)
+      
+      // If user doesn't exist, create them with default panelist role
+      if (error.code === 'PGRST116') { // Not found
+        const { data: newUser, error: createError } = await supabase
+          .from('users')
+          .insert({
+            id: userId,
+            email: '', // Will be updated by webhook
+            role: 'panelist',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .select('role, email, created_at')
+          .single()
+
+        if (createError) {
+          console.error('Error creating user:', createError)
+          return NextResponse.json({ error: 'Failed to create user' }, { status: 500 })
+        }
+
+        return NextResponse.json({
+          role: newUser.role,
+          email: newUser.email,
+          createdAt: newUser.created_at
+        })
+      }
+      
       return NextResponse.json({ error: 'Failed to fetch user role' }, { status: 500 })
     }
 
@@ -47,7 +74,7 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     // Get user ID from Clerk auth
-    const { userId } = auth()
+    const { userId } = await auth()
     
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

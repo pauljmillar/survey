@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card'
 export default function OnboardingPage() {
   const { user, userRole, loading, isSignedIn } = useAuth()
   const [hasProfile, setHasProfile] = useState<boolean | null>(null)
+  const [profileCheckComplete, setProfileCheckComplete] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -17,15 +18,17 @@ export default function OnboardingPage() {
       return
     }
 
-    if (!loading && isSignedIn && userRole) {
+    // Wait for auth to be loaded and user to be signed in
+    if (!loading && isSignedIn) {
       // Check if user already has a panelist profile
       checkExistingProfile()
     }
-  }, [loading, isSignedIn, userRole, router])
+  }, [loading, isSignedIn, router])
 
   const checkExistingProfile = async () => {
     try {
       const response = await fetch('/api/auth/panelist-profile')
+      
       if (response.ok) {
         // User already has a profile, redirect to dashboard
         setHasProfile(true)
@@ -40,6 +43,8 @@ export default function OnboardingPage() {
     } catch (error) {
       console.error('Error checking profile:', error)
       setHasProfile(false)
+    } finally {
+      setProfileCheckComplete(true)
     }
   }
 
@@ -48,8 +53,8 @@ export default function OnboardingPage() {
     router.push('/dashboard')
   }
 
-  // Show loading state
-  if (loading || hasProfile === null) {
+  // Show loading state while auth is loading or profile check is in progress
+  if (loading || !profileCheckComplete) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="p-8 text-center">
