@@ -10,14 +10,14 @@ import Link from 'next/link'
 export default function SurveysPage() {
   return (
     <PanelistGuard>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200">
+        <div className="bg-card border-b border-border">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Available Surveys</h1>
-                <p className="mt-1 text-gray-600">
+                <h1 className="text-3xl font-bold text-foreground">Available Surveys</h1>
+                <p className="mt-1 text-muted-foreground">
                   Complete surveys to earn points and share your valuable opinions
                 </p>
               </div>
@@ -40,36 +40,36 @@ export default function SurveysPage() {
             {/* Sidebar */}
             <div className="lg:col-span-1">
               <Card className="p-6 sticky top-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Survey Tips</h2>
+                <h2 className="text-lg font-semibold text-foreground mb-4">Survey Tips</h2>
                 <div className="space-y-4 text-sm">
                   <div className="flex items-start">
-                    <span className="text-blue-600 mr-2">💡</span>
-                    <p className="text-gray-600">
+                    <span className="text-blue-600 dark:text-blue-400 mr-2">💡</span>
+                    <p className="text-muted-foreground">
                       Answer honestly and thoughtfully for the best experience
                     </p>
                   </div>
                   <div className="flex items-start">
-                    <span className="text-green-600 mr-2">⚡</span>
-                    <p className="text-gray-600">
+                    <span className="text-green-600 dark:text-green-400 mr-2">⚡</span>
+                    <p className="text-muted-foreground">
                       Shorter surveys are great for quick points
                     </p>
                   </div>
                   <div className="flex items-start">
-                    <span className="text-purple-600 mr-2">🎯</span>
-                    <p className="text-gray-600">
+                    <span className="text-purple-600 dark:text-purple-400 mr-2">🎯</span>
+                    <p className="text-muted-foreground">
                       Complete your profile for more targeted opportunities
                     </p>
                   </div>
                   <div className="flex items-start">
-                    <span className="text-orange-600 mr-2">🏆</span>
-                    <p className="text-gray-600">
+                    <span className="text-orange-600 dark:text-orange-400 mr-2">🏆</span>
+                    <p className="text-muted-foreground">
                       Higher point surveys usually require more detailed responses
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <h3 className="font-medium text-gray-900 mb-2">Quick Actions</h3>
+                <div className="mt-6 pt-6 border-t border-border">
+                  <h3 className="font-medium text-foreground mb-2">Quick Actions</h3>
                   <div className="space-y-2">
                     <Link href="/offers" className="block">
                       <Button variant="outline" size="sm" className="w-full justify-start">

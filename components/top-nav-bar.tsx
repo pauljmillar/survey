@@ -17,6 +17,7 @@ const MENU_OPTIONS: { label: string; href: string }[] = [
 export function TopNavBar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false)
+  const [accountModalOpen, setAccountModalOpen] = useState(false)
   const pathname = usePathname()
   const { user } = useUser()
   const { signOut } = useClerk()
@@ -33,6 +34,11 @@ export function TopNavBar() {
 
   const handleThemeToggle = () => {
     setTheme(theme === "light" ? "dark" : "light")
+    setProfileDropdownOpen(false)
+  }
+
+  const handleAccountSettings = () => {
+    setAccountModalOpen(true)
     setProfileDropdownOpen(false)
   }
 
@@ -117,14 +123,13 @@ export function TopNavBar() {
               {profileDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-black border border-black/10 dark:border-white/10 rounded-md shadow-lg z-50">
                   <div className="py-1">
-                    <Link
-                      href="/account"
-                      className="flex items-center px-4 py-2 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10"
-                      onClick={() => setProfileDropdownOpen(false)}
+                    <button
+                      onClick={handleAccountSettings}
+                      className="flex items-center w-full px-4 py-2 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10"
                     >
                       <Settings className="w-4 h-4 mr-3" />
                       Account settings
-                    </Link>
+                    </button>
                     <button
                       onClick={handleThemeToggle}
                       className="flex items-center w-full px-4 py-2 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10"
@@ -218,14 +223,13 @@ export function TopNavBar() {
                   </div>
                   
                   <div className="space-y-1">
-                    <Link
-                      href="/account"
-                      className="flex items-center px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-md"
-                      onClick={() => setMobileOpen(false)}
+                    <button
+                      onClick={handleAccountSettings}
+                      className="flex items-center w-full px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-md"
                     >
                       <Settings className="w-4 h-4 mr-3" />
                       Account settings
-                    </Link>
+                    </button>
                     <button
                       onClick={handleThemeToggle}
                       className="flex items-center w-full px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-md"
@@ -258,6 +262,79 @@ export function TopNavBar() {
           className="fixed inset-0 z-40" 
           onClick={() => setProfileDropdownOpen(false)}
         />
+      )}
+
+      {/* Account Settings Modal */}
+      {accountModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div 
+            className="fixed inset-0 bg-black/50"
+            onClick={() => setAccountModalOpen(false)}
+          />
+          <div className="relative bg-white dark:bg-black border border-black/10 dark:border-white/10 rounded-lg shadow-lg w-full max-w-md mx-4">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-black dark:text-white">
+                  Account Settings
+                </h2>
+                <button
+                  onClick={() => setAccountModalOpen(false)}
+                  className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-black dark:text-white mb-2">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    defaultValue={user?.firstName || ''}
+                    className="w-full px-3 py-2 border border-black/10 dark:border-white/10 rounded-md bg-white dark:bg-black text-black dark:text-white"
+                    placeholder="Enter your name"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-black dark:text-white mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    defaultValue={user?.emailAddresses[0]?.emailAddress || ''}
+                    className="w-full px-3 py-2 border border-black/10 dark:border-white/10 rounded-md bg-white dark:bg-black text-black dark:text-white"
+                    placeholder="Enter your email"
+                    disabled
+                  />
+                  <p className="text-xs text-black/60 dark:text-white/60 mt-1">
+                    Email cannot be changed
+                  </p>
+                </div>
+                
+                <div className="flex items-center justify-between pt-4">
+                  <button
+                    onClick={() => setAccountModalOpen(false)}
+                    className="px-4 py-2 text-sm text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      // Handle save functionality here
+                      setAccountModalOpen(false)
+                    }}
+                    className="px-4 py-2 text-sm bg-black text-white dark:bg-white dark:text-black rounded-md hover:bg-black/80 dark:hover:bg-white/80"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </nav>
   )

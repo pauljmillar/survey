@@ -36,6 +36,7 @@ export function SurveyList({
   const [surveys, setSurveys] = useState<Survey[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [emptyMessage, setEmptyMessage] = useState<string>('No surveys are currently available.')
   const [searchTerm, setSearchTerm] = useState('')
   const [pointsFilter, setPointsFilter] = useState<'all' | 'low' | 'medium' | 'high'>('all')
   const [timeFilter, setTimeFilter] = useState<'all' | 'quick' | 'medium' | 'long'>('all')
@@ -78,10 +79,16 @@ export function SurveyList({
       if (response.ok) {
         const data = await response.json()
         setSurveys(data.surveys || [])
-      } else if (response.status === 404) {
-        // Panelist profile not found - this is expected for new users
-        setSurveys([])
-        setError(null)
+        // Update empty message if provided by API
+        if (data.message && data.surveys.length === 0) {
+          setEmptyMessage(data.message)
+        }
+        // Don't set error if we get an empty array - that's a valid state
+        if (data.error) {
+          setError(data.error)
+        } else {
+          setError(null)
+        }
       } else {
         const errorData = await response.json()
         setError(errorData.error || 'Failed to load surveys')
@@ -211,8 +218,8 @@ export function SurveyList({
     return (
       <Card className={`p-8 text-center border-red-200 ${className}`}>
         <div className="text-red-500 text-4xl mb-4">⚠️</div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Surveys</h3>
-        <p className="text-gray-600 mb-4">{error}</p>
+        <h3 className="text-lg font-semibold text-foreground mb-2">Error Loading Surveys</h3>
+        <p className="text-muted-foreground mb-4">{error}</p>
         <Button onClick={fetchSurveys}>
           Try Again
         </Button>
@@ -236,11 +243,11 @@ export function SurveyList({
           
           <div className="flex flex-wrap gap-4">
             <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">Points</label>
+              <label className="text-sm font-medium text-foreground block mb-1">Points</label>
               <select
                 value={pointsFilter}
                 onChange={(e) => setPointsFilter(e.target.value as any)}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                className="px-3 py-2 border border-border rounded-md text-sm bg-background text-foreground"
               >
                 <option value="all">All Points</option>
                 <option value="low">Low (&le;50)</option>
@@ -250,11 +257,11 @@ export function SurveyList({
             </div>
             
             <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">Duration</label>
+              <label className="text-sm font-medium text-foreground block mb-1">Duration</label>
               <select
                 value={timeFilter}
                 onChange={(e) => setTimeFilter(e.target.value as any)}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                className="px-3 py-2 border border-border rounded-md text-sm bg-background text-foreground"
               >
                 <option value="all">All Durations</option>
                 <option value="quick">Quick (&le;5 min)</option>
@@ -268,11 +275,11 @@ export function SurveyList({
 
       {/* Survey Count */}
       <div className="flex justify-between items-center">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           {filteredSurveys.length} survey{filteredSurveys.length !== 1 ? 's' : ''} available
         </p>
         {filteredSurveys.length > 0 && (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             Sorted by newest first
           </p>
         )}
@@ -286,7 +293,7 @@ export function SurveyList({
           message={
             searchTerm || pointsFilter !== 'all' || timeFilter !== 'all'
               ? 'No surveys match your current filters. Try adjusting your search criteria.'
-              : 'No surveys have been created yet. Contact your administrator to add surveys.'
+              : emptyMessage
           }
           actionLabel={
             searchTerm || pointsFilter !== 'all' || timeFilter !== 'all'
@@ -310,33 +317,33 @@ export function SurveyList({
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900 truncate">
+                    <h3 className="text-lg font-semibold text-foreground truncate">
                       {survey.title}
                     </h3>
-                    <span className="ml-2 text-sm text-gray-500 whitespace-nowrap">
+                    <span className="ml-2 text-sm text-muted-foreground whitespace-nowrap">
                       {formatDate(survey.created_at)}
                     </span>
                   </div>
                   
-                  <p className="text-gray-600 mb-4 line-clamp-2">
+                  <p className="text-muted-foreground mb-4 line-clamp-2">
                     {survey.description}
                   </p>
                   
                   <div className="flex flex-wrap gap-4 text-sm">
                     <div className="flex items-center">
-                      <span className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center mr-2">
-                        <span className="text-blue-600 text-xs font-semibold">$</span>
+                      <span className="w-4 h-4 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-2">
+                        <span className="text-blue-600 dark:text-blue-400 text-xs font-semibold">$</span>
                       </span>
-                      <span className="font-semibold text-blue-600">
+                      <span className="font-semibold text-blue-600 dark:text-blue-400">
                         {survey.points_reward} points
                       </span>
                     </div>
                     
                     <div className="flex items-center">
-                      <span className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center mr-2">
-                        <span className="text-green-600 text-xs" role="img" aria-label="Timer">⏱</span>
+                      <span className="w-4 h-4 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mr-2">
+                        <span className="text-green-600 dark:text-green-400 text-xs" role="img" aria-label="Timer">⏱</span>
                       </span>
-                      <span className="text-gray-600">
+                      <span className="text-muted-foreground">
                         {formatTime(survey.estimated_completion_time)}
                       </span>
                     </div>
@@ -375,7 +382,7 @@ export function SurveyList({
           >
             Previous
           </Button>
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-muted-foreground">
             Page {currentPage}
           </span>
           <Button
@@ -421,18 +428,18 @@ export function SurveyCard({ survey, onComplete }: {
 
   return (
     <Card className="p-6 hover:shadow-lg transition-shadow">
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+      <h3 className="text-lg font-semibold text-foreground mb-2">
         {survey.title}
       </h3>
-      <p className="text-gray-600 mb-4">
+      <p className="text-muted-foreground mb-4">
         {survey.description}
       </p>
       <div className="flex justify-between items-center">
         <div className="flex gap-4 text-sm">
-          <span className="font-semibold text-blue-600">
+          <span className="font-semibold text-blue-600 dark:text-blue-400">
             {survey.points_reward} points
           </span>
-          <span className="text-gray-600">
+          <span className="text-muted-foreground">
             {survey.estimated_completion_time} min
           </span>
         </div>

@@ -1,7 +1,7 @@
-import { auth } from '@clerk/nextjs/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/types/database.types'
+import { auth } from '@clerk/nextjs/server'
 
 const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,14 +10,15 @@ const supabase = createClient<Database>(
 
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth()
+    // Get user ID from Clerk auth
+    const { userId } = auth()
     
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Get user role from database
-    const { data: user, error } = await supabase
+    const { data: dbUser, error } = await supabase
       .from('users')
       .select('role, email, created_at')
       .eq('id', userId)
@@ -28,14 +29,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch user role' }, { status: 500 })
     }
 
-    if (!user) {
+    if (!dbUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     return NextResponse.json({
-      role: user.role,
-      email: user.email,
-      createdAt: user.created_at
+      role: dbUser.role,
+      email: dbUser.email,
+      createdAt: dbUser.created_at
     })
   } catch (error) {
     console.error('Error in user-role API:', error)
@@ -45,7 +46,8 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const { userId } = await auth()
+    // Get user ID from Clerk auth
+    const { userId } = auth()
     
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

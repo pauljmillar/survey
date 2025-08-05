@@ -101,14 +101,13 @@ export function Sidebar({ className }: SidebarProps) {
         { label: "Surveys", href: "/surveys", icon: ClipboardList },
         { label: "Live Surveys", href: "/surveys/live", icon: PlayCircle },
         { label: "Panels", href: "/panels", icon: Users2 }
-      ],
-      collapsible: true
+      ]
     },
     {
       title: "Redeem",
       items: [
-        { label: "Rewards", href: "/offers", icon: Gift },
-        { label: "Redemptions", href: "/redemptions", icon: ShoppingCart }
+        { label: "Redeem", href: "/offers", icon: Gift },
+        { label: "History", href: "/redemptions", icon: ShoppingCart }
       ]
     },
     {
@@ -155,7 +154,9 @@ export function Sidebar({ className }: SidebarProps) {
     }
   ]
 
-  const menuGroups = userRole === "panelist" ? panelistMenuGroups : adminMenuGroups
+  // Determine which menu groups to show based on user role
+  const isAdmin = userRole === "system_admin" || userRole === "survey_admin"
+  const menuGroups = isAdmin ? adminMenuGroups : panelistMenuGroups
 
   if (!user) return null
 
