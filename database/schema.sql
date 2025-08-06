@@ -41,6 +41,7 @@ CREATE TABLE surveys (
     points_reward INTEGER NOT NULL CHECK (points_reward > 0),
     estimated_completion_time INTEGER NOT NULL CHECK (estimated_completion_time > 0), -- in minutes
     qualification_criteria JSONB DEFAULT '{}',
+    audience_count INTEGER DEFAULT 0,
     status survey_status NOT NULL DEFAULT 'draft',
     created_by TEXT NOT NULL REFERENCES users(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

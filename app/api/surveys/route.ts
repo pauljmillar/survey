@@ -71,13 +71,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch surveys' }, { status: 500 })
     }
 
-    // Calculate audience counts for each survey
-    const surveysWithAudience = await Promise.all(
-      surveys?.map(async (survey) => ({
-        ...survey,
-        audience_count: await calculateAudienceCount(survey.id)
-      })) || []
-    )
+    // Use the stored audience_count from the database
+    const surveysWithAudience = surveys || []
 
     return NextResponse.json({
       surveys: surveysWithAudience,
@@ -117,7 +112,7 @@ export async function POST(request: NextRequest) {
       .insert({
         ...surveyData,
         created_by: user.id,
-        audience_count: await calculateAudienceCount('new') // Will be updated after creation
+        audience_count: await calculateAudienceCount('new')
       })
       .select()
       .single()

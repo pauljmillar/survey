@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       return {
         id: panelist.id,
         user_id: panelist.user_id,
-        email: panelist.users?.email || '',
+        email: panelist.users?.[0]?.email || '',
         first_name: firstName,
         last_name: lastName,
         points_balance: panelist.points_balance || 0,

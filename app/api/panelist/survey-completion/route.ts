@@ -103,25 +103,9 @@ export async function POST(request: NextRequest) {
 
     console.log('Survey completion recorded:', completion.id)
 
-    // Insert individual responses
-    const surveyResponses = responses.map(response => ({
-      survey_id,
-      panelist_id: profile.id,
-      question_id: response.question_id,
-      response_value: response.response_value,
-      response_metadata: response.response_metadata || null
-    }))
-
-    const { error: responsesError } = await supabase
-      .from('survey_responses')
-      .insert(surveyResponses)
-
-    if (responsesError) {
-      console.error('Error inserting survey responses:', responsesError)
-      // Note: We don't fail here since the completion is already recorded
-    } else {
-      console.log('Survey responses inserted successfully')
-    }
+    // Note: Individual responses are stored in the response_data JSONB field
+    // The survey_responses table is not part of the main schema
+    console.log('Survey responses stored in completion record')
 
     // Update panelist's points balance and survey count
     const { data: updatedProfile, error: updateError } = await supabase
@@ -129,11 +113,10 @@ export async function POST(request: NextRequest) {
       .update({
         points_balance: (profile.points_balance || 0) + survey.points_reward,
         total_points_earned: (profile.total_points_earned || 0) + survey.points_reward,
-        surveys_completed: (profile.surveys_completed || 0) + 1,
         updated_at: new Date().toISOString()
       })
       .eq('id', profile.id)
-      .select('points_balance, total_points_earned, surveys_completed')
+      .select('points_balance, total_points_earned')
       .single()
 
     if (updateError) {
