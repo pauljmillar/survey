@@ -352,8 +352,8 @@ export function RegistrationWizard({ onComplete, isEditMode = false, existingDat
                   <option value="">Select education level</option>
                   <option value="high_school">High School</option>
                   <option value="some_college">Some College</option>
-                  <option value="bachelors">Bachelor's Degree</option>
-                  <option value="masters">Master's Degree</option>
+                  <option value="bachelors">Bachelor&apos;s Degree</option>
+                  <option value="masters">Master&apos;s Degree</option>
                   <option value="doctorate">Doctorate</option>
                   <option value="other">Other</option>
                 </select>
