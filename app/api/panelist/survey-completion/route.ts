@@ -41,10 +41,10 @@ export async function POST(request: NextRequest) {
     const { survey_id, responses } = validation.data
     console.log('Validated data:', { survey_id, responses_count: responses.length })
 
-    // Get panelist profile ID
+    // Get panelist profile ID and current points
     const { data: profile, error: profileError } = await supabase
       .from('panelist_profiles')
-      .select('id')
+      .select('id, points_balance, total_points_earned, surveys_completed')
       .eq('user_id', user.id)
       .single()
 
@@ -113,10 +113,11 @@ export async function POST(request: NextRequest) {
       .update({
         points_balance: (profile.points_balance || 0) + survey.points_reward,
         total_points_earned: (profile.total_points_earned || 0) + survey.points_reward,
+        surveys_completed: (profile.surveys_completed || 0) + 1,
         updated_at: new Date().toISOString()
       })
       .eq('id', profile.id)
-      .select('points_balance, total_points_earned')
+      .select('points_balance, total_points_earned, surveys_completed')
       .single()
 
     if (updateError) {
