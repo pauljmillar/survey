@@ -15,8 +15,8 @@ const questionSchema = z.object({
   question_type: z.enum(['multiple_choice', 'text', 'rating', 'checkbox', 'yes_no', 'date_time']),
   question_order: z.number().min(1),
   is_required: z.boolean(),
-  options: z.array(z.string()).optional(),
-  validation_rules: z.record(z.any()).optional(),
+  options: z.array(z.string()).nullable().optional(), // Make options optional and nullable
+  validation_rules: z.record(z.any()).nullable().optional(), // Make validation_rules optional and nullable
 })
 
 const bulkQuestionsSchema = z.object({
@@ -158,9 +158,12 @@ export async function PUT(
     const { surveyId } = await params
     const body = await request.json()
 
+    console.log('PUT /questions - Request body:', body)
+
     // Validate request body
     const validation = bulkQuestionsSchema.safeParse(body)
     if (!validation.success) {
+      console.error('PUT /questions - Validation error:', validation.error.flatten())
       return NextResponse.json(
         { error: 'Invalid input', details: validation.error.flatten() },
         { status: 400 }
@@ -168,6 +171,7 @@ export async function PUT(
     }
 
     const { questions } = validation.data
+    console.log('PUT /questions - Validated questions:', questions)
 
     // Check if survey exists and user has permission
     const { data: survey, error: surveyError } = await supabase
@@ -177,44 +181,54 @@ export async function PUT(
       .single()
 
     if (surveyError || !survey) {
+      console.error('PUT /questions - Survey not found:', surveyId, surveyError)
       return NextResponse.json({ error: 'Survey not found' }, { status: 404 })
     }
 
     if (survey.created_by !== user.id) {
+      console.error('PUT /questions - Permission denied for user:', user.id, 'survey created by:', survey.created_by)
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
 
     // Delete existing questions
+    console.log('PUT /questions - Deleting existing questions for survey:', surveyId)
     const { error: deleteError } = await supabase
       .from('survey_questions')
       .delete()
       .eq('survey_id', surveyId)
 
     if (deleteError) {
-      console.error('Error deleting existing questions:', deleteError)
-      return NextResponse.json({ error: 'Failed to update questions' }, { status: 500 })
+      console.error('PUT /questions - Error deleting existing questions:', deleteError)
+      return NextResponse.json({ error: 'Failed to update questions', details: deleteError.message }, { status: 500 })
     }
 
     // Insert new questions
+    const questionsToInsert = questions.map(q => ({
+      survey_id: surveyId,
+      question_text: q.question_text,
+      question_type: q.question_type,
+      question_order: q.question_order,
+      is_required: q.is_required,
+      options: q.options || null,
+      validation_rules: q.validation_rules || null
+    }))
+
+    console.log('PUT /questions - Inserting questions:', questionsToInsert)
+
     const { data: insertedQuestions, error } = await supabase
       .from('survey_questions')
-      .insert(
-        questions.map(q => ({
-          survey_id: surveyId,
-          question_text: q.question_text,
-          question_type: q.question_type,
-          question_order: q.question_order,
-          is_required: q.is_required,
-          options: q.options || null,
-          validation_rules: q.validation_rules || null
-        }))
-      )
+      .insert(questionsToInsert)
       .select()
 
     if (error) {
-      console.error('Error creating survey questions:', error)
-      return NextResponse.json({ error: 'Failed to update questions' }, { status: 500 })
+      console.error('PUT /questions - Error creating survey questions:', error)
+      return NextResponse.json({ 
+        error: 'Failed to update questions', 
+        details: error.message 
+      }, { status: 500 })
     }
+
+    console.log('PUT /questions - Successfully updated questions:', insertedQuestions)
 
     // Try to log activity, but don't fail if it doesn't work
     try {
@@ -225,16 +239,19 @@ export async function PUT(
         p_metadata: { survey_id: surveyId, question_count: questions.length }
       })
     } catch (logError) {
-      console.warn('Failed to log activity:', logError)
+      console.warn('PUT /questions - Failed to log activity:', logError)
       // Don't fail the request if logging fails
     }
 
     return NextResponse.json({ questions: insertedQuestions })
   } catch (error) {
+    console.error('PUT /questions - Unexpected error:', error)
     if (error instanceof Error && error.message === 'Insufficient permissions') {
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
-    console.error('Error in survey questions PUT API:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Internal server error', 
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 } 

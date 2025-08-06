@@ -136,11 +136,35 @@ export default function PanelistsPage() {
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Panelist Management</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage panelist accounts and view activity
-          </p>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Panelist Management</h1>
+            <p className="text-muted-foreground">Manage and view all panelists in the system</p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/admin/panelists/sample-data', {
+                    method: 'POST'
+                  })
+                  if (response.ok) {
+                    const result = await response.json()
+                    alert(`Updated ${result.updatedCount} panelists with sample data`)
+                    window.location.reload()
+                  } else {
+                    alert('Failed to update panelists')
+                  }
+                } catch (error) {
+                  alert('Error updating panelists')
+                }
+              }}
+              variant="outline"
+              size="sm"
+            >
+              Populate Sample Data
+            </Button>
+          </div>
         </div>
 
         {/* Search and Filters */}

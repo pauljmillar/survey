@@ -10,8 +10,8 @@ import { Label } from '@/components/ui/label'
 import { z } from 'zod'
 
 const profileSchema = z.object({
-  first_name: z.string().min(1),
-  last_name: z.string().min(1),
+  first_name: z.string().min(1).optional(),
+  last_name: z.string().min(1).optional(),
   age: z.number().min(13).max(120),
   gender: z.enum(['male', 'female', 'other', 'prefer_not_to_say']),
   location: z.object({
@@ -52,8 +52,6 @@ export function RegistrationWizard({ onComplete, isEditMode = false, existingDat
   const [formData, setFormData] = useState<Partial<ProfileData>>(() => {
     if (isEditMode && existingData) {
       return {
-        first_name: existingData.first_name || '',
-        last_name: existingData.last_name || '',
         age: existingData.age || undefined,
         gender: existingData.gender || '',
         location: existingData.location || {},
@@ -134,8 +132,8 @@ export function RegistrationWizard({ onComplete, isEditMode = false, existingDat
       // Validate full form data
       const validatedData = profileSchema.parse(formData)
 
-      // Get user's name from Clerk (only for create mode)
-      const userData = isEditMode ? validatedData : {
+      // Always use Clerk user data for names
+      const userData = {
         ...validatedData,
         first_name: user?.firstName || 'Unknown',
         last_name: user?.lastName || 'User'

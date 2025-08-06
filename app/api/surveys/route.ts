@@ -9,6 +9,22 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+// Function to calculate audience count for a survey
+async function calculateAudienceCount(surveyId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from('survey_qualifications')
+    .select('*', { count: 'exact', head: true })
+    .eq('survey_id', surveyId)
+    .eq('is_qualified', true)
+
+  if (error) {
+    console.error('Error calculating audience count:', error)
+    return 0
+  }
+
+  return count || 0
+}
+
 // Validation schemas
 const createSurveySchema = z.object({
   title: z.string().min(1).max(255),
@@ -57,7 +73,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch surveys' }, { status: 500 })
     }
 
-    return NextResponse.json({ surveys, total: surveys?.length || 0 })
+    // Add audience count to each survey
+    const surveysWithAudience = await Promise.all(
+      (surveys || []).map(async (survey) => {
+        const audienceCount = await calculateAudienceCount(survey.id)
+        return {
+          ...survey,
+          audience_count: audienceCount
+        }
+      })
+    )
+
+    return NextResponse.json({ surveys: surveysWithAudience, total: surveysWithAudience?.length || 0 })
   } catch (error) {
     console.error('Error in surveys GET API:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

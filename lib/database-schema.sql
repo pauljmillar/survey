@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS survey_questions (
 CREATE TABLE IF NOT EXISTS survey_responses (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   survey_id UUID NOT NULL REFERENCES surveys(id) ON DELETE CASCADE,
-  panelist_id UUID NOT NULL REFERENCES panelist_profiles(user_id) ON DELETE CASCADE,
+  panelist_id TEXT NOT NULL REFERENCES panelist_profiles(user_id) ON DELETE CASCADE,
   question_id UUID NOT NULL REFERENCES survey_questions(id) ON DELETE CASCADE,
   response_value TEXT, -- The actual answer
   response_metadata JSONB, -- Additional data like time spent, browser info, etc.

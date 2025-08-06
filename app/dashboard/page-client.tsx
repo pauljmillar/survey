@@ -91,7 +91,7 @@ export default function DashboardClient() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Welcome Header with Last Updated Timestamp */}
         <div className="mb-8 pt-32 pb-16">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
@@ -109,11 +109,11 @@ export default function DashboardClient() {
         {/* Show different content based on user role */}
         {userRole === 'panelist' ? (
           // Panelist Dashboard
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
             {/* Available Surveys - Takes ~2/3 width */}
             <div className="lg:col-span-2">
-              <Card className="p-6 h-full">
-                <div className="flex justify-between items-center mb-6">
+              <Card className="p-4 sm:p-6 h-full">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-2">
                   <h2 className="text-xl font-semibold text-foreground">Available Surveys</h2>
                   <Link href="/surveys">
                     <Button variant="outline" size="sm">
@@ -127,7 +127,7 @@ export default function DashboardClient() {
             </div>
 
             {/* Right Side - 4 Smaller Panels */}
-            <div className="space-y-4">
+            <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
               {/* Available Points */}
               <Card className="p-4">
                 <div className="text-center">
@@ -171,8 +171,8 @@ export default function DashboardClient() {
           </div>
         ) : (
           // Admin Dashboard
-          <div className="grid gap-6 lg:grid-cols-2">
-            <Card className="p-6">
+          <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+            <Card className="p-4 sm:p-6">
               <h2 className="text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
               <div className="space-y-3">
                 <Link href="/admin/panelists">

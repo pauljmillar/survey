@@ -241,7 +241,7 @@ export function SurveyList({
             />
           </div>
           
-          <div className="flex flex-wrap gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-foreground block mb-1">Points</label>
               <select
@@ -313,14 +313,14 @@ export function SurveyList({
       ) : (
         <div className="space-y-4">
           {filteredSurveys.map((survey) => (
-            <Card key={survey.id} className="p-6 hover:shadow-lg transition-shadow">
+            <Card key={survey.id} className="p-4 sm:p-6 hover:shadow-lg transition-shadow">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between mb-2">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-2 gap-2">
                     <h3 className="text-lg font-semibold text-foreground truncate">
                       {survey.title}
                     </h3>
-                    <span className="ml-2 text-sm text-muted-foreground whitespace-nowrap">
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">
                       {formatDate(survey.created_at)}
                     </span>
                   </div>
@@ -329,7 +329,7 @@ export function SurveyList({
                     {survey.description}
                   </p>
                   
-                  <div className="flex flex-wrap gap-4 text-sm">
+                  <div className="flex flex-wrap gap-2 sm:gap-4 text-sm">
                     <div className="flex items-center">
                       <span className="w-4 h-4 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-2">
                         <span className="text-blue-600 dark:text-blue-400 text-xs font-semibold">$</span>

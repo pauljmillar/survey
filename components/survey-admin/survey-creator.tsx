@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { QuestionBuilder } from './question-builder'
 import { JsonUpload } from './json-upload'
+import { QualificationCriteria } from './qualification-criteria'
 import { CheckCircle, AlertCircle } from 'lucide-react'
 
 interface Question {
@@ -36,15 +37,34 @@ interface SurveyData {
   points_reward: number
   estimated_completion_time: number
   questions: Question[]
+  qualification_criteria?: {
+    gender?: string[]
+    age_range?: [number, number]
+    location?: {
+      countries?: string[]
+      states?: string[]
+    }
+    interests?: string[]
+    demographics?: {
+      income_range?: string[]
+      education?: string[]
+      employment?: string[]
+    }
+  }
 }
 
-export function SurveyCreator() {
+interface SurveyCreatorProps {
+  onSuccess?: () => void
+}
+
+export function SurveyCreator({ onSuccess }: SurveyCreatorProps) {
   const [surveyData, setSurveyData] = useState<SurveyData>({
     title: '',
     description: '',
     points_reward: 100,
     estimated_completion_time: 5,
-    questions: []
+    questions: [],
+    qualification_criteria: {}
   })
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null)
@@ -114,6 +134,7 @@ export function SurveyCreator() {
           description: surveyData.description,
           points_reward: surveyData.points_reward,
           estimated_completion_time: surveyData.estimated_completion_time,
+          qualification_criteria: surveyData.qualification_criteria,
           status: 'draft'
         }),
       })
@@ -141,6 +162,18 @@ export function SurveyCreator() {
         throw new Error(errorData.error || 'Failed to create questions')
       }
 
+      // Calculate audience if qualification criteria exists
+      if (surveyData.qualification_criteria && Object.keys(surveyData.qualification_criteria).length > 0) {
+        try {
+          await fetch(`/api/surveys/${survey.id}/recalculate-audience`, {
+            method: 'POST',
+          })
+        } catch (error) {
+          console.warn('Failed to calculate audience:', error)
+          // Don't fail the survey creation if audience calculation fails
+        }
+      }
+
       setResult({ 
         success: true, 
         message: `Survey "${surveyData.title}" created successfully with ${surveyData.questions.length} questions!` 
@@ -152,9 +185,15 @@ export function SurveyCreator() {
         description: '',
         points_reward: 100,
         estimated_completion_time: 5,
-        questions: []
+        questions: [],
+        qualification_criteria: {}
       })
       setActiveTab('basic')
+
+      // Call success callback if provided
+      if (onSuccess) {
+        onSuccess()
+      }
 
     } catch (error) {
       console.error('Error creating survey:', error)
@@ -170,8 +209,9 @@ export function SurveyCreator() {
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="basic">Basic Info</TabsTrigger>
+          <TabsTrigger value="audience">Audience</TabsTrigger>
           <TabsTrigger value="questions">Questions</TabsTrigger>
           <TabsTrigger value="import">Import JSON</TabsTrigger>
         </TabsList>
@@ -235,14 +275,30 @@ export function SurveyCreator() {
 
               <div className="flex justify-end">
                 <Button 
-                  onClick={() => setActiveTab('questions')}
+                  onClick={() => setActiveTab('audience')}
                   disabled={!surveyData.title.trim() || !surveyData.description.trim()}
                 >
-                  Next: Add Questions
+                  Next: Set Audience
                 </Button>
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="audience" className="space-y-4">
+          <QualificationCriteria
+            criteria={surveyData.qualification_criteria || {}}
+            onChange={(criteria) => setSurveyData(prev => ({ ...prev, qualification_criteria: criteria }))}
+          />
+
+          <div className="flex justify-between">
+            <Button variant="outline" onClick={() => setActiveTab('basic')}>
+              Back to Basic Info
+            </Button>
+            <Button onClick={() => setActiveTab('questions')}>
+              Next: Add Questions
+            </Button>
+          </div>
         </TabsContent>
 
         <TabsContent value="questions" className="space-y-4">
@@ -252,8 +308,8 @@ export function SurveyCreator() {
           />
 
           <div className="flex justify-between">
-            <Button variant="outline" onClick={() => setActiveTab('basic')}>
-              Back to Basic Info
+            <Button variant="outline" onClick={() => setActiveTab('audience')}>
+              Back to Audience
             </Button>
             <Button 
               onClick={createSurvey}
@@ -285,7 +341,7 @@ export function SurveyCreator() {
       )}
 
       {/* Survey Summary */}
-      {surveyData.questions.length > 0 && (
+      {(surveyData.questions.length > 0 || (surveyData.qualification_criteria && Object.keys(surveyData.qualification_criteria).length > 0)) && (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Survey Summary</CardTitle>
@@ -308,6 +364,16 @@ export function SurveyCreator() {
                 <Label className="text-xs font-medium">Questions</Label>
                 <p className="font-medium">{surveyData.questions.length}</p>
               </div>
+              {surveyData.qualification_criteria && Object.keys(surveyData.qualification_criteria).length > 0 && (
+                <div className="col-span-2">
+                  <Label className="text-xs font-medium">Audience Criteria</Label>
+                  <p className="font-medium text-xs">
+                    {surveyData.qualification_criteria?.gender && surveyData.qualification_criteria.gender.length > 0 && `Gender: ${surveyData.qualification_criteria.gender.join(', ')} `}
+                    {surveyData.qualification_criteria?.age_range && `Age: ${surveyData.qualification_criteria.age_range[0]}-${surveyData.qualification_criteria.age_range[1]} `}
+                    {surveyData.qualification_criteria?.interests && surveyData.qualification_criteria.interests.length > 0 && `Interests: ${surveyData.qualification_criteria.interests.join(', ')}`}
+                  </p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

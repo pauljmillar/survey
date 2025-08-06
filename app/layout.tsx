@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import { ClerkProvider } from '@clerk/nextjs'
 import "./globals.css";
 import { TopNavBar } from '@/components/top-nav-bar'
 import { Provider } from './provider'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 
-const geist = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -55,10 +50,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-background text-foreground min-h-screen antialiased">
+      <body className={`${inter.variable} bg-background text-foreground min-h-screen antialiased`}>
         <ErrorBoundary>
           <Provider>
-            <ClerkProvider appearance={appearance}>
+            <ClerkProvider appearance={appearance} dynamic>
               <TopNavBar />
               {children}
             </ClerkProvider>
