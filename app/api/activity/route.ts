@@ -68,8 +68,8 @@ export async function GET(request: NextRequest) {
       description: activity.description,
       metadata: activity.metadata,
       created_at: activity.created_at,
-      user_email: userData?.role === 'system_admin' ? activity.users?.email : undefined,
-      user_role: userData?.role === 'system_admin' ? activity.users?.role : undefined,
+      user_email: userData?.role === 'system_admin' ? activity.users?.[0]?.email : undefined,
+      user_role: userData?.role === 'system_admin' ? activity.users?.[0]?.role : undefined,
     })) || []
 
     return NextResponse.json({ 
