@@ -181,14 +181,23 @@ export function RedemptionCenter() {
                   </details>
                 )}
               </div>
-              <Button
-                variant="default"
-                className="mt-4 w-full"
-                disabled={!isSignedIn || redeemingId === offer.id}
-                onClick={() => handleRedeem(offer)}
-              >
-                {redeemingId === offer.id ? 'Processing...' : 'Redeem'}
-              </Button>
+              <div className="flex gap-2 mt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => window.open(`/offers/${offer.id}`, '_blank')}
+                >
+                  View Details
+                </Button>
+                <Button
+                  variant="default"
+                  className="flex-1"
+                  disabled={!isSignedIn || redeemingId === offer.id}
+                  onClick={() => handleRedeem(offer)}
+                >
+                  {redeemingId === offer.id ? 'Processing...' : 'Redeem'}
+                </Button>
+              </div>
             </Card>
           ))}
         </div>

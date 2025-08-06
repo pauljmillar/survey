@@ -158,10 +158,10 @@ export default function PanelistDashboard() {
         </Card>
       )}
 
-      {/* Available Surveys */}
+      {/* Surveys */}
       <Card>
         <CardHeader>
-          <CardTitle>Available Surveys</CardTitle>
+          <CardTitle>Surveys</CardTitle>
           <CardDescription>
             Complete surveys to earn points. Click on any survey to get started.
           </CardDescription>

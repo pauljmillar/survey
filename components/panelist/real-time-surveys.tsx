@@ -15,6 +15,8 @@ interface Survey {
   created_at: string
   is_qualified?: boolean
   audience_count?: number
+  is_completed?: boolean
+  completed_at?: string | null
 }
 
 export function RealTimeSurveys() {
@@ -50,10 +52,10 @@ export function RealTimeSurveys() {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const response = await fetch('/api/surveys')
+        const response = await fetch('/api/panelist/surveys')
         if (response.ok) {
           const data = await response.json()
-          setSurveys(data)
+          setSurveys(data.surveys || [])
         }
       } catch (err) {
         console.error('Failed to fetch initial survey data:', err)
@@ -162,14 +164,18 @@ export function RealTimeSurveys() {
                     </span>
                   </div>
                   
-                  {survey.is_qualified && survey.status === 'active' && (
+                  {survey.is_completed ? (
+                    <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                      ✓ Completed
+                    </span>
+                  ) : survey.is_qualified && survey.status === 'active' ? (
                     <Button
                       size="sm"
                       onClick={() => handleStartSurvey(survey.id)}
                     >
                       Start Survey
                     </Button>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </Card>

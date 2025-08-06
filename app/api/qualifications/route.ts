@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/types/database.types'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, hasPermission } from '@/lib/auth'
 import { z } from 'zod'
 
 const supabase = createClient<Database>(
@@ -9,10 +9,12 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-const updateQualificationSchema = z.object({
+// Validation schemas
+const qualificationSchema = z.object({
   survey_id: z.string().uuid(),
   panelist_id: z.string().uuid(),
   is_qualified: z.boolean(),
+  qualification_reason: z.string().optional(),
 })
 
 const bulkQualificationSchema = z.object({
@@ -20,13 +22,15 @@ const bulkQualificationSchema = z.object({
   qualifications: z.array(z.object({
     panelist_id: z.string().uuid(),
     is_qualified: z.boolean(),
-  })),
+    qualification_reason: z.string().optional(),
+  }))
 })
 
 export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth('manage_qualifications')
     const { searchParams } = new URL(request.url)
+    
     const surveyId = searchParams.get('survey_id')
     const panelistId = searchParams.get('panelist_id')
     const limit = parseInt(searchParams.get('limit') || '50')
@@ -47,15 +51,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Survey not found' }, { status: 404 })
     }
 
-    // Get user role to check permissions
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    // Only survey creator or system admin can manage qualifications
-    if (survey.created_by !== user.id && userData?.role !== 'system_admin') {
+    // Allow survey admins to manage qualifications for any survey, or users to manage their own surveys
+    if (survey.created_by !== user.id && !hasPermission(user.role, 'manage_qualifications')) {
       return NextResponse.json({ error: 'Cannot manage qualifications for surveys created by others' }, { status: 403 })
     }
 
@@ -134,53 +131,44 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Survey not found' }, { status: 404 })
       }
 
-      // Get user role to check permissions
-      const { data: userData } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-
-      if (survey.created_by !== user.id && userData?.role !== 'system_admin') {
+      // Allow survey admins to manage qualifications for any survey, or users to manage their own surveys
+      if (survey.created_by !== user.id && !hasPermission(user.role, 'manage_qualifications')) {
         return NextResponse.json({ error: 'Cannot manage qualifications for surveys created by others' }, { status: 403 })
       }
 
       // Process bulk qualifications with upsert
       const qualificationRecords = qualifications.map(q => ({
-        survey_id: survey_id,
+        survey_id,
         panelist_id: q.panelist_id,
         is_qualified: q.is_qualified,
+        qualification_reason: q.qualification_reason || null,
       }))
 
-      const { data: results, error } = await supabase
+      const { data: insertedQualifications, error } = await supabase
         .from('survey_qualifications')
-        .upsert(qualificationRecords, {
-          onConflict: 'survey_id,panelist_id',
-          ignoreDuplicates: false
-        })
+        .upsert(qualificationRecords, { onConflict: 'survey_id,panelist_id' })
         .select()
 
       if (error) {
         console.error('Error creating bulk qualifications:', error)
-        return NextResponse.json({ error: 'Failed to create bulk qualifications' }, { status: 500 })
+        return NextResponse.json({ error: 'Failed to create qualifications' }, { status: 500 })
       }
 
       // Log activity
       await supabase.rpc('log_activity', {
         p_user_id: user.id,
-        p_activity_type: 'qualifications_bulk_updated',
+        p_activity_type: 'qualifications_updated',
         p_description: `Updated ${qualifications.length} qualifications for survey: ${survey.title}`,
-        p_metadata: { survey_id: survey_id, count: qualifications.length }
+        p_metadata: { survey_id, qualification_count: qualifications.length }
       })
 
-      return NextResponse.json({
-        success: true,
-        updated_count: results?.length || 0,
-        qualifications: results,
+      return NextResponse.json({ 
+        qualifications: insertedQualifications,
+        message: `Updated ${insertedQualifications?.length || 0} qualifications`
       }, { status: 201 })
     } else {
-      // Single qualification update
-      const validation = updateQualificationSchema.safeParse(body)
+      // Single qualification
+      const validation = qualificationSchema.safeParse(body)
       if (!validation.success) {
         return NextResponse.json(
           { error: 'Invalid input', details: validation.error.flatten() },
@@ -188,7 +176,7 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      const { survey_id, panelist_id, is_qualified } = validation.data
+      const { survey_id, panelist_id, is_qualified, qualification_reason } = validation.data
 
       // Verify survey exists and user has access
       const { data: survey } = await supabase
@@ -201,39 +189,20 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Survey not found' }, { status: 404 })
       }
 
-      // Get user role to check permissions
-      const { data: userData } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-
-      if (survey.created_by !== user.id && userData?.role !== 'system_admin') {
+      // Allow survey admins to manage qualifications for any survey, or users to manage their own surveys
+      if (survey.created_by !== user.id && !hasPermission(user.role, 'manage_qualifications')) {
         return NextResponse.json({ error: 'Cannot manage qualifications for surveys created by others' }, { status: 403 })
       }
 
-      // Verify panelist exists
-      const { data: panelist } = await supabase
-        .from('panelist_profiles')
-        .select('id')
-        .eq('id', panelist_id)
-        .single()
-
-      if (!panelist) {
-        return NextResponse.json({ error: 'Panelist not found' }, { status: 404 })
-      }
-
-      // Upsert qualification
+      // Create or update qualification
       const { data: qualification, error } = await supabase
         .from('survey_qualifications')
         .upsert({
-          survey_id: survey_id,
-          panelist_id: panelist_id,
-          is_qualified: is_qualified,
-        }, {
-          onConflict: 'survey_id,panelist_id',
-          ignoreDuplicates: false
-        })
+          survey_id,
+          panelist_id,
+          is_qualified,
+          qualification_reason: qualification_reason || null,
+        }, { onConflict: 'survey_id,panelist_id' })
         .select()
         .single()
 
@@ -246,8 +215,8 @@ export async function POST(request: NextRequest) {
       await supabase.rpc('log_activity', {
         p_user_id: user.id,
         p_activity_type: 'qualification_updated',
-        p_description: `${is_qualified ? 'Qualified' : 'Disqualified'} panelist for survey: ${survey.title}`,
-        p_metadata: { survey_id: survey_id, panelist_id: panelist_id, is_qualified }
+        p_description: `Updated qualification for survey: ${survey.title}`,
+        p_metadata: { survey_id, panelist_id, is_qualified }
       })
 
       return NextResponse.json(qualification, { status: 201 })
@@ -257,6 +226,73 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
     console.error('Error in qualifications POST API:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const user = await requireAuth('manage_qualifications')
+    const body = await request.json()
+
+    // Validate request
+    const validation = qualificationSchema.safeParse(body)
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: validation.error.flatten() },
+        { status: 400 }
+      )
+    }
+
+    const { survey_id, panelist_id, is_qualified, qualification_reason } = validation.data
+
+    // Verify survey exists and user has access
+    const { data: survey } = await supabase
+      .from('surveys')
+      .select('id, title, created_by')
+      .eq('id', survey_id)
+      .single()
+
+    if (!survey) {
+      return NextResponse.json({ error: 'Survey not found' }, { status: 404 })
+    }
+
+    // Allow survey admins to manage qualifications for any survey, or users to manage their own surveys
+    if (survey.created_by !== user.id && !hasPermission(user.role, 'manage_qualifications')) {
+      return NextResponse.json({ error: 'Cannot manage qualifications for surveys created by others' }, { status: 403 })
+    }
+
+    // Update qualification
+    const { data: qualification, error } = await supabase
+      .from('survey_qualifications')
+      .update({
+        is_qualified,
+        qualification_reason: qualification_reason || null,
+      })
+      .eq('survey_id', survey_id)
+      .eq('panelist_id', panelist_id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error updating qualification:', error)
+      return NextResponse.json({ error: 'Failed to update qualification' }, { status: 500 })
+    }
+
+    // Log activity
+    await supabase.rpc('log_activity', {
+      p_user_id: user.id,
+      p_activity_type: 'qualification_updated',
+      p_description: `Updated qualification for survey: ${survey.title}`,
+      p_metadata: { survey_id, panelist_id, is_qualified }
+    })
+
+    return NextResponse.json(qualification)
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Insufficient permissions') {
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
+    }
+    console.error('Error in qualifications PUT API:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 } 

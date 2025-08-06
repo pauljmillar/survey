@@ -25,6 +25,7 @@ CREATE TABLE panelist_profiles (
     points_balance INTEGER NOT NULL DEFAULT 0 CHECK (points_balance >= 0),
     total_points_earned INTEGER NOT NULL DEFAULT 0 CHECK (total_points_earned >= 0),
     total_points_redeemed INTEGER NOT NULL DEFAULT 0 CHECK (total_points_redeemed >= 0),
+    surveys_completed INTEGER NOT NULL DEFAULT 0 CHECK (surveys_completed >= 0),
     profile_data JSONB DEFAULT '{}',
     is_active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

@@ -26,6 +26,8 @@ interface Survey {
   created_at: string
   is_qualified?: boolean
   audience_count?: number
+  is_completed?: boolean
+  completed_at?: string | null
 }
 
 interface SurveyListProps {
@@ -231,68 +233,147 @@ export function SurveyList({
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
-          {filteredSurveys.slice(0, limit).map((survey) => (
-            <Card key={survey.id} className="p-6 hover:shadow-lg transition-shadow">
-              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-foreground">
-                      {survey.title}
-                    </h3>
-                    <Badge variant="secondary" className="ml-2 flex-shrink-0">
-                      {survey.points_reward} pts
-                    </Badge>
-                  </div>
-                  
-                  <p className="text-muted-foreground mb-4">
-                    {survey.description}
-                  </p>
-                  
-                  <div className="flex flex-wrap gap-2 sm:gap-4 text-sm">
-                    <div className="flex items-center">
-                      <span className="w-4 h-4 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-2">
-                        <span className="text-blue-600 dark:text-blue-400 text-xs font-semibold">$</span>
-                      </span>
-                      <span className="font-semibold text-blue-600 dark:text-blue-400">
-                        {survey.points_reward} points
-                      </span>
+        <div className="space-y-6">
+          {/* Available Surveys Section */}
+          {filteredSurveys.filter(survey => !survey.is_completed).length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-foreground">Available Surveys</h3>
+              <div className="space-y-4">
+                {filteredSurveys.filter(survey => !survey.is_completed).slice(0, limit).map((survey) => (
+                  <Card key={survey.id} className="p-6 hover:shadow-lg transition-shadow">
+                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="text-lg font-semibold text-foreground">
+                            {survey.title}
+                          </h3>
+                          <Badge variant="secondary" className="ml-2 flex-shrink-0">
+                            {survey.points_reward} pts
+                          </Badge>
+                        </div>
+                        
+                        <p className="text-muted-foreground mb-4">
+                          {survey.description}
+                        </p>
+                        
+                        <div className="flex flex-wrap gap-2 sm:gap-4 text-sm">
+                          <div className="flex items-center">
+                            <span className="w-4 h-4 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-2">
+                              <span className="text-blue-600 dark:text-blue-400 text-xs font-semibold">$</span>
+                            </span>
+                            <span className="font-semibold text-blue-600 dark:text-blue-400">
+                              {survey.points_reward} points
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center">
+                            <span className="w-4 h-4 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mr-2">
+                              <span className="text-green-600 dark:text-green-400 text-xs" role="img" aria-label="Timer">⏱</span>
+                            </span>
+                            <span className="text-muted-foreground">
+                              {formatTime(survey.estimated_completion_time)}
+                            </span>
+                          </div>
+                          
+                          {survey.audience_count !== undefined && (
+                            <div className="flex items-center">
+                              <span className="w-4 h-4 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mr-2">
+                                <span className="text-purple-600 dark:text-purple-400 text-xs" role="img" aria-label="Users">👥</span>
+                              </span>
+                              <span className="text-muted-foreground">
+                                {survey.audience_count} eligible
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="mt-4 lg:mt-0 lg:ml-6 flex-shrink-0">
+                        <Button
+                          onClick={() => handleStartSurvey(survey.id)}
+                          className="w-full lg:w-auto min-w-[120px]"
+                        >
+                          <Play className="h-4 w-4 mr-1" />
+                          Start Survey
+                        </Button>
+                      </div>
                     </div>
-                    
-                    <div className="flex items-center">
-                      <span className="w-4 h-4 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mr-2">
-                        <span className="text-green-600 dark:text-green-400 text-xs" role="img" aria-label="Timer">⏱</span>
-                      </span>
-                      <span className="text-muted-foreground">
-                        {formatTime(survey.estimated_completion_time)}
-                      </span>
-                    </div>
-                    
-                                         {survey.audience_count !== undefined && (
-                       <div className="flex items-center">
-                         <span className="w-4 h-4 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mr-2">
-                           <span className="text-purple-600 dark:text-purple-400 text-xs" role="img" aria-label="Users">👥</span>
-                         </span>
-                         <span className="text-muted-foreground">
-                           {survey.audience_count} eligible
-                         </span>
-                       </div>
-                     )}
-                  </div>
-                </div>
-                
-                <div className="mt-4 lg:mt-0 lg:ml-6 flex-shrink-0">
-                  <Button
-                    onClick={() => handleStartSurvey(survey.id)}
-                    className="w-full lg:w-auto min-w-[120px]"
-                  >
-                    <Play className="h-4 w-4 mr-1" />
-                    Start Survey
-                  </Button>
-                </div>
+                  </Card>
+                ))}
               </div>
-            </Card>
-          ))}
+            </div>
+          )}
+
+          {/* Completed Surveys Section */}
+          {filteredSurveys.filter(survey => survey.is_completed).length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-muted-foreground">Completed Surveys</h3>
+              <div className="space-y-4">
+                {filteredSurveys.filter(survey => survey.is_completed).map((survey) => (
+                  <Card key={survey.id} className="p-6 hover:shadow-lg transition-shadow border-green-200 dark:border-green-800">
+                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="text-lg font-semibold text-foreground">
+                            {survey.title}
+                          </h3>
+                          <Badge variant="outline" className="ml-2 flex-shrink-0 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800">
+                            ✓ Completed
+                          </Badge>
+                        </div>
+                        
+                        <p className="text-muted-foreground mb-4">
+                          {survey.description}
+                        </p>
+                        
+                        <div className="flex flex-wrap gap-2 sm:gap-4 text-sm">
+                          <div className="flex items-center">
+                            <span className="w-4 h-4 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-2">
+                              <span className="text-blue-600 dark:text-blue-400 text-xs font-semibold">$</span>
+                            </span>
+                            <span className="font-semibold text-blue-600 dark:text-blue-400">
+                              {survey.points_reward} points
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center">
+                            <span className="w-4 h-4 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mr-2">
+                              <span className="text-green-600 dark:text-green-400 text-xs" role="img" aria-label="Timer">⏱</span>
+                            </span>
+                            <span className="text-muted-foreground">
+                              {formatTime(survey.estimated_completion_time)}
+                            </span>
+                          </div>
+                          
+                          {survey.completed_at && (
+                            <div className="flex items-center">
+                              <span className="w-4 h-4 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mr-2">
+                                <span className="text-green-600 dark:text-green-400 text-xs" role="img" aria-label="Calendar">📅</span>
+                              </span>
+                              <span className="text-muted-foreground">
+                                Completed {formatDate(survey.completed_at)}
+                              </span>
+                            </div>
+                          )}
+                          
+                          {survey.audience_count !== undefined && (
+                            <div className="flex items-center">
+                              <span className="w-4 h-4 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mr-2">
+                                <span className="text-purple-600 dark:text-purple-400 text-xs" role="img" aria-label="Users">👥</span>
+                              </span>
+                              <span className="text-muted-foreground">
+                                {survey.audience_count} eligible
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

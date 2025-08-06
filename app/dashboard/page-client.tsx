@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/use-auth'
 
@@ -26,18 +26,7 @@ export default function DashboardClient() {
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
-  useEffect(() => {
-    if (!loading && isSignedIn) {
-      if (userRole === 'panelist') {
-        checkPanelistProfile()
-      } else {
-        // For admin users, skip profile check and show dashboard
-        setProfileLoading(false)
-      }
-    }
-  }, [loading, isSignedIn, userRole])
-
-  const checkPanelistProfile = async () => {
+  const checkPanelistProfile = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/panelist-profile')
       
@@ -58,7 +47,18 @@ export default function DashboardClient() {
     } finally {
       setProfileLoading(false)
     }
-  }
+  }, [router])
+
+  useEffect(() => {
+    if (!loading && isSignedIn) {
+      if (userRole === 'panelist') {
+        checkPanelistProfile()
+      } else {
+        // For admin users, skip profile check and show dashboard
+        setProfileLoading(false)
+      }
+    }
+  }, [loading, isSignedIn, userRole, checkPanelistProfile])
 
   // Show loading state
   if (loading || profileLoading) {
@@ -110,11 +110,11 @@ export default function DashboardClient() {
         {userRole === 'panelist' ? (
           // Panelist Dashboard
           <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
-            {/* Available Surveys - Takes ~2/3 width */}
+            {/* Surveys - Takes ~2/3 width */}
             <div className="lg:col-span-2">
               <Card className="p-4 sm:p-6 h-full">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-2">
-                  <h2 className="text-xl font-semibold text-foreground">Available Surveys</h2>
+                  <h2 className="text-xl font-semibold text-foreground">Surveys</h2>
                   <Link href="/surveys">
                     <Button variant="outline" size="sm">
                       View All

@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     // Get the survey IDs that this panelist has already completed
     const { data: completedSurveys, error: completedError } = await supabase
       .from('survey_completions')
-      .select('survey_id')
+      .select('survey_id, completed_at')
       .eq('panelist_id', profile.id)
 
     if (completedError) {
@@ -59,12 +59,29 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch surveys' }, { status: 500 })
     }
 
-    const completedSurveyIds = new Set(completedSurveys?.map(c => c.survey_id) || [])
+    const completedSurveyMap = new Map(
+      completedSurveys?.map(c => [c.survey_id, c.completed_at]) || []
+    )
 
-    // Filter out completed surveys in JavaScript
-    const availableSurveys = allSurveys?.filter(survey => !completedSurveyIds.has(survey.id)) || []
+    // Add completion status to all surveys
+    const surveysWithStatus = allSurveys?.map(survey => ({
+      ...survey,
+      is_completed: completedSurveyMap.has(survey.id),
+      completed_at: completedSurveyMap.get(survey.id) || null
+    })) || []
 
-    return NextResponse.json({ surveys: availableSurveys })
+    // Sort surveys: available surveys first (newest first), then completed surveys (newest first)
+    const sortedSurveys = surveysWithStatus.sort((a, b) => {
+      // First, sort by completion status (available surveys first)
+      if (a.is_completed !== b.is_completed) {
+        return a.is_completed ? 1 : -1
+      }
+      
+      // Then sort by creation date (newest first)
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
+
+    return NextResponse.json({ surveys: sortedSurveys })
   } catch (error) {
     if (error instanceof Error && error.message === 'Insufficient permissions') {
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })

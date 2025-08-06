@@ -123,16 +123,17 @@ export async function POST(request: NextRequest) {
       console.log('Survey responses inserted successfully')
     }
 
-    // Update panelist's points balance
+    // Update panelist's points balance and survey count
     const { data: updatedProfile, error: updateError } = await supabase
       .from('panelist_profiles')
       .update({
         points_balance: (profile.points_balance || 0) + survey.points_reward,
         total_points_earned: (profile.total_points_earned || 0) + survey.points_reward,
+        surveys_completed: (profile.surveys_completed || 0) + 1,
         updated_at: new Date().toISOString()
       })
       .eq('id', profile.id)
-      .select('points_balance, total_points_earned')
+      .select('points_balance, total_points_earned, surveys_completed')
       .single()
 
     if (updateError) {
