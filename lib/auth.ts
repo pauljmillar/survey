@@ -10,6 +10,7 @@ export const PERMISSIONS = {
   // Panelist permissions
   'view_own_profile': ['panelist', 'survey_admin', 'system_admin'] as UserRole[],
   'complete_surveys': ['panelist'] as UserRole[],
+  'read_survey_questions': ['panelist', 'survey_admin', 'system_admin'] as UserRole[],
   'redeem_points': ['panelist'] as UserRole[],
   'view_own_activity': ['panelist', 'survey_admin', 'system_admin'] as UserRole[],
   

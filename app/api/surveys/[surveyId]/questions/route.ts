@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/types/database.types'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, hasPermission } from '@/lib/auth'
 import { z } from 'zod'
 
 const supabase = createClient<Database>(
@@ -28,7 +28,7 @@ export async function GET(
   { params }: { params: Promise<{ surveyId: string }> }
 ) {
   try {
-    const user = await requireAuth('create_surveys')
+    const user = await requireAuth('read_survey_questions')
     const { surveyId } = await params
 
     // Get questions for the survey
@@ -89,7 +89,8 @@ export async function POST(
       return NextResponse.json({ error: 'Survey not found' }, { status: 404 })
     }
 
-    if (survey.created_by !== user.id) {
+    // Allow survey admins to edit any survey, or users to edit their own surveys
+    if (survey.created_by !== user.id && !hasPermission(user.role, 'manage_qualifications')) {
       console.error('Permission denied for user:', user.id, 'survey created by:', survey.created_by)
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
@@ -185,7 +186,8 @@ export async function PUT(
       return NextResponse.json({ error: 'Survey not found' }, { status: 404 })
     }
 
-    if (survey.created_by !== user.id) {
+    // Allow survey admins to edit any survey, or users to edit their own surveys
+    if (survey.created_by !== user.id && !hasPermission(user.role, 'manage_qualifications')) {
       console.error('PUT /questions - Permission denied for user:', user.id, 'survey created by:', survey.created_by)
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }

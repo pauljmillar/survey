@@ -340,12 +340,14 @@ export default function SurveyTakingPage({ params }: { params: { surveyId: strin
 
   if (error || !survey) {
     return (
-      <div className="space-y-6 pt-12">
-        <div className="text-center py-8">
-          <p className="text-red-600 dark:text-red-400 mb-4">{error || 'Survey not found'}</p>
-          <Button onClick={() => router.push('/panelist')} variant="outline">
-            Back to Dashboard
-          </Button>
+      <div className="min-h-screen bg-background">
+        <div className="w-full max-w-4xl mx-auto px-4 py-8 pt-24">
+          <div className="text-center py-8">
+            <p className="text-red-600 dark:text-red-400 mb-4">{error || 'Survey not found'}</p>
+            <Button onClick={() => router.push('/dashboard')} variant="outline">
+              Back to Dashboard
+            </Button>
+          </div>
         </div>
       </div>
     )
@@ -354,14 +356,16 @@ export default function SurveyTakingPage({ params }: { params: { surveyId: strin
   // Check if we have questions
   if (!survey.questions || survey.questions.length === 0) {
     return (
-      <div className="space-y-6 pt-12">
-        <div className="text-center py-8">
-          <p className="text-red-600 dark:text-red-400 mb-4">
-            This survey has no questions. Please contact the administrator.
-          </p>
-          <Button onClick={() => router.push('/panelist')} variant="outline">
-            Back to Dashboard
-          </Button>
+      <div className="min-h-screen bg-background">
+        <div className="w-full max-w-4xl mx-auto px-4 py-8 pt-24">
+          <div className="text-center py-8">
+            <p className="text-red-600 dark:text-red-400 mb-4">
+              This survey has no questions. Please contact the administrator.
+            </p>
+            <Button onClick={() => router.push('/dashboard')} variant="outline">
+              Back to Dashboard
+            </Button>
+          </div>
         </div>
       </div>
     )
@@ -371,97 +375,101 @@ export default function SurveyTakingPage({ params }: { params: { surveyId: strin
   const isLastQuestion = currentQuestionIndex === survey.questions.length - 1
 
   return (
-    <div className="space-y-6 pt-12">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{survey.title}</h1>
-          <p className="text-muted-foreground mt-1">{survey.description}</p>
-        </div>
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Award className="h-4 w-4" />
-            <span>{survey.points_reward} points</span>
+    <div className="min-h-screen bg-background">
+      <div className="w-full max-w-4xl mx-auto px-4 py-8 pt-24">
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">{survey.title}</h1>
+              <p className="text-muted-foreground mt-1">{survey.description}</p>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Award className="h-4 w-4" />
+                <span>{survey.points_reward} points</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                <span>{survey.estimated_completion_time} min</span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
-            <span>{survey.estimated_completion_time} min</span>
-          </div>
-        </div>
-      </div>
 
-      {/* Progress */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Question {currentQuestionIndex + 1} of {survey.questions.length}</span>
-          <div className="w-32 h-2 bg-gray-200 rounded-full">
-            <div 
-              className="h-2 bg-blue-600 rounded-full transition-all duration-300"
-              style={{ width: `${((currentQuestionIndex + 1) / survey.questions.length) * 100}%` }}
-            />
-          </div>
-        </div>
-        <Button variant="ghost" size="sm" onClick={() => router.push('/panelist')}>
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Exit Survey
-        </Button>
-      </div>
-
-      {/* Question Card */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-muted-foreground">
-              Question {currentQuestionIndex + 1}
-            </span>
-            {currentQuestion.is_required && (
-              <Badge variant="destructive" className="text-xs">Required</Badge>
-            )}
-          </div>
-          <CardTitle className="text-lg">{currentQuestion.question_text}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {renderQuestion(currentQuestion)}
-        </CardContent>
-      </Card>
-
-      {/* Navigation */}
-      <div className="flex items-center justify-between">
-        <Button
-          variant="outline"
-          onClick={goToPreviousQuestion}
-          disabled={currentQuestionIndex === 0}
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Previous
-        </Button>
-
-        <div className="flex items-center gap-2">
-          {!isLastQuestion ? (
-            <Button
-              onClick={goToNextQuestion}
-              disabled={!isCurrentQuestionValid()}
-            >
-              Next
-              <ArrowRight className="h-4 w-4 ml-1" />
+          {/* Progress */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Question {currentQuestionIndex + 1} of {survey.questions.length}</span>
+              <div className="w-32 h-2 bg-gray-200 rounded-full">
+                <div 
+                  className="h-2 bg-blue-600 rounded-full transition-all duration-300"
+                  style={{ width: `${((currentQuestionIndex + 1) / survey.questions.length) * 100}%` }}
+                />
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard')}>
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Exit Survey
             </Button>
-          ) : (
+          </div>
+
+          {/* Question Card */}
+          <Card className="max-w-2xl mx-auto">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-muted-foreground">
+                  Question {currentQuestionIndex + 1}
+                </span>
+                {currentQuestion.is_required && (
+                  <Badge variant="destructive" className="text-xs">Required</Badge>
+                )}
+              </div>
+              <CardTitle className="text-lg">{currentQuestion.question_text}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {renderQuestion(currentQuestion)}
+            </CardContent>
+          </Card>
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between max-w-2xl mx-auto">
             <Button
-              onClick={handleSubmit}
-              disabled={!isCurrentQuestionValid() || submitting}
+              variant="outline"
+              onClick={goToPreviousQuestion}
+              disabled={currentQuestionIndex === 0}
             >
-              {submitting ? 'Submitting...' : 'Submit Survey'}
-              <CheckCircle className="h-4 w-4 ml-1" />
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Previous
             </Button>
+
+            <div className="flex items-center gap-2">
+              {!isLastQuestion ? (
+                <Button
+                  onClick={goToNextQuestion}
+                  disabled={!isCurrentQuestionValid()}
+                >
+                  Next
+                  <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!isCurrentQuestionValid() || submitting}
+                >
+                  {submitting ? 'Submitting...' : 'Submit Survey'}
+                  <CheckCircle className="h-4 w-4 ml-1" />
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {error && (
+            <div className="max-w-2xl mx-auto p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-lg">
+              {error}
+            </div>
           )}
         </div>
       </div>
-
-      {error && (
-        <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-lg">
-          {error}
-        </div>
-      )}
     </div>
   )
 } 

@@ -297,6 +297,12 @@ export function SurveyList() {
                           <span>{survey.completion_count} completions</span>
                         </div>
                       )}
+                      {survey.audience_count !== undefined && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-purple-600 dark:text-purple-400">👥</span>
+                          <span>{survey.audience_count} eligible</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                   

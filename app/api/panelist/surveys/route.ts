@@ -12,6 +12,21 @@ export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth('complete_surveys')
     
+    // First, get the panelist profile ID
+    const { data: profile, error: profileError } = await supabase
+      .from('panelist_profiles')
+      .select('id')
+      .eq('user_id', user.id)
+      .single()
+
+    if (profileError || !profile) {
+      console.error('Panelist profile not found for user:', user.id)
+      return NextResponse.json({ 
+        surveys: [], 
+        message: 'Panelist profile not found. Please complete your profile setup.'
+      })
+    }
+
     // Get all active surveys first
     const { data: allSurveys, error: surveysError } = await supabase
       .from('surveys')
@@ -37,7 +52,7 @@ export async function GET(request: NextRequest) {
     const { data: completedSurveys, error: completedError } = await supabase
       .from('survey_completions')
       .select('survey_id')
-      .eq('panelist_id', user.id)
+      .eq('panelist_id', profile.id)
 
     if (completedError) {
       console.error('Error fetching completed surveys:', completedError)

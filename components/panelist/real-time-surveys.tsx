@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
-import { useRealtime } from '@/hooks/use-realtime'
+import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { useRealtime } from '@/hooks/use-realtime'
 import { MobileSpinner } from '@/components/ui/mobile-loading'
+import { useRouter } from 'next/navigation'
 
 interface Survey {
   id: string
@@ -13,11 +14,13 @@ interface Survey {
   status: string
   created_at: string
   is_qualified?: boolean
+  audience_count?: number
 }
 
 export function RealTimeSurveys() {
   const [surveys, setSurveys] = useState<Survey[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
 
   const { isConnected, error } = useRealtime(
     { 
@@ -62,21 +65,9 @@ export function RealTimeSurveys() {
     fetchInitialData()
   }, [])
 
-  const handleSurveyComplete = async (surveyId: string) => {
-    try {
-      const response = await fetch('/api/surveys/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ surveyId }),
-      })
-      
-      if (response.ok) {
-        // Survey will be updated via real-time subscription
-        console.log('Survey completed successfully')
-      }
-    } catch (err) {
-      console.error('Failed to complete survey:', err)
-    }
+  const handleStartSurvey = (surveyId: string) => {
+    // Navigate to the survey taking page
+    router.push(`/panelist/survey/${surveyId}`)
   }
 
   const formatTime = (minutes: number) => {
@@ -145,6 +136,11 @@ export function RealTimeSurveys() {
                     <span className="text-xs text-muted-foreground">
                       {formatTime(survey.estimated_completion_time)}
                     </span>
+                    {survey.audience_count !== undefined && (
+                      <span className="text-xs text-muted-foreground">
+                        👥 {survey.audience_count}
+                      </span>
+                    )}
                   </div>
                 </div>
                 
@@ -169,9 +165,9 @@ export function RealTimeSurveys() {
                   {survey.is_qualified && survey.status === 'active' && (
                     <Button
                       size="sm"
-                      onClick={() => handleSurveyComplete(survey.id)}
+                      onClick={() => handleStartSurvey(survey.id)}
                     >
-                      Complete Survey
+                      Start Survey
                     </Button>
                   )}
                 </div>

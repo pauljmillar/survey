@@ -23,7 +23,7 @@ export async function GET(
   { params }: { params: Promise<{ surveyId: string }> }
 ) {
   try {
-    const user = await requireAuth('create_surveys')
+    const user = await requireAuth('read_survey_questions')
     const { surveyId } = await params
 
     const { data: survey, error } = await supabase
@@ -37,8 +37,12 @@ export async function GET(
     }
 
     // Check if user has permission to view this survey
+    // Panelists can view active surveys, survey admins can view their own surveys
     if (survey.created_by !== user.id && !hasPermission(user.role, 'view_survey_analytics')) {
-      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
+      // For panelists, only allow viewing active surveys
+      if (survey.status !== 'active') {
+        return NextResponse.json({ error: 'Survey not available' }, { status: 403 })
+      }
     }
 
     return NextResponse.json({ survey })
@@ -80,7 +84,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Survey not found' }, { status: 404 })
     }
 
-    if (survey.created_by !== user.id && !hasPermission(user.role, 'view_survey_analytics')) {
+    if (survey.created_by !== user.id && !hasPermission(user.role, 'manage_qualifications')) {
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
 
@@ -141,7 +145,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Survey not found' }, { status: 404 })
     }
 
-    if (survey.created_by !== user.id && !hasPermission(user.role, 'view_survey_analytics')) {
+    if (survey.created_by !== user.id && !hasPermission(user.role, 'manage_qualifications')) {
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
 
@@ -238,7 +242,8 @@ export async function DELETE(
 function hasPermission(userRole: string, permission: string): boolean {
   const permissions = {
     'view_survey_analytics': ['survey_admin', 'system_admin'],
-    'create_surveys': ['survey_admin', 'system_admin']
+    'create_surveys': ['survey_admin', 'system_admin'],
+    'manage_qualifications': ['survey_admin', 'system_admin']
   }
   return permissions[permission as keyof typeof permissions]?.includes(userRole) || false
 } 

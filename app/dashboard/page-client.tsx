@@ -91,15 +91,15 @@ export default function DashboardClient() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+      <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-8">
         {/* Welcome Header with Last Updated Timestamp */}
-        <div className="mb-8 pt-32 pb-16">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+        <div className="mb-6 sm:mb-8 pt-24 sm:pt-32 pb-8 sm:pb-16">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 sm:mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
                 Welcome back, {user?.firstName || 'User'}!
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Last updated: {new Date().toLocaleTimeString()}
               </p>
             </div>

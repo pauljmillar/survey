@@ -1,13 +1,21 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
+import { 
+  Search, 
+  Filter, 
+  Award, 
+  Clock, 
+  Calendar,
+  Play
+} from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
-import { useRealtime } from '@/hooks/use-realtime'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Input } from '@/components/ui/input'
-import { EmptyState } from '@/components/ui/empty-state'
+import { useRouter } from 'next/navigation'
 
 interface Survey {
   id: string
@@ -17,6 +25,7 @@ interface Survey {
   estimated_completion_time: number
   created_at: string
   is_qualified?: boolean
+  audience_count?: number
 }
 
 interface SurveyListProps {
@@ -32,116 +41,44 @@ export function SurveyList({
   showPagination = true,
   className = ''
 }: SurveyListProps) {
-  const { isSignedIn } = useAuth()
   const [surveys, setSurveys] = useState<Survey[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [emptyMessage, setEmptyMessage] = useState<string>('No surveys are currently available.')
   const [searchTerm, setSearchTerm] = useState('')
-  const [pointsFilter, setPointsFilter] = useState<'all' | 'low' | 'medium' | 'high'>('all')
-  const [timeFilter, setTimeFilter] = useState<'all' | 'quick' | 'medium' | 'long'>('all')
+  const [pointsFilter, setPointsFilter] = useState('all')
+  const [timeFilter, setTimeFilter] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
-  const [completingId, setCompletingId] = useState<string | null>(null)
+  const { isSignedIn } = useAuth()
+  const router = useRouter()
 
-  // Real-time subscription for survey availability updates
-  const { isConnected: isRealtimeConnected } = useRealtime(
-    { enableSurveyAvailability: true, enableSurveyQualifications: true },
-    {
-      onSurveyAvailabilityUpdate: (newSurvey) => {
-        // Add new survey to the list if it matches current filters
-        setSurveys(prev => {
-          const filtered = prev.filter(s => s.id !== newSurvey.id)
-          return [newSurvey as Survey, ...filtered]
-        })
-      },
-      onSurveyQualificationUpdate: (qualification) => {
-        // Update survey qualification status
-        setSurveys(prev => 
-          prev.map(survey => 
-            survey.id === qualification.survey_id 
-              ? { ...survey, is_qualified: qualification.is_qualified }
-              : survey
-          )
-        )
-      },
+  useEffect(() => {
+    if (isSignedIn) {
+      fetchSurveys()
     }
-  )
+  }, [isSignedIn, currentPage, limit])
 
   const fetchSurveys = async () => {
-    if (!isSignedIn) return
-
     try {
       setLoading(true)
-      setError(null)
-      const offset = (currentPage - 1) * limit
-      const response = await fetch(`/api/surveys/available?limit=${limit}&offset=${offset}`)
+      const response = await fetch('/api/panelist/surveys')
       
-      if (response.ok) {
-        const data = await response.json()
-        setSurveys(data.surveys || [])
-        // Update empty message if provided by API
-        if (data.message && data.surveys.length === 0) {
-          setEmptyMessage(data.message)
-        }
-        // Don't set error if we get an empty array - that's a valid state
-        if (data.error) {
-          setError(data.error)
-        } else {
-          setError(null)
-        }
-      } else {
-        const errorData = await response.json()
-        setError(errorData.error || 'Failed to load surveys')
+      if (!response.ok) {
+        throw new Error('Failed to fetch surveys')
       }
+      
+      const data = await response.json()
+      setSurveys(data.surveys || [])
     } catch (error) {
       console.error('Error fetching surveys:', error)
-      setError('Network error - please try again')
+      setError('Failed to load surveys')
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => {
-    fetchSurveys()
-  }, [isSignedIn, currentPage, limit])
-
-  const handleSurveyComplete = async (surveyId: string) => {
-    setCompletingId(surveyId)
-    try {
-      const response = await fetch('/api/surveys/complete', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          survey_id: surveyId,
-          response_data: {
-            completed_at: new Date().toISOString(),
-            source: 'dashboard'
-          }
-        }),
-      })
-
-      if (response.ok) {
-        const result = await response.json()
-        // Remove completed survey from list
-        setSurveys(prev => prev.filter(s => s.id !== surveyId))
-        
-        // Show success message or notification
-        alert(`Survey completed! You earned ${result.points_earned} points. New balance: ${result.new_balance}`)
-        
-        // Refresh the list to get updated surveys
-        fetchSurveys()
-      } else {
-        const errorData = await response.json()
-        alert(`Error completing survey: ${errorData.error}`)
-      }
-    } catch (error) {
-      console.error('Error completing survey:', error)
-      alert('Failed to complete survey. Please try again.')
-    } finally {
-      setCompletingId(null)
-    }
+  const handleStartSurvey = (surveyId: string) => {
+    // Navigate to the survey taking page
+    router.push(`/panelist/survey/${surveyId}`)
   }
 
   // Filter surveys based on search and filters
@@ -205,7 +142,7 @@ export function SurveyList({
                   <Skeleton className="h-4 w-20" />
                   <Skeleton className="h-4 w-16" />
                 </div>
-                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-8 w-24" />
               </div>
             </div>
           </Card>
@@ -216,14 +153,18 @@ export function SurveyList({
 
   if (error) {
     return (
-      <Card className={`p-8 text-center border-red-200 ${className}`}>
-        <div className="text-red-500 text-4xl mb-4">⚠️</div>
-        <h3 className="text-lg font-semibold text-foreground mb-2">Error Loading Surveys</h3>
-        <p className="text-muted-foreground mb-4">{error}</p>
-        <Button onClick={fetchSurveys}>
-          Try Again
-        </Button>
-      </Card>
+      <div className={`space-y-6 ${className}`}>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center py-8">
+              <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+              <Button onClick={fetchSurveys} variant="outline">
+                Try Again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     )
   }
 
@@ -232,38 +173,41 @@ export function SurveyList({
       {/* Filters */}
       {showFilters && (
         <div className="space-y-4">
-          <div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               placeholder="Search surveys..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-md"
+              className="pl-10"
             />
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium text-foreground block mb-1">Points</label>
+          <div className="flex flex-wrap gap-4">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-gray-400" />
+              <span className="text-sm font-medium">Points:</span>
               <select
                 value={pointsFilter}
-                onChange={(e) => setPointsFilter(e.target.value as any)}
-                className="px-3 py-2 border border-border rounded-md text-sm bg-background text-foreground"
+                onChange={(e) => setPointsFilter(e.target.value)}
+                className="text-sm border rounded px-2 py-1"
               >
-                <option value="all">All Points</option>
+                <option value="all">All</option>
                 <option value="low">Low (&le;50)</option>
                 <option value="medium">Medium (51-150)</option>
                 <option value="high">High (&gt;150)</option>
               </select>
             </div>
             
-            <div>
-              <label className="text-sm font-medium text-foreground block mb-1">Duration</label>
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-gray-400" />
+              <span className="text-sm font-medium">Time:</span>
               <select
                 value={timeFilter}
-                onChange={(e) => setTimeFilter(e.target.value as any)}
-                className="px-3 py-2 border border-border rounded-md text-sm bg-background text-foreground"
+                onChange={(e) => setTimeFilter(e.target.value)}
+                className="text-sm border rounded px-2 py-1"
               >
-                <option value="all">All Durations</option>
+                <option value="all">All</option>
                 <option value="quick">Quick (&le;5 min)</option>
                 <option value="medium">Medium (6-15 min)</option>
                 <option value="long">Long (&gt;15 min)</option>
@@ -273,59 +217,35 @@ export function SurveyList({
         </div>
       )}
 
-      {/* Survey Count */}
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-muted-foreground">
-          {filteredSurveys.length} survey{filteredSurveys.length !== 1 ? 's' : ''} available
-        </p>
-        {filteredSurveys.length > 0 && (
-          <p className="text-sm text-muted-foreground">
-            Sorted by newest first
-          </p>
-        )}
-      </div>
-
-      {/* Surveys List */}
+      {/* Survey List */}
       {filteredSurveys.length === 0 ? (
-        <EmptyState
-          icon={<span role="img" aria-label="Clipboard">📋</span>}
-          title="No Surveys Available"
-          message={
-            searchTerm || pointsFilter !== 'all' || timeFilter !== 'all'
-              ? 'No surveys match your current filters. Try adjusting your search criteria.'
-              : emptyMessage
-          }
-          actionLabel={
-            searchTerm || pointsFilter !== 'all' || timeFilter !== 'all'
-              ? 'Clear Filters'
-              : undefined
-          }
-          onAction={
-            searchTerm || pointsFilter !== 'all' || timeFilter !== 'all'
-              ? () => {
-                  setSearchTerm('')
-                  setPointsFilter('all')
-                  setTimeFilter('all')
-                }
-              : undefined
-          }
-        />
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center py-8">
+              <p className="text-gray-500 dark:text-gray-400">
+                {searchTerm || pointsFilter !== 'all' || timeFilter !== 'all'
+                  ? 'No surveys match your filters. Try adjusting your search criteria.'
+                  : 'No surveys available at the moment. Check back later!'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       ) : (
         <div className="space-y-4">
-          {filteredSurveys.map((survey) => (
-            <Card key={survey.id} className="p-4 sm:p-6 hover:shadow-lg transition-shadow">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-2 gap-2">
-                    <h3 className="text-lg font-semibold text-foreground truncate">
+          {filteredSurveys.slice(0, limit).map((survey) => (
+            <Card key={survey.id} className="p-6 hover:shadow-lg transition-shadow">
+              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                <div className="flex-1">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-foreground">
                       {survey.title}
                     </h3>
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">
-                      {formatDate(survey.created_at)}
-                    </span>
+                    <Badge variant="secondary" className="ml-2 flex-shrink-0">
+                      {survey.points_reward} pts
+                    </Badge>
                   </div>
                   
-                  <p className="text-muted-foreground mb-4 line-clamp-2">
+                  <p className="text-muted-foreground mb-4">
                     {survey.description}
                   </p>
                   
@@ -347,23 +267,27 @@ export function SurveyList({
                         {formatTime(survey.estimated_completion_time)}
                       </span>
                     </div>
+                    
+                                         {survey.audience_count !== undefined && (
+                       <div className="flex items-center">
+                         <span className="w-4 h-4 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mr-2">
+                           <span className="text-purple-600 dark:text-purple-400 text-xs" role="img" aria-label="Users">👥</span>
+                         </span>
+                         <span className="text-muted-foreground">
+                           {survey.audience_count} eligible
+                         </span>
+                       </div>
+                     )}
                   </div>
                 </div>
                 
                 <div className="mt-4 lg:mt-0 lg:ml-6 flex-shrink-0">
                   <Button
-                    onClick={() => handleSurveyComplete(survey.id)}
-                    disabled={completingId === survey.id}
+                    onClick={() => handleStartSurvey(survey.id)}
                     className="w-full lg:w-auto min-w-[120px]"
                   >
-                    {completingId === survey.id ? (
-                      <div className="flex items-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Completing...
-                      </div>
-                    ) : (
-                      'Start Survey'
-                    )}
+                    <Play className="h-4 w-4 mr-1" />
+                    Start Survey
                   </Button>
                 </div>
               </div>
@@ -416,35 +340,38 @@ export function SurveyCard({ survey, onComplete }: {
   onComplete: (id: string) => void 
 }) {
   const [completing, setCompleting] = useState(false)
+  const router = useRouter()
 
-  const handleComplete = async () => {
-    setCompleting(true)
-    try {
-      await onComplete(survey.id)
-    } finally {
-      setCompleting(false)
-    }
+  const handleStartSurvey = () => {
+    // Navigate to the survey taking page
+    router.push(`/panelist/survey/${survey.id}`)
   }
 
   return (
-    <Card className="p-6 hover:shadow-lg transition-shadow">
+    <Card className="p-4 sm:p-6 hover:shadow-lg transition-shadow">
       <h3 className="text-lg font-semibold text-foreground mb-2">
         {survey.title}
       </h3>
       <p className="text-muted-foreground mb-4">
         {survey.description}
       </p>
-      <div className="flex justify-between items-center">
-        <div className="flex gap-4 text-sm">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div className="flex flex-wrap gap-4 text-sm">
           <span className="font-semibold text-blue-600 dark:text-blue-400">
             {survey.points_reward} points
           </span>
           <span className="text-muted-foreground">
             {survey.estimated_completion_time} min
           </span>
+          {survey.audience_count !== undefined && (
+            <span className="text-muted-foreground">
+              👥 {survey.audience_count} eligible
+            </span>
+          )}
         </div>
-        <Button onClick={handleComplete} disabled={completing}>
-          {completing ? 'Starting...' : 'Start Survey'}
+        <Button onClick={handleStartSurvey} className="w-full sm:w-auto">
+          <Play className="h-4 w-4 mr-1" />
+          Start Survey
         </Button>
       </div>
     </Card>

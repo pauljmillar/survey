@@ -41,6 +41,18 @@ export async function POST(request: NextRequest) {
     const { survey_id, responses } = validation.data
     console.log('Validated data:', { survey_id, responses_count: responses.length })
 
+    // Get panelist profile ID
+    const { data: profile, error: profileError } = await supabase
+      .from('panelist_profiles')
+      .select('id')
+      .eq('user_id', user.id)
+      .single()
+
+    if (profileError || !profile) {
+      console.error('Panelist profile not found for user:', user.id)
+      return NextResponse.json({ error: 'Panelist profile not found' }, { status: 404 })
+    }
+
     // Check if survey exists and is active
     const { data: survey, error: surveyError } = await supabase
       .from('surveys')
@@ -61,7 +73,7 @@ export async function POST(request: NextRequest) {
       .from('survey_completions')
       .select('id')
       .eq('survey_id', survey_id)
-      .eq('panelist_id', user.id)
+      .eq('panelist_id', profile.id)
       .single()
 
     if (existingCompletion) {
@@ -76,7 +88,7 @@ export async function POST(request: NextRequest) {
       .from('survey_completions')
       .insert({
         survey_id,
-        panelist_id: user.id,
+        panelist_id: profile.id,
         points_earned: survey.points_reward,
         completed_at: new Date().toISOString(),
         response_data: { responses }
@@ -94,7 +106,7 @@ export async function POST(request: NextRequest) {
     // Insert individual responses
     const surveyResponses = responses.map(response => ({
       survey_id,
-      panelist_id: user.id,
+      panelist_id: profile.id,
       question_id: response.question_id,
       response_value: response.response_value,
       response_metadata: response.response_metadata || null
@@ -112,25 +124,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Update panelist's points balance
-    const { data: profile, error: profileError } = await supabase
-      .from('panelist_profiles')
-      .select('points_balance, total_points_earned')
-      .eq('user_id', user.id)
-      .single()
-
-    if (profileError) {
-      console.error('Error fetching panelist profile:', profileError)
-      return NextResponse.json({ error: 'Failed to update points balance' }, { status: 500 })
-    }
-
-    const { error: updateError } = await supabase
+    const { data: updatedProfile, error: updateError } = await supabase
       .from('panelist_profiles')
       .update({
         points_balance: (profile.points_balance || 0) + survey.points_reward,
         total_points_earned: (profile.total_points_earned || 0) + survey.points_reward,
         updated_at: new Date().toISOString()
       })
-      .eq('user_id', user.id)
+      .eq('id', profile.id)
+      .select('points_balance, total_points_earned')
+      .single()
 
     if (updateError) {
       console.error('Error updating panelist profile:', updateError)
@@ -161,7 +164,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       success: true,
       points_earned: survey.points_reward,
-      completion_id: completion.id
+      completion_id: completion.id,
+      new_balance: updatedProfile.points_balance,
+      total_earned: updatedProfile.total_points_earned
     })
   } catch (error) {
     if (error instanceof Error && error.message === 'Insufficient permissions') {

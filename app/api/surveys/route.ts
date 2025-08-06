@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/types/database.types'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, hasPermission } from '@/lib/auth'
 import { z } from 'zod'
 
 const supabase = createClient<Database>(
@@ -9,83 +9,87 @@ const supabase = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// Function to calculate audience count for a survey
-async function calculateAudienceCount(surveyId: string): Promise<number> {
-  const { count, error } = await supabase
-    .from('survey_qualifications')
-    .select('*', { count: 'exact', head: true })
-    .eq('survey_id', surveyId)
-    .eq('is_qualified', true)
+// Validation schema for survey creation/updates
+const surveySchema = z.object({
+  title: z.string().min(1).max(255),
+  description: z.string().optional(),
+  points_reward: z.number().min(0),
+  estimated_completion_time: z.number().min(1),
+  status: z.enum(['draft', 'active', 'inactive']).default('draft'),
+  target_audience: z.record(z.any()).optional(),
+  qualification_criteria: z.record(z.any()).optional(),
+})
 
-  if (error) {
+// Function to calculate audience count based on qualification criteria
+async function calculateAudienceCount(surveyId: string): Promise<number> {
+  try {
+    // This is a simplified calculation - in a real app, you'd have more complex logic
+    const { count } = await supabase
+      .from('panelist_profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_active', true)
+    
+    return count || 0
+  } catch (error) {
     console.error('Error calculating audience count:', error)
     return 0
   }
-
-  return count || 0
 }
-
-// Validation schemas
-const createSurveySchema = z.object({
-  title: z.string().min(1).max(255),
-  description: z.string().optional(),
-  points_reward: z.number().min(1),
-  estimated_completion_time: z.number().min(1),
-  qualification_criteria: z.record(z.any()).optional(),
-  status: z.enum(['draft', 'active', 'inactive']).optional(),
-})
-
-const updateSurveySchema = createSurveySchema.partial()
 
 export async function GET(request: NextRequest) {
   try {
+    const user = await requireAuth('create_surveys')
     const { searchParams } = new URL(request.url)
+    
     const status = searchParams.get('status')
     const limit = parseInt(searchParams.get('limit') || '10')
     const offset = parseInt(searchParams.get('offset') || '0')
-
-    // Get surveys - different access based on user role
+    const page = parseInt(searchParams.get('page') || '1')
+    
+    // Build query
     let query = supabase
       .from('surveys')
       .select(`
-        id,
-        title,
-        description,
-        points_reward,
-        estimated_completion_time,
-        qualification_criteria,
-        status,
-        created_by,
-        created_at,
-        updated_at
+        *,
+        created_by_user:users!surveys_created_by_fkey(email)
       `)
-      .range(offset, offset + limit - 1)
       .order('created_at', { ascending: false })
 
-    if (status) {
+    // Apply status filter if provided
+    if (status && status !== 'all') {
       query = query.eq('status', status)
     }
 
-    const { data: surveys, error } = await query
+    // Apply pagination
+    const actualOffset = page > 1 ? (page - 1) * limit : offset
+    query = query.range(actualOffset, actualOffset + limit - 1)
+
+    const { data: surveys, error, count } = await query
 
     if (error) {
       console.error('Error fetching surveys:', error)
       return NextResponse.json({ error: 'Failed to fetch surveys' }, { status: 500 })
     }
 
-    // Add audience count to each survey
+    // Calculate audience counts for each survey
     const surveysWithAudience = await Promise.all(
-      (surveys || []).map(async (survey) => {
-        const audienceCount = await calculateAudienceCount(survey.id)
-        return {
-          ...survey,
-          audience_count: audienceCount
-        }
-      })
+      surveys?.map(async (survey) => ({
+        ...survey,
+        audience_count: await calculateAudienceCount(survey.id)
+      })) || []
     )
 
-    return NextResponse.json({ surveys: surveysWithAudience, total: surveysWithAudience?.length || 0 })
+    return NextResponse.json({
+      surveys: surveysWithAudience,
+      total: count,
+      page,
+      limit,
+      hasMore: surveysWithAudience.length === limit
+    })
   } catch (error) {
+    if (error instanceof Error && error.message === 'Insufficient permissions') {
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
+    }
     console.error('Error in surveys GET API:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
@@ -97,7 +101,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     // Validate request body
-    const validation = createSurveySchema.safeParse(body)
+    const validation = surveySchema.safeParse(body)
     if (!validation.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: validation.error.flatten() },
@@ -111,13 +115,9 @@ export async function POST(request: NextRequest) {
     const { data: survey, error } = await supabase
       .from('surveys')
       .insert({
-        title: surveyData.title,
-        description: surveyData.description,
-        points_reward: surveyData.points_reward,
-        estimated_completion_time: surveyData.estimated_completion_time,
-        qualification_criteria: surveyData.qualification_criteria || {},
-        status: surveyData.status || 'draft',
+        ...surveyData,
         created_by: user.id,
+        audience_count: await calculateAudienceCount('new') // Will be updated after creation
       })
       .select()
       .single()
@@ -148,6 +148,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const user = await requireAuth('create_surveys')
+    const body = await request.json()
     const { searchParams } = new URL(request.url)
     const surveyId = searchParams.get('id')
 
@@ -155,10 +156,8 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Survey ID required' }, { status: 400 })
     }
 
-    const body = await request.json()
-
     // Validate request body
-    const validation = updateSurveySchema.safeParse(body)
+    const validation = surveySchema.partial().safeParse(body)
     if (!validation.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: validation.error.flatten() },
@@ -168,7 +167,7 @@ export async function PUT(request: NextRequest) {
 
     const updates = validation.data
 
-    // Check if user owns the survey or is system admin
+    // Check if survey exists and user has permission
     const { data: existingSurvey } = await supabase
       .from('surveys')
       .select('created_by')
@@ -179,14 +178,8 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Survey not found' }, { status: 404 })
     }
 
-    // Get user role to check permissions
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (existingSurvey.created_by !== user.id && userData?.role !== 'system_admin') {
+    // Allow survey admins to edit any survey, or users to edit their own surveys
+    if (existingSurvey.created_by !== user.id && !hasPermission(user.role, 'manage_qualifications')) {
       return NextResponse.json({ error: 'Cannot update surveys created by others' }, { status: 403 })
     }
 
@@ -231,7 +224,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Survey ID required' }, { status: 400 })
     }
 
-    // Check if user owns the survey or is system admin
+    // Check if survey exists and user has permission
     const { data: existingSurvey } = await supabase
       .from('surveys')
       .select('created_by, title')
@@ -242,14 +235,8 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Survey not found' }, { status: 404 })
     }
 
-    // Get user role to check permissions
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (existingSurvey.created_by !== user.id && userData?.role !== 'system_admin') {
+    // Allow survey admins to delete any survey, or users to delete their own surveys
+    if (existingSurvey.created_by !== user.id && !hasPermission(user.role, 'manage_qualifications')) {
       return NextResponse.json({ error: 'Cannot delete surveys created by others' }, { status: 403 })
     }
 
