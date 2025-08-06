@@ -16,7 +16,7 @@ export const PERMISSIONS = {
   
   // System Admin permissions
   'view_all_users': ['system_admin'],
-  'manage_offers': ['system_admin'],
+  'manage_offers': ['system_admin', 'survey_admin'],
   'manage_user_accounts': ['system_admin'],
   'view_platform_analytics': ['system_admin'],
 } as const

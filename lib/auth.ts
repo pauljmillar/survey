@@ -22,7 +22,7 @@ export const PERMISSIONS = {
   
   // System Admin permissions
   'view_all_users': ['system_admin'] as UserRole[],
-  'manage_offers': ['system_admin'] as UserRole[],
+  'manage_offers': ['system_admin', 'survey_admin'] as UserRole[],
   'manage_user_accounts': ['system_admin'] as UserRole[],
   'view_platform_analytics': ['system_admin'] as UserRole[],
 } as const
