@@ -23,7 +23,7 @@ interface Offer {
 }
 
 interface OfferEditorProps {
-  offerId?: string
+  offerId?: string | Promise<string>
   onBack: () => void
   onSave: () => void
 }
@@ -44,15 +44,19 @@ export function OfferEditor({ offerId, onBack, onSave }: OfferEditorProps) {
   const isEditMode = !!offerId
 
   useEffect(() => {
-    if (isEditMode) {
-      fetchOffer()
+    if (isEditMode && offerId) {
+      const resolveOfferId = async () => {
+        const id = typeof offerId === 'string' ? offerId : await offerId
+        fetchOffer(id)
+      }
+      resolveOfferId()
     }
   }, [offerId])
 
-  const fetchOffer = async () => {
+  const fetchOffer = async (id: string) => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/offers/${offerId}`)
+      const response = await fetch(`/api/offers/${id}`)
       
       if (!response.ok) {
         throw new Error('Failed to fetch offer')

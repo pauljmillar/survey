@@ -74,7 +74,7 @@ export function AuthGuard({
     return null
   }
 
-  // If we don't have user role yet, show loading
+  // If we don&apos;t have user role yet, show loading
   if (!userRole) {
     return loadingComponent || (
       <div className="flex items-center justify-center min-h-screen">
@@ -91,7 +91,7 @@ export function AuthGuard({
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
-            <p className="text-gray-600">You don't have permission to access this page.</p>
+            <p className="text-gray-600">You don&apos;t have permission to access this page.</p>
           </div>
         </div>
       )
@@ -104,7 +104,7 @@ export function AuthGuard({
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
-          <p className="text-gray-600">You don't have permission to access this page.</p>
+          <p className="text-gray-600">You don&apos;t have permission to access this page.</p>
         </div>
       </div>
     )
@@ -121,7 +121,7 @@ export function AuthGuard({
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
-            <p className="text-gray-600">You don't have permission to access this page.</p>
+            <p className="text-gray-600">You don&apos;t have permission to access this page.</p>
           </div>
         </div>
       )

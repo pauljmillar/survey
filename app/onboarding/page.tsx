@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/use-auth'
 import { RegistrationWizard } from '@/components/panelist/registration-wizard'
@@ -12,20 +12,7 @@ export default function OnboardingPage() {
   const [profileCheckComplete, setProfileCheckComplete] = useState(false)
   const router = useRouter()
 
-  useEffect(() => {
-    if (!loading && !isSignedIn) {
-      router.push('/')
-      return
-    }
-
-    // Wait for auth to be loaded and user to be signed in
-    if (!loading && isSignedIn) {
-      // Check if user already has a panelist profile
-      checkExistingProfile()
-    }
-  }, [loading, isSignedIn, router])
-
-  const checkExistingProfile = async () => {
+  const checkExistingProfile = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/panelist-profile')
       
@@ -46,7 +33,20 @@ export default function OnboardingPage() {
     } finally {
       setProfileCheckComplete(true)
     }
-  }
+  }, [router])
+
+  useEffect(() => {
+    if (!loading && !isSignedIn) {
+      router.push('/')
+      return
+    }
+
+    // Wait for auth to be loaded and user to be signed in
+    if (!loading && isSignedIn) {
+      // Check if user already has a panelist profile
+      checkExistingProfile()
+    }
+  }, [loading, isSignedIn, router, checkExistingProfile])
 
   const handleRegistrationComplete = () => {
     // Redirect to dashboard after successful registration
@@ -80,7 +80,7 @@ export default function OnboardingPage() {
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-gray-900">Welcome to the Panelist Platform!</h1>
               <p className="mt-2 text-lg text-gray-600">
-                Let's set up your profile to start earning points
+                Let&apos;s set up your profile to start earning points
               </p>
             </div>
           </div>
