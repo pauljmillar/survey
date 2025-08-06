@@ -111,8 +111,7 @@ export async function POST(request: NextRequest) {
       .from('surveys')
       .insert({
         ...surveyData,
-        created_by: user.id,
-        audience_count: await calculateAudienceCount('new')
+        created_by: user.id
       })
       .select()
       .single()

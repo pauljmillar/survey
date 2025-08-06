@@ -65,6 +65,7 @@ export function PointsDisplay({
           points_balance: data.points_balance,
           total_points_earned: data.total_points_earned,
           total_points_redeemed: data.total_points_redeemed,
+          last_updated: new Date().toISOString()
         })
         setLastUpdated(new Date())
         setError(null)
