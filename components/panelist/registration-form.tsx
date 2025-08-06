@@ -38,8 +38,9 @@ export function RegistrationForm() {
     'Shopping', 'Entertainment', 'Sports', 'Education', 'Finance'
   ];
 
-  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const { name, value, type, checked } = e.target;
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
@@ -58,11 +59,11 @@ export function RegistrationForm() {
   function validateStep(stepNumber: number): boolean {
     switch (stepNumber) {
       case 1:
-        return formData.firstName && formData.lastName && formData.email;
+        return formData.firstName.trim() !== '' && formData.lastName.trim() !== '' && formData.email.trim() !== '';
       case 2:
-        return formData.phone && formData.dateOfBirth && formData.gender;
+        return formData.phone.trim() !== '' && formData.dateOfBirth.trim() !== '' && formData.gender.trim() !== '';
       case 3:
-        return formData.location && formData.interests.length > 0;
+        return formData.location.trim() !== '' && formData.interests.length > 0;
       case 4:
         return formData.agreeToTerms;
       default:
