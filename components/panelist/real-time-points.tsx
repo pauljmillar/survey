@@ -81,22 +81,16 @@ export function RealTimePoints() {
         </div>
       </div>
       
-      <PointsHero
-        points={pointsData.points_balance}
-        totalEarned={pointsData.total_points_earned}
-        totalRedeemed={pointsData.total_points_redeemed}
-      />
+      <PointsHero />
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <PointsCard
-          title="Total Earned"
-          points={pointsData.total_points_earned}
-          variant="earned"
+          showDetails={true}
+          showTrends={false}
         />
         <PointsCard
-          title="Total Redeemed"
-          points={pointsData.total_points_redeemed}
-          variant="redeemed"
+          showDetails={true}
+          showTrends={false}
         />
       </div>
     </div>

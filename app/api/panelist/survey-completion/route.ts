@@ -42,15 +42,37 @@ export async function POST(request: NextRequest) {
     console.log('Validated data:', { survey_id, responses_count: responses.length })
 
     // Get panelist profile ID and current points
-    const { data: profile, error: profileError } = await supabase
+    let { data: profile, error: profileError } = await supabase
       .from('panelist_profiles')
       .select('id, points_balance, total_points_earned, surveys_completed')
       .eq('user_id', user.id)
       .single()
 
+    // If profile doesn't exist, create it
     if (profileError || !profile) {
-      console.error('Panelist profile not found for user:', user.id)
-      return NextResponse.json({ error: 'Panelist profile not found' }, { status: 404 })
+      console.log('Creating panelist profile for user:', user.id)
+      
+      const { data: newProfile, error: createError } = await supabase
+        .from('panelist_profiles')
+        .insert({
+          user_id: user.id,
+          points_balance: 0,
+          total_points_earned: 0,
+          total_points_redeemed: 0,
+          surveys_completed: 0,
+          profile_data: {},
+          is_active: true
+        })
+        .select('id, points_balance, total_points_earned, surveys_completed')
+        .single()
+
+      if (createError) {
+        console.error('Error creating panelist profile:', createError)
+        return NextResponse.json({ error: 'Failed to create panelist profile' }, { status: 500 })
+      }
+
+      profile = newProfile
+      console.log('Panelist profile created:', profile.id)
     }
 
     // Check if survey exists and is active
