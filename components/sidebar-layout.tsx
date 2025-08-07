@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { UserButton } from "@stackframe/stack";
+import { UserButton } from "@clerk/nextjs";
 import { LucideIcon, Menu } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
@@ -185,11 +185,7 @@ export default function SidebarLayout(props: {
             </div>
           </div>
 
-          <UserButton
-            colorModeToggle={() =>
-              setTheme(resolvedTheme === "light" ? "dark" : "light")
-            }
-          />
+          <UserButton />
         </div>
         <div className="flex-grow">{props.children}</div>
       </div>

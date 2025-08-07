@@ -1,9 +1,10 @@
 'use client';
 
 import SidebarLayout, { SidebarItem } from "@/components/sidebar-layout";
-import { SelectedTeamSwitcher, useUser } from "@stackframe/stack";
+import { useUser } from "@clerk/nextjs";
 import { BadgePercent, BarChart4, Columns3, Globe, Locate, Settings2, ShoppingBag, ShoppingCart, Users } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
+import { TeamSwitcher } from "@/components/team-switcher";
 
 const navigationItems: SidebarItem[] = [
   {
@@ -76,26 +77,29 @@ const navigationItems: SidebarItem[] = [
 
 export default function Layout(props: { children: React.ReactNode }) {
   const params = useParams<{ teamId: string }>();
-  const user = useUser({ or: 'redirect' });
-  const team = user.useTeam(params.teamId);
+  const { user } = useUser();
   const router = useRouter();
 
-  if (!team) {
-    router.push('/dashboard');
-    return null;
-  }
+  // For now, we'll use the teamId from params directly
+  // You can add team validation logic here later
+  const teamId = params.teamId;
+  const selectedTeam = { id: teamId, displayName: `Team ${teamId}` };
+
+  const handleTeamChange = (newTeamId: string) => {
+    router.push(`/dashboard/${newTeamId}`);
+  };
 
   return (
     <SidebarLayout 
       items={navigationItems}
-      basePath={`/dashboard/${team.id}`}
-      sidebarTop={<SelectedTeamSwitcher 
-        selectedTeam={team}
-        urlMap={(team) => `/dashboard/${team.id}`}
+      basePath={`/dashboard/${teamId}`}
+      sidebarTop={<TeamSwitcher 
+        selectedTeamId={teamId}
+        onTeamChange={handleTeamChange}
       />}
       baseBreadcrumb={[{
-        title: team.displayName,
-        href: `/dashboard/${team.id}`,
+        title: selectedTeam.displayName,
+        href: `/dashboard/${teamId}`,
       }]}
     >
       {props.children}

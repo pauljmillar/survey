@@ -1,6 +1,6 @@
 'use client';
 
-import { UserButton, useUser } from "@stackframe/stack";
+import { UserButton, useUser } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import { Logo } from "./logo";
 
@@ -14,7 +14,7 @@ export default function HandlerHeader() {
         <Logo link={user ? "/dashboard" : "/"}/>
 
         <div className="flex items-center justify-end gap-5">
-          <UserButton colorModeToggle={() => setTheme(theme === 'dark' ? 'light' : 'dark')} />
+          <UserButton />
         </div>
       </header>
       <div className="min-h-14"/> {/* Placeholder for fixed header */}
