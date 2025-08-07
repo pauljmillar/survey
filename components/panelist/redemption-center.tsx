@@ -79,6 +79,23 @@ export function RedemptionCenter() {
     }
   }
 
+  const fetchRedemptions = async () => {
+    setHistoryLoading(true)
+    try {
+      const res = await fetch('/api/redemptions')
+      const data = await res.json()
+      if (res.ok) {
+        setRedemptions(data.redemptions || [])
+      } else {
+        console.error('Failed to load redemption history:', data.error)
+      }
+    } catch (e) {
+      console.error('Error loading redemption history:', e)
+    } finally {
+      setHistoryLoading(false)
+    }
+  }
+
   const handleRedeem = async (offer: Offer) => {
     setRedeemingId(offer.id);
     setRedeemError(null);
@@ -95,6 +112,7 @@ export function RedemptionCenter() {
         setSuccess('Redemption successful!');
         setReceipt(data);
         fetchOffers(); // Refresh offers in case of changes
+        fetchRedemptions(); // Refresh redemption history
       } else {
         setRedeemError(data.error || 'Redemption failed');
       }
@@ -224,6 +242,71 @@ export function RedemptionCenter() {
           ))}
         </div>
       )}
+
+      {/* Redemption History Section */}
+      <div className="mt-12">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-black dark:text-white">Redemption History</h2>
+          <Badge variant="outline" className="text-sm">
+            {redemptions.length} {redemptions.length === 1 ? 'redemption' : 'redemptions'}
+          </Badge>
+        </div>
+
+        {historyLoading ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-white"></div>
+          </div>
+        ) : redemptions.length === 0 ? (
+          <EmptyState
+            title="No Redemptions Yet"
+            message="You haven't redeemed any offers yet. Complete surveys to earn points and start redeeming rewards!"
+          />
+        ) : (
+          <div className="space-y-4">
+            {redemptions.map((redemption) => (
+              <Card key={redemption.id} className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="font-semibold text-black dark:text-white">
+                        {redemption.merchant_offers.title}
+                      </h3>
+                      <Badge 
+                        variant={redemption.status === 'completed' ? 'default' : 
+                                redemption.status === 'pending' ? 'secondary' : 'destructive'}
+                        className="text-xs"
+                      >
+                        {redemption.status}
+                      </Badge>
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-300 mb-1">
+                      {redemption.merchant_offers.merchant_name}
+                    </div>
+                    <div className="text-xs text-gray-500 mb-2">
+                      Points spent: <span className="font-bold">{redemption.points_spent}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <Calendar className="h-3 w-3" />
+                      {new Date(redemption.redemption_date).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {redemption.status === 'completed' && (
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                    )}
+                    {redemption.status === 'pending' && (
+                      <Clock className="h-5 w-5 text-yellow-500" />
+                    )}
+                    {redemption.status === 'cancelled' && (
+                      <XCircle className="h-5 w-5 text-red-500" />
+                    )}
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 } 
