@@ -26,7 +26,7 @@ export function subscribeToPointsBalance(
         filter: `id=eq.${panelistId}`,
       },
       (payload) => {
-        if (payload.new) {
+        if (payload.new && typeof payload.new === 'object' && 'points_balance' in payload.new) {
           callback({
             points_balance: payload.new.points_balance,
             total_points_earned: payload.new.total_points_earned,
@@ -66,7 +66,7 @@ export function subscribeToActivityFeed(
         filter: `user_id=eq.${userId}`,
       },
       (payload) => {
-        if (payload.new) {
+        if (payload.new && typeof payload.new === 'object' && 'id' in payload.new) {
           callback({
             id: payload.new.id,
             activity_type: payload.new.activity_type,
@@ -109,7 +109,7 @@ export function subscribeToSurveyAvailability(
         filter: 'status=eq.active',
       },
       (payload) => {
-        if (payload.new) {
+        if (payload.new && typeof payload.new === 'object' && 'id' in payload.new) {
           callback({
             id: payload.new.id,
             title: payload.new.title,
@@ -150,7 +150,7 @@ export function subscribeToSurveyQualifications(
         filter: `panelist_id=eq.${panelistId}`,
       },
       (payload) => {
-        if (payload.new) {
+        if (payload.new && typeof payload.new === 'object' && 'survey_id' in payload.new) {
           callback({
             survey_id: payload.new.survey_id,
             is_qualified: payload.new.is_qualified,
@@ -194,7 +194,7 @@ export function subscribeToRedemptions(
         filter: `panelist_id=eq.${panelistId}`,
       },
       (payload) => {
-        if (payload.new) {
+        if (payload.new && typeof payload.new === 'object' && 'id' in payload.new) {
           // Fetch the associated merchant offer details
           supabase
             .from('merchant_offers')

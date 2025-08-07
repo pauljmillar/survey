@@ -5,7 +5,9 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { EmptyState } from "@/components/ui/empty-state"
+import { Badge } from "@/components/ui/badge"
 import { useAuth } from '@/hooks/use-auth'
+import { Clock, CheckCircle, XCircle, Calendar } from 'lucide-react'
 
 interface Offer {
   id: string
@@ -17,6 +19,21 @@ interface Offer {
   is_active: boolean
   created_at: string
   updated_at: string
+}
+
+interface Redemption {
+  id: string
+  points_spent: number
+  status: 'pending' | 'completed' | 'cancelled'
+  redemption_date: string
+  created_at: string
+  merchant_offers: {
+    id: string
+    title: string
+    description?: string
+    merchant_name: string
+    offer_details?: Record<string, any>
+  }
 }
 
 type SortOption = "points_asc" | "points_desc" | "newest" | "oldest"
@@ -34,9 +51,14 @@ export function RedemptionCenter() {
   const [success, setSuccess] = useState<string | null>(null);
   const [redeemError, setRedeemError] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<any>(null);
+  
+  // Redemption history state
+  const [redemptions, setRedemptions] = useState<Redemption[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
 
   useEffect(() => {
     fetchOffers()
+    fetchRedemptions()
     // eslint-disable-next-line
   }, [minPoints, maxPoints])
 
