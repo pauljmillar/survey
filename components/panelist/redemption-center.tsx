@@ -262,9 +262,9 @@ export function RedemptionCenter() {
             message="You haven't redeemed any offers yet. Complete surveys to earn points and start redeeming rewards!"
           />
         ) : (
-          <div className="space-y-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {redemptions.map((redemption) => (
-              <Card key={redemption.id} className="p-4">
+              <Card key={redemption.id} className="p-6 flex flex-col justify-between h-full">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
