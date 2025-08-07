@@ -153,7 +153,7 @@ export default function LandingPage() {
                   </div>
                   <h3 className="text-lg font-semibold text-foreground mb-2">Exchange Points for Cash or Gift Cards</h3>
                   <p className="text-muted-foreground">
-                    Once you've reached at least 500 points ($5 equivalent), you can cash out. Choose from PayPal, direct bank transfer, or gift cards from hundreds of brands.
+                    Once you&apos;ve reached at least 500 points ($5 equivalent), you can cash out. Choose from PayPal, direct bank transfer, or gift cards from hundreds of brands.
                   </p>
                 </div>
               </div>
@@ -286,14 +286,14 @@ export default function LandingPage() {
                 <Card className="p-6">
                   <h3 className="text-lg font-semibold text-foreground mb-2">What is this platform about?</h3>
                   <p className="text-muted-foreground">
-                    It's a free service that allows users to earn rewards in exchange for participating in market research surveys.
+                    It&apos;s a free service that allows users to earn rewards in exchange for participating in market research surveys.
                   </p>
                 </Card>
                 
                 <Card className="p-6">
                   <h3 className="text-lg font-semibold text-foreground mb-2">How often can I take surveys?</h3>
                   <p className="text-muted-foreground">
-                    There's no cap—new surveys become available regularly depending on your profile.
+                    There&apos;s no cap—new surveys become available regularly depending on your profile.
                   </p>
                 </Card>
                 
@@ -328,7 +328,7 @@ export default function LandingPage() {
                 <Card className="p-6">
                   <h3 className="text-lg font-semibold text-foreground mb-2">Why do some surveys end abruptly?</h3>
                   <p className="text-muted-foreground">
-                    Some surveys close once enough responses are collected or if your profile doesn't match their specific criteria.
+                    Some surveys close once enough responses are collected or if your profile doesn&apos;t match their specific criteria.
                   </p>
                 </Card>
               </div>
