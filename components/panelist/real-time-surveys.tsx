@@ -166,7 +166,8 @@ export function RealTimeSurveys() {
                   
                   {survey.is_completed ? (
                     <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                      ✓ Completed
+                      <span className="hidden sm:inline">✓ Completed</span>
+                      <span className="sm:hidden">✓</span>
                     </span>
                   ) : survey.is_qualified && survey.status === 'active' ? (
                     <Button

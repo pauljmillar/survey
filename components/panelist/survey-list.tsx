@@ -318,7 +318,8 @@ export function SurveyList({
                             {survey.title}
                           </h3>
                           <Badge variant="outline" className="ml-2 flex-shrink-0 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800">
-                            ✓ Completed
+                            <span className="hidden sm:inline">✓ Completed</span>
+                            <span className="sm:hidden">✓</span>
                           </Badge>
                         </div>
                         

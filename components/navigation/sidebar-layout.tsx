@@ -30,11 +30,17 @@ export function SidebarLayout({ children, className }: SidebarLayoutProps) {
 
   return (
     <div className="flex h-screen bg-background">
-      <Sidebar data-sidebar />
+      {/* Desktop Sidebar */}
+      <div className="hidden md:block">
+        <Sidebar data-sidebar />
+      </div>
+      
+      {/* Mobile - No sidebar, full width */}
       <main 
         className={cn(
           "flex-1 transition-all duration-300 ease-in-out",
-          sidebarExpanded ? "ml-64" : "ml-16",
+          "md:ml-16", // Only apply margin on desktop
+          sidebarExpanded ? "md:ml-64" : "md:ml-16",
           className
         )}
       >

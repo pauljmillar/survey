@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 import { SignedIn, SignedOut, UserButton, SignInButton, SignUpButton, useUser, useClerk } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "next-themes"
-import { Menu, X, Settings, LogOut, User, Sun, Moon } from "lucide-react"
+import { Menu, X, Settings, LogOut, User, Sun, Moon, Home, ClipboardList, Users, Gift, BarChart3, Target, Activity, CreditCard, ShoppingCart, Star, Award, TrendingUp, Calendar, Clock, CheckCircle, PlayCircle, Users2, Settings2 } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
 
 const MENU_OPTIONS: { label: string; href: string }[] = [
@@ -24,6 +24,35 @@ export function TopNavBar() {
   const { signOut } = useClerk()
   const { theme, setTheme } = useTheme()
   const { userRole } = useAuth()
+
+  // Menu items for mobile when signed in
+  const panelistMenuItems = [
+    { label: "Dashboard", href: "/dashboard", icon: Home },
+    { label: "Surveys", href: "/surveys", icon: ClipboardList },
+    { label: "Live Surveys", href: "/surveys/live", icon: PlayCircle },
+    { label: "Panels", href: "/panels", icon: Users2 },
+    { label: "Redeem", href: "/offers", icon: Gift },
+    { label: "History", href: "/redemptions", icon: ShoppingCart },
+    { label: "Profile", href: "/profile", icon: User },
+    { label: "Activity", href: "/activity", icon: Activity },
+    { label: "Settings", href: "/settings", icon: Settings }
+  ]
+
+  const adminMenuItems = [
+    { label: "Dashboard", href: "/admin/dashboard", icon: Home },
+    { label: "Panelists", href: "/admin/panelists", icon: Users },
+    { label: "Surveys", href: "/admin/surveys", icon: ClipboardList },
+    { label: "Live Surveys", href: "/admin/surveys/live", icon: PlayCircle },
+    { label: "Panels", href: "/admin/panels", icon: Users2 },
+    { label: "Offers", href: "/admin/offers", icon: Gift },
+    { label: "Redemptions", href: "/admin/redemptions", icon: ShoppingCart },
+    { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+    { label: "Settings", href: "/admin/settings", icon: Settings2 },
+    { label: "Logs", href: "/admin/logs", icon: Activity }
+  ]
+
+  const isAdmin = userRole === "system_admin" || userRole === "survey_admin"
+  const mobileMenuItems = isAdmin ? adminMenuItems : panelistMenuItems
 
   const handleSignOut = async () => {
     try {
@@ -75,11 +104,11 @@ export function TopNavBar() {
 
         {/* Right Side: Auth/Profile */}
         <div className="flex items-center gap-3">
-          {/* Theme Switcher (when signed out) */}
+          {/* Theme Switcher (when signed out) - Desktop only */}
           <SignedOut>
             <button
               onClick={handleThemeToggle}
-              className="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors duration-150"
+              className="hidden md:block p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors duration-150"
               aria-label="Toggle theme"
             >
               {theme === "light" ? (
@@ -90,23 +119,25 @@ export function TopNavBar() {
             </button>
           </SignedOut>
 
-          {/* Auth Buttons (when signed out) */}
+          {/* Auth Buttons (when signed out) - Desktop only */}
           <SignedOut>
-            <SignInButton mode="modal">
-              <Button variant="ghost" size="sm" className="text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10">
-                Sign In
-              </Button>
-            </SignInButton>
-            <SignUpButton mode="modal">
-              <Button variant="default" size="sm" className="ml-1 bg-black text-white dark:bg-white dark:text-black hover:bg-black/80 dark:hover:bg-white/80">
-                Sign Up
-              </Button>
-            </SignUpButton>
+            <div className="hidden md:flex items-center gap-2">
+              <SignInButton mode="modal">
+                <Button variant="ghost" size="sm" className="text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10">
+                  Sign In
+                </Button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <Button variant="default" size="sm" className="ml-1 bg-black text-white dark:bg-white dark:text-black hover:bg-black/80 dark:hover:bg-white/80">
+                  Sign Up
+                </Button>
+              </SignUpButton>
+            </div>
           </SignedOut>
 
-          {/* Profile Dropdown (when signed in) */}
+          {/* Profile Dropdown (when signed in) - Desktop only */}
           <SignedIn>
-            <div className="relative">
+            <div className="relative hidden md:block">
               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                 className="flex items-center space-x-2 p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors duration-150"
@@ -191,10 +222,44 @@ export function TopNavBar() {
               ))}
             </SignedOut>
 
+            {/* Mobile Menu Items - Show sidebar items for signed in users */}
+            <SignedIn>
+              {mobileMenuItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center text-lg font-medium px-4 py-3 rounded-md transition-colors duration-150 ${
+                    pathname === item.href
+                      ? "bg-black text-white dark:bg-white dark:text-black"
+                      : "text-black/90 dark:text-white/90 hover:bg-black/5 dark:hover:bg-white/10"
+                  }`}
+                  role="menuitem"
+                  tabIndex={0}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <item.icon className="w-5 h-5 mr-3" />
+                  {item.label}
+                </Link>
+              ))}
+            </SignedIn>
+
             {/* Mobile Auth Section */}
             <div className="border-t border-black/10 dark:border-white/10 pt-4 mt-4">
               <SignedOut>
                 <div className="flex flex-col gap-3">
+                  {/* Theme Switcher for mobile */}
+                  <button
+                    onClick={handleThemeToggle}
+                    className="flex items-center w-full px-4 py-3 text-sm text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-md"
+                  >
+                    {theme === "light" ? (
+                      <Moon className="w-4 h-4 mr-3" />
+                    ) : (
+                      <Sun className="w-4 h-4 mr-3" />
+                    )}
+                    Toggle theme
+                  </button>
+                  
                   <SignInButton mode="modal">
                     <Button variant="ghost" size="lg" className="w-full text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10">
                       Sign In
