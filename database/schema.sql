@@ -103,6 +103,52 @@ CREATE TABLE activity_log (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Panelist programs
+CREATE TABLE panelist_programs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(100) NOT NULL UNIQUE,
+    display_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Panelist program opt-ins (many-to-many)
+CREATE TABLE panelist_program_opt_ins (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    panelist_id UUID NOT NULL REFERENCES panelist_profiles(id) ON DELETE CASCADE,
+    program_id UUID NOT NULL REFERENCES panelist_programs(id) ON DELETE CASCADE,
+    opted_in_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    opted_out_at TIMESTAMP WITH TIME ZONE NULL,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(panelist_id, program_id)
+);
+
+-- Audience presets for admin use
+CREATE TABLE audience_presets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    filter_criteria JSONB NOT NULL,
+    audience_count INTEGER NOT NULL DEFAULT 0,
+    created_by TEXT NOT NULL REFERENCES users(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Survey audience assignments
+CREATE TABLE survey_audience_assignments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    survey_id UUID NOT NULL REFERENCES surveys(id) ON DELETE CASCADE,
+    audience_preset_id UUID NOT NULL REFERENCES audience_presets(id) ON DELETE CASCADE,
+    assigned_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    assigned_by TEXT NOT NULL REFERENCES users(id),
+    assignment_metadata JSONB DEFAULT '{}'
+);
+
 -- Indexes for performance optimization
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_role ON users(role);
@@ -135,6 +181,21 @@ CREATE INDEX idx_activity_log_user_id ON activity_log(user_id);
 CREATE INDEX idx_activity_log_activity_type ON activity_log(activity_type);
 CREATE INDEX idx_activity_log_created_at ON activity_log(created_at DESC);
 
+-- Program management indexes
+CREATE INDEX idx_panelist_programs_is_active ON panelist_programs(is_active);
+CREATE INDEX idx_panelist_programs_name ON panelist_programs(name);
+
+CREATE INDEX idx_panelist_program_opt_ins_panelist_id ON panelist_program_opt_ins(panelist_id);
+CREATE INDEX idx_panelist_program_opt_ins_program_id ON panelist_program_opt_ins(program_id);
+CREATE INDEX idx_panelist_program_opt_ins_active ON panelist_program_opt_ins(program_id, is_active) WHERE is_active = true;
+
+-- Audience management indexes
+CREATE INDEX idx_audience_presets_created_by ON audience_presets(created_by);
+CREATE INDEX idx_audience_presets_created_at ON audience_presets(created_at DESC);
+
+CREATE INDEX idx_survey_audience_assignments_survey_id ON survey_audience_assignments(survey_id);
+CREATE INDEX idx_survey_audience_assignments_preset_id ON survey_audience_assignments(audience_preset_id);
+
 -- Functions for automatic timestamp updates
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -162,6 +223,21 @@ CREATE TRIGGER update_surveys_updated_at
 
 CREATE TRIGGER update_merchant_offers_updated_at 
     BEFORE UPDATE ON merchant_offers 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_panelist_programs_updated_at 
+    BEFORE UPDATE ON panelist_programs 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_panelist_program_opt_ins_updated_at 
+    BEFORE UPDATE ON panelist_program_opt_ins 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_audience_presets_updated_at 
+    BEFORE UPDATE ON audience_presets 
     FOR EACH ROW 
     EXECUTE FUNCTION update_updated_at_column();
 
