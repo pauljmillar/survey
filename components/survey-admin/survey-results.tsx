@@ -25,6 +25,7 @@ interface SurveyResponse {
   completed_at: string
   points_earned: number
   response_data: any
+  processed_response_data: any
   panelist: {
     user_id: string
     profile_data: any
@@ -42,6 +43,11 @@ interface SurveyResultsData {
   }
   response_count: number
   responses: SurveyResponse[]
+  questions: Array<{
+    id: string
+    question_text: string
+    question_type: string
+  }>
 }
 
 export function SurveyResults({ surveyId, onBack }: SurveyResultsProps) {
@@ -76,18 +82,12 @@ export function SurveyResults({ surveyId, onBack }: SurveyResultsProps) {
   const exportCSV = () => {
     if (!data) return
 
-    // Create CSV content
+    // Create CSV content with question headers
     const headers = ['Response ID', 'Panelist Name', 'Email', 'Completed At', 'Points Earned']
     
-    // Add response data headers if available
-    const responseKeys = new Set<string>()
-    data.responses.forEach(response => {
-      if (response.response_data && typeof response.response_data === 'object') {
-        Object.keys(response.response_data).forEach(key => responseKeys.add(key))
-      }
-    })
-    
-    const allHeaders = [...headers, ...Array.from(responseKeys)]
+    // Add question headers
+    const questionHeaders = data.questions.map(q => q.question_text)
+    const allHeaders = [...headers, ...questionHeaders]
     
     const csvRows = [
       allHeaders.join(','),
@@ -100,16 +100,15 @@ export function SurveyResults({ surveyId, onBack }: SurveyResultsProps) {
           response.points_earned.toString()
         ]
         
-        // Add response data values
-        const responseData = response.response_data || {}
-        const dataValues = Array.from(responseKeys).map(key => {
-          const value = responseData[key]
+        // Add response values for each question
+        const responseValues = data.questions.map(question => {
+          const value = response.processed_response_data?.[question.question_text] || ''
           // Escape commas and quotes in CSV
           const escapedValue = typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value
-          return escapedValue || ''
+          return escapedValue
         })
         
-        return [...baseRow, ...dataValues].join(',')
+        return [...baseRow, ...responseValues].join(',')
       })
     ]
     
@@ -281,16 +280,25 @@ export function SurveyResults({ surveyId, onBack }: SurveyResultsProps) {
                     </div>
                   </div>
                   
-                  {response.response_data && Object.keys(response.response_data).length > 0 && (
+                  {response.processed_response_data && Object.keys(response.processed_response_data).length > 0 && (
                     <div className="mt-3 pt-3 border-t">
-                      <h4 className="text-sm font-medium mb-2">Response Data:</h4>
-                      <div className="grid gap-2 text-sm">
-                        {Object.entries(response.response_data).map(([key, value]) => (
-                          <div key={key} className="flex justify-between">
-                            <span className="font-medium">{key}:</span>
-                            <span className="text-gray-600">{String(value)}</span>
-                          </div>
-                        ))}
+                      <h4 className="text-sm font-medium mb-2">Survey Responses:</h4>
+                      <div className="space-y-3">
+                        {data.questions.map(question => {
+                          const responseValue = response.processed_response_data[question.question_text]
+                          if (responseValue === undefined) return null
+                          
+                          return (
+                            <div key={question.id} className="bg-gray-50 dark:bg-gray-800 rounded p-3">
+                              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                {question.question_text}
+                              </p>
+                              <p className="text-sm text-gray-900 dark:text-gray-100">
+                                {responseValue || 'No response'}
+                              </p>
+                            </div>
+                          )
+                        })}
                       </div>
                     </div>
                   )}

@@ -43,6 +43,18 @@ export async function GET(
       return NextResponse.json({ error: 'Failed to count responses' }, { status: 500 })
     }
 
+    // Get survey questions to map question IDs to question text
+    const { data: questions, error: questionsError } = await supabase
+      .from('survey_questions')
+      .select('id, question_text, question_type')
+      .eq('survey_id', surveyId)
+      .order('question_order')
+
+    if (questionsError) {
+      console.error('Error fetching survey questions:', questionsError)
+      return NextResponse.json({ error: 'Failed to fetch survey questions' }, { status: 500 })
+    }
+
     // Get detailed response data
     const { data: responses, error: responsesError } = await supabase
       .from('survey_completions')
@@ -64,10 +76,32 @@ export async function GET(
       return NextResponse.json({ error: 'Failed to fetch responses' }, { status: 500 })
     }
 
+    // Process responses to include question details
+    const processedResponses = (responses || []).map(response => {
+      const responseData = response.response_data || {}
+      const processedData: any = {}
+      
+      // Process each response to include question text
+      if (responseData.responses && Array.isArray(responseData.responses)) {
+        responseData.responses.forEach((resp: any) => {
+          const question = questions?.find(q => q.id === resp.question_id)
+          if (question) {
+            processedData[question.question_text] = resp.response_value
+          }
+        })
+      }
+      
+      return {
+        ...response,
+        processed_response_data: processedData
+      }
+    })
+
     return NextResponse.json({
       survey,
       response_count: responseCount || 0,
-      responses: responses || []
+      responses: processedResponses || [],
+      questions: questions || []
     })
   } catch (error) {
     if (error instanceof Error && error.message === 'Insufficient permissions') {
