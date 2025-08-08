@@ -109,25 +109,9 @@ export default function DashboardClient() {
         {/* Show different content based on user role */}
         {userRole === 'panelist' ? (
           // Panelist Dashboard
-          <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
-            {/* Surveys - Takes ~2/3 width */}
-            <div className="lg:col-span-2">
-              <Card className="p-4 sm:p-6 h-full">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-2">
-                  <h2 className="text-xl font-semibold text-foreground">Surveys</h2>
-                  <Link href="/surveys">
-                    <Button variant="outline" size="sm">
-                      View All
-                    </Button>
-                  </Link>
-                </div>
-                
-                <CompactSurveyList limit={5} />
-              </Card>
-            </div>
-
-            {/* Right Side - 4 Smaller Panels */}
-            <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
+          <div className="space-y-6">
+            {/* Summary Boxes - Show above surveys on mobile */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 order-1 lg:order-2">
               {/* Available Points */}
               <Card className="p-4">
                 <div className="text-center">
@@ -167,6 +151,11 @@ export default function DashboardClient() {
                   <div className="text-sm text-muted-foreground">Surveys Completed</div>
                 </div>
               </Card>
+            </div>
+
+            {/* Survey Lists - Full width, no outer card */}
+            <div className="order-2 lg:order-1">
+              <CompactSurveyList limit={5} />
             </div>
           </div>
         ) : (

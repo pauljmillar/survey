@@ -23,10 +23,14 @@ import {
   Award,
   Plus,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  BarChart3,
+  Play,
+  Pause
 } from 'lucide-react'
 import { SurveyViewer } from './survey-viewer'
 import { SurveyEditor } from './survey-editor'
+import { SurveyResults } from './survey-results'
 import Link from 'next/link'
 
 interface Survey {
@@ -41,6 +45,7 @@ interface Survey {
   completion_count?: number
   average_rating?: number
   audience_count?: number
+  response_count?: number
   qualification_criteria?: any
 }
 
@@ -51,9 +56,10 @@ export function SurveyList() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive' | 'draft'>('all')
   const [selectedSurveyId, setSelectedSurveyId] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<'list' | 'view' | 'edit'>('list')
+  const [viewMode, setViewMode] = useState<'list' | 'view' | 'edit' | 'results'>('list')
   const [recalculating, setRecalculating] = useState<string | null>(null)
   const [deletingSurveyId, setDeletingSurveyId] = useState<string | null>(null)
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null)
 
   useEffect(() => {
     fetchSurveys()
@@ -69,7 +75,24 @@ export function SurveyList() {
       }
       
       const data = await response.json()
-      setSurveys(data.surveys || [])
+      
+      // Fetch response counts for each survey
+      const surveysWithCounts = await Promise.all(
+        (data.surveys || []).map(async (survey: Survey) => {
+          try {
+            const countResponse = await fetch(`/api/surveys/${survey.id}/responses`)
+            if (countResponse.ok) {
+              const countData = await countResponse.json()
+              return { ...survey, response_count: countData.response_count || 0 }
+            }
+          } catch (error) {
+            console.error(`Error fetching response count for survey ${survey.id}:`, error)
+          }
+          return { ...survey, response_count: 0 }
+        })
+      )
+      
+      setSurveys(surveysWithCounts)
     } catch (error) {
       console.error('Error fetching surveys:', error)
       setError('Failed to load surveys')
@@ -108,7 +131,36 @@ export function SurveyList() {
     }
   }
 
-  // Handle view/edit modes
+  const handleStatusChange = async (surveyId: string, newStatus: 'active' | 'inactive') => {
+    try {
+      setUpdatingStatus(surveyId)
+      
+      const response = await fetch(`/api/surveys/${surveyId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update survey status')
+      }
+
+      // Update the survey in local state
+      setSurveys(prev => prev.map(survey => 
+        survey.id === surveyId ? { ...survey, status: newStatus } : survey
+      ))
+      
+      console.log(`Survey status updated to ${newStatus}`)
+    } catch (error) {
+      console.error('Error updating survey status:', error)
+      alert(error instanceof Error ? error.message : 'Failed to update survey status')
+    } finally {
+      setUpdatingStatus(null)
+    }
+  }
+
+  // Handle view/edit/results modes
   if (viewMode === 'view' && selectedSurveyId) {
     return (
       <SurveyViewer
@@ -136,6 +188,18 @@ export function SurveyList() {
           setViewMode('list')
           setSelectedSurveyId(null)
           fetchSurveys() // Refresh the list
+        }}
+      />
+    )
+  }
+
+  if (viewMode === 'results' && selectedSurveyId) {
+    return (
+      <SurveyResults
+        surveyId={selectedSurveyId}
+        onBack={() => {
+          setViewMode('list')
+          setSelectedSurveyId(null)
         }}
       />
     )
@@ -276,7 +340,15 @@ export function SurveyList() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold text-lg">{survey.title}</h3>
+                      <h3 
+                        className="font-semibold text-lg cursor-pointer hover:text-blue-600 transition-colors"
+                        onClick={() => {
+                          setSelectedSurveyId(survey.id)
+                          setViewMode('view')
+                        }}
+                      >
+                        {survey.title}
+                      </h3>
                       {getStatusBadge(survey.status)}
                     </div>
                     <p className="text-gray-600 dark:text-gray-400 mb-3">
@@ -303,32 +375,16 @@ export function SurveyList() {
                           <span>{survey.audience_count} eligible</span>
                         </div>
                       )}
+                      {survey.response_count !== undefined && (
+                        <div className="flex items-center gap-1">
+                          <BarChart3 className="h-4 w-4 text-green-600" />
+                          <span>{survey.response_count} responses</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-2 ml-4">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setSelectedSurveyId(survey.id)
-                        setViewMode('view')
-                      }}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      View
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setSelectedSurveyId(survey.id)
-                        setViewMode('edit')
-                      }}
-                    >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button size="sm" variant="ghost">
@@ -337,13 +393,64 @@ export function SurveyList() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedSurveyId(survey.id)
+                            setViewMode('edit')
+                          }}
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Survey
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedSurveyId(survey.id)
+                            setViewMode('results')
+                          }}
+                        >
+                          <BarChart3 className="h-4 w-4 mr-2" />
+                          View Results
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem asChild>
+                          <Link href={`/admin/surveys/${survey.id}/results`}>
+                            <BarChart3 className="h-4 w-4 mr-2" />
+                            Open Results Page
+                          </Link>
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuSeparator />
+                        
+                        {survey.status === 'active' ? (
+                          <DropdownMenuItem
+                            onClick={() => handleStatusChange(survey.id, 'inactive')}
+                            disabled={updatingStatus === survey.id}
+                          >
+                            <Pause className="h-4 w-4 mr-2" />
+                            {updatingStatus === survey.id ? 'Disabling...' : 'Disable Survey'}
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem
+                            onClick={() => handleStatusChange(survey.id, 'active')}
+                            disabled={updatingStatus === survey.id}
+                          >
+                            <Play className="h-4 w-4 mr-2" />
+                            {updatingStatus === survey.id ? 'Enabling...' : 'Enable Survey'}
+                          </DropdownMenuItem>
+                        )}
+                        
+                        <DropdownMenuSeparator />
+                        
+                        <DropdownMenuItem
                           onClick={() => recalculateAudience(survey.id)}
                           disabled={recalculating === survey.id}
                         >
                           <Users className="h-4 w-4 mr-2" />
                           {recalculating === survey.id ? 'Recalculating...' : 'Recalculate Audience'}
                         </DropdownMenuItem>
+                        
                         <DropdownMenuSeparator />
+                        
                         <DropdownMenuItem
                           onClick={() => handleDeleteSurvey(survey.id, survey.title)}
                           disabled={deletingSurveyId === survey.id}
