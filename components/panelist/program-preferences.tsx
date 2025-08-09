@@ -86,7 +86,7 @@ export function ProgramPreferences() {
         <CardHeader>
           <CardTitle>Research Programs</CardTitle>
           <CardDescription>
-            Choose which types of research opportunities you'd like to participate in
+            Choose which types of research opportunities you&apos;d like to participate in
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -133,7 +133,7 @@ export function ProgramPreferences() {
           <div>
             <CardTitle>Research Programs</CardTitle>
             <CardDescription>
-              Choose which types of research opportunities you'd like to participate in
+              Choose which types of research opportunities you&apos;d like to participate in
             </CardDescription>
           </div>
           <Badge variant="outline">
