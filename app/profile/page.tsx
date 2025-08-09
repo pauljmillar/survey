@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Edit, User, MapPin, Calendar, Heart } from 'lucide-react'
 import Link from 'next/link'
+import { ProgramPreferences } from '@/components/panelist/program-preferences'
 
 interface ProfileData {
   first_name?: string
@@ -112,121 +113,127 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Profile Information */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-foreground">Profile Information</h2>
-              <Link href="/profile/edit">
-                <Button variant="outline" size="sm">
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Profile
-                </Button>
-              </Link>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <User className="w-4 h-4 mr-3 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {profileData?.first_name && profileData?.last_name 
-                      ? `${profileData.first_name} ${profileData.last_name}`
-                      : 'Name not set'
-                    }
-                  </p>
-                  <p className="text-xs text-muted-foreground">Full Name</p>
-                </div>
+        <div className="space-y-6">
+          {/* Profile Information and Preferences */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* Profile Information */}
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-foreground">Profile Information</h2>
+                <Link href="/profile/edit">
+                  <Button variant="outline" size="sm">
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Profile
+                  </Button>
+                </Link>
               </div>
 
-              {profileData?.age && (
-                <div className="flex items-center">
-                  <Calendar className="w-4 h-4 mr-3 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{profileData.age} years old</p>
-                    <p className="text-xs text-muted-foreground">Age</p>
-                  </div>
-                </div>
-              )}
-
-              {profileData?.gender && (
+              <div className="space-y-4">
                 <div className="flex items-center">
                   <User className="w-4 h-4 mr-3 text-muted-foreground" />
                   <div>
-                    <p className="text-sm font-medium text-foreground capitalize">{profileData.gender}</p>
-                    <p className="text-xs text-muted-foreground">Gender</p>
-                  </div>
-                </div>
-              )}
-
-              {profileData?.location?.country && (
-                <div className="flex items-center">
-                  <MapPin className="w-4 h-4 mr-3 text-muted-foreground" />
-                  <div>
                     <p className="text-sm font-medium text-foreground">
-                      {profileData.location.country}
-                      {profileData.location.state && `, ${profileData.location.state}`}
-                      {profileData.location.city && `, ${profileData.location.city}`}
+                      {profileData?.first_name && profileData?.last_name 
+                        ? `${profileData.first_name} ${profileData.last_name}`
+                        : 'Name not set'
+                      }
                     </p>
-                    <p className="text-xs text-muted-foreground">Location</p>
+                    <p className="text-xs text-muted-foreground">Full Name</p>
+                  </div>
+                </div>
+
+                {profileData?.age && (
+                  <div className="flex items-center">
+                    <Calendar className="w-4 h-4 mr-3 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{profileData.age} years old</p>
+                      <p className="text-xs text-muted-foreground">Age</p>
+                    </div>
+                  </div>
+                )}
+
+                {profileData?.gender && (
+                  <div className="flex items-center">
+                    <User className="w-4 h-4 mr-3 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground capitalize">{profileData.gender}</p>
+                      <p className="text-xs text-muted-foreground">Gender</p>
+                    </div>
+                  </div>
+                )}
+
+                {profileData?.location?.country && (
+                  <div className="flex items-center">
+                    <MapPin className="w-4 h-4 mr-3 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">
+                        {profileData.location.country}
+                        {profileData.location.state && `, ${profileData.location.state}`}
+                        {profileData.location.city && `, ${profileData.location.city}`}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Location</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {/* Interests & Demographics */}
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold text-foreground mb-4">Preferences</h2>
+
+              {profileData?.interests && profileData.interests.length > 0 && (
+                <div className="mb-6">
+                  <div className="flex items-center mb-3">
+                    <Heart className="w-4 h-4 mr-2 text-muted-foreground" />
+                    <p className="text-sm font-medium text-foreground">Interests</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {profileData.interests.map((interest, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {interest}
+                      </Badge>
+                    ))}
                   </div>
                 </div>
               )}
-            </div>
-          </Card>
 
-          {/* Interests & Demographics */}
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold text-foreground mb-4">Preferences</h2>
-
-            {profileData?.interests && profileData.interests.length > 0 && (
-              <div className="mb-6">
-                <div className="flex items-center mb-3">
-                  <Heart className="w-4 h-4 mr-2 text-muted-foreground" />
-                  <p className="text-sm font-medium text-foreground">Interests</p>
+              {profileData?.demographics && (
+                <div>
+                  <h3 className="text-sm font-medium text-foreground mb-3">Demographics</h3>
+                  <div className="space-y-2 text-sm">
+                    {profileData.demographics.income_range && (
+                      <div>
+                        <span className="text-muted-foreground">Income:</span>{' '}
+                        <span className="font-medium">{profileData.demographics.income_range.replace('_', ' ')}</span>
+                      </div>
+                    )}
+                    {profileData.demographics.education && (
+                      <div>
+                        <span className="text-muted-foreground">Education:</span>{' '}
+                        <span className="font-medium capitalize">{profileData.demographics.education.replace('_', ' ')}</span>
+                      </div>
+                    )}
+                    {profileData.demographics.employment && (
+                      <div>
+                        <span className="text-muted-foreground">Employment:</span>{' '}
+                        <span className="font-medium capitalize">{profileData.demographics.employment.replace('_', ' ')}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {profileData.interests.map((interest, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
-                      {interest}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
+              )}
 
-            {profileData?.demographics && (
-              <div>
-                <h3 className="text-sm font-medium text-foreground mb-3">Demographics</h3>
-                <div className="space-y-2 text-sm">
-                  {profileData.demographics.income_range && (
-                    <div>
-                      <span className="text-muted-foreground">Income:</span>{' '}
-                      <span className="font-medium">{profileData.demographics.income_range.replace('_', ' ')}</span>
-                    </div>
-                  )}
-                  {profileData.demographics.education && (
-                    <div>
-                      <span className="text-muted-foreground">Education:</span>{' '}
-                      <span className="font-medium capitalize">{profileData.demographics.education.replace('_', ' ')}</span>
-                    </div>
-                  )}
-                  {profileData.demographics.employment && (
-                    <div>
-                      <span className="text-muted-foreground">Employment:</span>{' '}
-                      <span className="font-medium capitalize">{profileData.demographics.employment.replace('_', ' ')}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+              {!profileData?.interests && !profileData?.demographics && (
+                <p className="text-sm text-muted-foreground">
+                  No preferences set. Edit your profile to add interests and demographics.
+                </p>
+              )}
+            </Card>
+          </div>
 
-            {!profileData?.interests && !profileData?.demographics && (
-              <p className="text-sm text-muted-foreground">
-                No preferences set. Edit your profile to add interests and demographics.
-              </p>
-            )}
-          </Card>
+          {/* Program Preferences */}
+          <ProgramPreferences />
         </div>
 
         {/* Quick Actions */}

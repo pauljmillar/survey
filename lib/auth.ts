@@ -25,6 +25,7 @@ export const PERMISSIONS = {
   'manage_offers': ['system_admin', 'survey_admin'] as UserRole[],
   'manage_user_accounts': ['system_admin'] as UserRole[],
   'view_platform_analytics': ['system_admin'] as UserRole[],
+  'manage_programs': ['system_admin', 'survey_admin'] as UserRole[],
 } as const
 
 export type Permission = keyof typeof PERMISSIONS

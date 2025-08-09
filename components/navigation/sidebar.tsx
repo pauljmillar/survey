@@ -131,6 +131,7 @@ export function Sidebar({ className }: SidebarProps) {
       title: "Management",
       items: [
         { label: "Panelists", href: "/admin/panelists", icon: Users },
+        { label: "Audiences", href: "/admin/audiences", icon: Target },
         { label: "Surveys", href: "/admin/surveys", icon: ClipboardList },
         { label: "Live Surveys", href: "/admin/surveys/live", icon: PlayCircle },
         { label: "Panels", href: "/admin/panels", icon: Users2 }

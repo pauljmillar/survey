@@ -1,8 +1,7 @@
 -- Panelist Rewards Platform Database Schema
 -- Based on TDD specifications for three-role architecture
 
--- Enable Row Level Security
-ALTER DATABASE postgres SET "app.jwt_secret" = 'your-jwt-secret';
+-- Note: JWT secret is configured in Supabase dashboard settings, not here
 
 -- Create custom types
 CREATE TYPE user_role AS ENUM ('panelist', 'survey_admin', 'system_admin');
@@ -371,6 +370,41 @@ CREATE POLICY "Panelists can create own redemptions" ON redemptions FOR INSERT W
 CREATE POLICY "Users can view own activity" ON activity_log FOR SELECT USING (auth.uid()::text = user_id);
 CREATE POLICY "System can insert activity" ON activity_log FOR INSERT WITH CHECK (true);
 
+-- Program management policies
+ALTER TABLE panelist_programs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE panelist_program_opt_ins ENABLE ROW LEVEL SECURITY;
+ALTER TABLE audience_presets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE survey_audience_assignments ENABLE ROW LEVEL SECURITY;
+
+-- Programs are public for viewing
+CREATE POLICY "Anyone can view active programs" ON panelist_programs FOR SELECT USING (is_active = true);
+CREATE POLICY "Admins can manage programs" ON panelist_programs FOR ALL USING (
+    EXISTS (SELECT 1 FROM users WHERE id = auth.uid()::text AND role IN ('survey_admin', 'system_admin'))
+);
+
+-- Panelists can view and manage their own program opt-ins
+CREATE POLICY "Panelists can view own program opt-ins" ON panelist_program_opt_ins FOR SELECT USING (
+    EXISTS (SELECT 1 FROM panelist_profiles WHERE id = panelist_id AND user_id = auth.uid()::text)
+);
+CREATE POLICY "Panelists can manage own program opt-ins" ON panelist_program_opt_ins FOR ALL USING (
+    EXISTS (SELECT 1 FROM panelist_profiles WHERE id = panelist_id AND user_id = auth.uid()::text)
+);
+
+-- Admins can view all program opt-ins
+CREATE POLICY "Admins can view all program opt-ins" ON panelist_program_opt_ins FOR SELECT USING (
+    EXISTS (SELECT 1 FROM users WHERE id = auth.uid()::text AND role IN ('survey_admin', 'system_admin'))
+);
+
+-- Audience presets can be managed by admins
+CREATE POLICY "Admins can manage audience presets" ON audience_presets FOR ALL USING (
+    EXISTS (SELECT 1 FROM users WHERE id = auth.uid()::text AND role IN ('survey_admin', 'system_admin'))
+);
+
+-- Survey audience assignments can be managed by admins
+CREATE POLICY "Admins can manage survey audience assignments" ON survey_audience_assignments FOR ALL USING (
+    EXISTS (SELECT 1 FROM users WHERE id = auth.uid()::text AND role IN ('survey_admin', 'system_admin'))
+);
+
 -- Comments for documentation
 COMMENT ON TABLE users IS 'User accounts managed by Clerk with role information';
 COMMENT ON TABLE panelist_profiles IS 'Extended profile information for panelist users';
@@ -380,6 +414,10 @@ COMMENT ON TABLE survey_completions IS 'Records of completed surveys and points 
 COMMENT ON TABLE merchant_offers IS 'Available offers for point redemption';
 COMMENT ON TABLE redemptions IS 'Records of point redemptions';
 COMMENT ON TABLE activity_log IS 'Audit trail of all user activities';
+COMMENT ON TABLE panelist_programs IS 'Available research programs for panelists';
+COMMENT ON TABLE panelist_program_opt_ins IS 'Panelist program participation records';
+COMMENT ON TABLE audience_presets IS 'Saved audience filter configurations for admins';
+COMMENT ON TABLE survey_audience_assignments IS 'Survey assignments to audience presets';
 
 COMMENT ON FUNCTION update_panelist_points IS 'Safely update panelist points balance with validation and logging';
 COMMENT ON FUNCTION log_activity IS 'Log user activity with metadata'; 

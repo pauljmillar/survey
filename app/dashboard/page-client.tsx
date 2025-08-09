@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/use-auth'
 
 import { CompactSurveyList } from '@/components/panelist/survey-list'
+import { ProgramStatus } from '@/components/panelist/program-status'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -154,8 +155,11 @@ export default function DashboardClient() {
             </div>
 
             {/* Survey Lists - Full width, no outer card */}
-            <div className="order-2 lg:order-1">
+            <div className="order-2 lg:order-1 space-y-6">
               <CompactSurveyList limit={5} />
+              
+              {/* Program Status */}
+              <ProgramStatus />
             </div>
           </div>
         ) : (
