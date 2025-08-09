@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     // Apply demographic filters
     if (filters.gender) {
-      query = query.eq('profile_data->gender', filters.gender)
+      query = query.eq('profile_data->>gender', filters.gender)
     }
 
     if (filters.age_range) {
@@ -97,11 +97,11 @@ export async function POST(request: NextRequest) {
     }
 
     if (filters.education_level) {
-      query = query.eq('profile_data->education_level', filters.education_level)
+      query = query.eq('profile_data->>education_level', filters.education_level)
     }
 
     if (filters.employment_status) {
-      query = query.eq('profile_data->employment_status', filters.employment_status)
+      query = query.eq('profile_data->>employment_status', filters.employment_status)
     }
 
     if (filters.household_size) {

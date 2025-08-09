@@ -43,9 +43,15 @@ export function AudienceBuilder() {
   const [presetName, setPresetName] = useState('')
   const [savedPresets, setSavedPresets] = useState<any[]>([])
   const [savingPreset, setSavingPreset] = useState(false)
+  
+  // Survey assignment
+  const [surveys, setSurveys] = useState<any[]>([])
+  const [selectedSurveyId, setSelectedSurveyId] = useState('')
+  const [assigning, setAssigning] = useState(false)
 
   useEffect(() => {
     fetchPrograms()
+    fetchSurveys()
   }, [])
 
   const fetchPrograms = async () => {
@@ -64,6 +70,20 @@ export function AudienceBuilder() {
     } catch (error) {
       console.error('Error fetching programs:', error)
       setError('Failed to load programs')
+    }
+  }
+
+  const fetchSurveys = async () => {
+    try {
+      const response = await fetch('/api/surveys')
+      if (response.ok) {
+        const data = await response.json()
+        setSurveys(data.surveys || [])
+      } else {
+        console.error('Failed to load surveys')
+      }
+    } catch (error) {
+      console.error('Error fetching surveys:', error)
     }
   }
 
@@ -194,10 +214,47 @@ export function AudienceBuilder() {
   }
 
   const updateFilter = (key: keyof DemographicFilters, value: any) => {
-    // Convert "any" selection back to undefined to clear the filter
-    const filterValue = value === 'any' ? undefined : value
-    setFilters(prev => ({ ...prev, [key]: filterValue }))
+    setFilters(prev => ({ ...prev, [key]: value }))
     setAudienceCount(null) // Reset count when filters change
+  }
+
+  const assignSurveyToAudience = async () => {
+    if (!selectedSurveyId || !selectedProgram) return
+
+    try {
+      setAssigning(true)
+      setError(null)
+
+      // For now, we'll use the filter API directly to assign to the current audience
+      const response = await fetch(`/api/admin/surveys/${selectedSurveyId}/assign-temporary-audience`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          program: selectedProgram,
+          filters: {
+            program: selectedProgram,
+            ...filters
+          }
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setError(null)
+        alert(`Survey successfully assigned to ${data.panelist_count} panelists!`)
+        setSelectedSurveyId('') // Reset selection
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Failed to assign survey')
+      }
+    } catch (error) {
+      console.error('Error assigning survey:', error)
+      setError('Failed to assign survey')
+    } finally {
+      setAssigning(false)
+    }
   }
 
   useEffect(() => {
@@ -252,7 +309,7 @@ export function AudienceBuilder() {
 
         {/* Advanced Filters */}
         {showAdvancedFilters && (
-          <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
+          <div className="space-y-4 p-4 border rounded-lg bg-muted/50 dark:bg-muted/20">
             <div className="flex items-center justify-between">
               <h4 className="font-medium">Demographic Filters</h4>
               <Button
@@ -272,7 +329,7 @@ export function AudienceBuilder() {
                 <Label className="text-sm">Gender</Label>
                 <Select
                   value={filters.gender || 'any'}
-                  onValueChange={(value) => updateFilter('gender', value)}
+                  onValueChange={(value) => updateFilter('gender', value === 'any' ? undefined : value)}
                 >
                   <SelectTrigger className="mt-2">
                     <SelectValue placeholder="Any" />
@@ -291,7 +348,7 @@ export function AudienceBuilder() {
                 <Label className="text-sm">Location</Label>
                 <Select
                   value={filters.location || 'any'}
-                  onValueChange={(value) => updateFilter('location', value)}
+                  onValueChange={(value) => updateFilter('location', value === 'any' ? undefined : value)}
                 >
                   <SelectTrigger className="mt-2">
                     <SelectValue placeholder="Any" />
@@ -359,7 +416,7 @@ export function AudienceBuilder() {
                 <Label className="text-sm">Education Level</Label>
                 <Select
                   value={filters.educationLevel || 'any'}
-                  onValueChange={(value) => updateFilter('educationLevel', value)}
+                  onValueChange={(value) => updateFilter('educationLevel', value === 'any' ? undefined : value)}
                 >
                   <SelectTrigger className="mt-2">
                     <SelectValue placeholder="Any" />
@@ -379,7 +436,7 @@ export function AudienceBuilder() {
                 <Label className="text-sm">Employment Status</Label>
                 <Select
                   value={filters.employmentStatus || 'any'}
-                  onValueChange={(value) => updateFilter('employmentStatus', value)}
+                  onValueChange={(value) => updateFilter('employmentStatus', value === 'any' ? undefined : value)}
                 >
                   <SelectTrigger className="mt-2">
                     <SelectValue placeholder="Any" />
@@ -431,7 +488,7 @@ export function AudienceBuilder() {
 
         {/* Save Preset */}
         {audienceCount !== null && audienceCount > 0 && (
-          <div className="p-4 border rounded-lg bg-blue-50">
+          <div className="p-4 border rounded-lg bg-blue-50/50 dark:bg-blue-950/20">
             <Label className="text-sm font-medium">Save as Preset</Label>
             <div className="flex gap-2 mt-2">
               <Input
@@ -452,6 +509,43 @@ export function AudienceBuilder() {
           </div>
         )}
 
+        {/* Assign Survey to Audience */}
+        {audienceCount !== null && audienceCount > 0 && (
+          <div className="p-4 border rounded-lg bg-green-50/50 dark:bg-green-950/20">
+            <Label className="text-sm font-medium">Assign Survey to This Audience</Label>
+            <p className="text-sm text-muted-foreground mt-1">
+              Select a survey to assign to the filtered audience of {audienceCount.toLocaleString()} panelists.
+            </p>
+            <div className="flex gap-2 mt-3">
+              <Select
+                value={selectedSurveyId}
+                onValueChange={setSelectedSurveyId}
+              >
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Select a survey" />
+                </SelectTrigger>
+                <SelectContent>
+                  {surveys
+                    .filter(survey => survey.status === 'active')
+                    .map((survey) => (
+                      <SelectItem key={survey.id} value={survey.id}>
+                        {survey.title} ({survey.points_reward} pts)
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+              <Button
+                onClick={assignSurveyToAudience}
+                disabled={assigning || !selectedSurveyId}
+                size="sm"
+              >
+                <Target className="h-4 w-4 mr-1" />
+                {assigning ? 'Assigning...' : 'Assign'}
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Saved Presets */}
         {savedPresets.length > 0 && (
           <div>
@@ -459,15 +553,21 @@ export function AudienceBuilder() {
             <div className="grid gap-2 mt-2">
               {savedPresets.map((preset) => (
                 <div key={preset.id} className="flex items-center justify-between p-3 border rounded">
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium">{preset.name}</p>
                     <p className="text-sm text-muted-foreground">
                       {preset.audience_count} panelists • {preset.description}
                     </p>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => loadPreset(preset)}>
-                    Load
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => loadPreset(preset)}>
+                      Load
+                    </Button>
+                    {/* TODO: Implement assign preset to survey functionality */}
+                    <Button variant="outline" size="sm" disabled>
+                      Assign
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>

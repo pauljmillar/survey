@@ -1,6 +1,7 @@
 'use client'
 
 import { AudienceBuilder } from '@/components/admin/audience-builder'
+import { SurveyAssignments } from '@/components/admin/survey-assignments'
 
 export default function AudiencesPage() {
   return (
@@ -13,7 +14,10 @@ export default function AudiencesPage() {
           </p>
         </div>
 
-        <AudienceBuilder />
+        <div className="space-y-8">
+          <AudienceBuilder />
+          <SurveyAssignments />
+        </div>
       </div>
     </div>
   )

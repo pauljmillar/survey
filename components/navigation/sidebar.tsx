@@ -106,14 +106,12 @@ export function Sidebar({ className }: SidebarProps) {
     {
       title: "Redeem",
       items: [
-        { label: "Redeem", href: "/offers", icon: Gift },
-        { label: "History", href: "/redemptions", icon: ShoppingCart }
+        { label: "Redeem", href: "/offers", icon: Gift }
       ]
     },
     {
       title: "Account",
       items: [
-        { label: "Profile", href: "/profile", icon: User },
         { label: "Activity", href: "/activity", icon: Activity },
         { label: "Settings", href: "/settings", icon: Settings }
       ]
@@ -135,8 +133,7 @@ export function Sidebar({ className }: SidebarProps) {
         { label: "Surveys", href: "/admin/surveys", icon: ClipboardList },
         { label: "Live Surveys", href: "/admin/surveys/live", icon: PlayCircle },
         { label: "Panels", href: "/admin/panels", icon: Users2 }
-      ],
-      collapsible: true
+      ]
     },
     {
       title: "Rewards",

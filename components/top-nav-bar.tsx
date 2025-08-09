@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { SignedIn, SignedOut, UserButton, SignInButton, SignUpButton, useUser, useClerk } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "next-themes"
@@ -18,7 +18,7 @@ const MENU_OPTIONS: { label: string; href: string }[] = [
 export function TopNavBar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false)
-  const [accountModalOpen, setAccountModalOpen] = useState(false)
+  const router = useRouter()
   const pathname = usePathname()
   const { user } = useUser()
   const { signOut } = useClerk()
@@ -69,7 +69,7 @@ export function TopNavBar() {
   }
 
   const handleAccountSettings = () => {
-    setAccountModalOpen(true)
+    router.push('/settings')
     setProfileDropdownOpen(false)
   }
 
@@ -331,95 +331,7 @@ export function TopNavBar() {
         />
       )}
 
-      {/* Account Settings Modal */}
-      {accountModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div 
-            className="fixed inset-0 bg-black/50"
-            onClick={() => setAccountModalOpen(false)}
-          />
-          <div className="relative bg-white dark:bg-black border border-black/10 dark:border-white/10 rounded-lg shadow-lg w-full max-w-md mx-4">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-black dark:text-white">
-                  Account Settings
-                </h2>
-                <button
-                  onClick={() => setAccountModalOpen(false)}
-                  className="text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-black dark:text-white mb-2">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    defaultValue={user?.firstName || ''}
-                    className="w-full px-3 py-2 border border-black/10 dark:border-white/10 rounded-md bg-white dark:bg-black text-black dark:text-white"
-                    placeholder="Enter your name"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-black dark:text-white mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    defaultValue={user?.emailAddresses[0]?.emailAddress || ''}
-                    className="w-full px-3 py-2 border border-black/10 dark:border-white/10 rounded-md bg-white dark:bg-black text-black dark:text-white"
-                    placeholder="Enter your email"
-                    disabled
-                  />
-                  <p className="text-xs text-black/60 dark:text-white/60 mt-1">
-                    Email cannot be changed
-                  </p>
-                </div>
 
-                {/* Profile Edit Link for Panelists */}
-                {userRole === 'panelist' && (
-                  <div className="pt-4 border-t border-black/10 dark:border-white/10">
-                    <Link
-                      href="/profile/edit"
-                      onClick={() => setAccountModalOpen(false)}
-                      className="flex items-center w-full px-3 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md"
-                    >
-                      <User className="w-4 h-4 mr-3" />
-                      Edit Profile & Demographics
-                    </Link>
-                    <p className="text-xs text-black/60 dark:text-white/60 mt-1 ml-7">
-                      Update your survey preferences and demographic information
-                    </p>
-                  </div>
-                )}
-                
-                <div className="flex items-center justify-between pt-4">
-                  <button
-                    onClick={() => setAccountModalOpen(false)}
-                    className="px-4 py-2 text-sm text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => {
-                      // Handle save functionality here
-                      setAccountModalOpen(false)
-                    }}
-                    className="px-4 py-2 text-sm bg-black text-white dark:bg-white dark:text-black rounded-md hover:bg-black/80 dark:hover:bg-white/80"
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </nav>
   )
 } 
