@@ -194,7 +194,9 @@ export function AudienceBuilder() {
   }
 
   const updateFilter = (key: keyof DemographicFilters, value: any) => {
-    setFilters(prev => ({ ...prev, [key]: value }))
+    // Convert "any" selection back to undefined to clear the filter
+    const filterValue = value === 'any' ? undefined : value
+    setFilters(prev => ({ ...prev, [key]: filterValue }))
     setAudienceCount(null) // Reset count when filters change
   }
 
@@ -269,14 +271,14 @@ export function AudienceBuilder() {
               <div>
                 <Label className="text-sm">Gender</Label>
                 <Select
-                  value={filters.gender || ''}
-                  onValueChange={(value) => updateFilter('gender', value || undefined)}
+                  value={filters.gender || 'any'}
+                  onValueChange={(value) => updateFilter('gender', value)}
                 >
                   <SelectTrigger className="mt-2">
                     <SelectValue placeholder="Any" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Any</SelectItem>
+                    <SelectItem value="any">Any</SelectItem>
                     <SelectItem value="male">Male</SelectItem>
                     <SelectItem value="female">Female</SelectItem>
                     <SelectItem value="non-binary">Non-binary</SelectItem>
@@ -288,14 +290,14 @@ export function AudienceBuilder() {
               <div>
                 <Label className="text-sm">Location</Label>
                 <Select
-                  value={filters.location || ''}
-                  onValueChange={(value) => updateFilter('location', value || undefined)}
+                  value={filters.location || 'any'}
+                  onValueChange={(value) => updateFilter('location', value)}
                 >
                   <SelectTrigger className="mt-2">
                     <SelectValue placeholder="Any" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Any</SelectItem>
+                    <SelectItem value="any">Any</SelectItem>
                     <SelectItem value="US">United States</SelectItem>
                     <SelectItem value="CA">Canada</SelectItem>
                     <SelectItem value="UK">United Kingdom</SelectItem>
@@ -356,14 +358,14 @@ export function AudienceBuilder() {
               <div>
                 <Label className="text-sm">Education Level</Label>
                 <Select
-                  value={filters.educationLevel || ''}
-                  onValueChange={(value) => updateFilter('educationLevel', value || undefined)}
+                  value={filters.educationLevel || 'any'}
+                  onValueChange={(value) => updateFilter('educationLevel', value)}
                 >
                   <SelectTrigger className="mt-2">
                     <SelectValue placeholder="Any" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Any</SelectItem>
+                    <SelectItem value="any">Any</SelectItem>
                     <SelectItem value="high-school">High School</SelectItem>
                     <SelectItem value="some-college">Some College</SelectItem>
                     <SelectItem value="bachelors">Bachelor&apos;s Degree</SelectItem>
@@ -376,14 +378,14 @@ export function AudienceBuilder() {
               <div>
                 <Label className="text-sm">Employment Status</Label>
                 <Select
-                  value={filters.employmentStatus || ''}
-                  onValueChange={(value) => updateFilter('employmentStatus', value || undefined)}
+                  value={filters.employmentStatus || 'any'}
+                  onValueChange={(value) => updateFilter('employmentStatus', value)}
                 >
                   <SelectTrigger className="mt-2">
                     <SelectValue placeholder="Any" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Any</SelectItem>
+                    <SelectItem value="any">Any</SelectItem>
                     <SelectItem value="employed-full-time">Full-time</SelectItem>
                     <SelectItem value="employed-part-time">Part-time</SelectItem>
                     <SelectItem value="self-employed">Self-employed</SelectItem>
