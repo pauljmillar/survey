@@ -1,11 +1,35 @@
-import { clerkMiddleware } from '@clerk/nextjs/server'
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
-export default clerkMiddleware()
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/panels",
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/api/offers(.*)",
+  "/api/auth/user-role(.*)",
+]);
+
+export default clerkMiddleware(async (auth, req) => {
+  // Allow public routes
+  if (isPublicRoute(req)) {
+    return NextResponse.next();
+  }
+
+  // For protected routes: check session
+  const { userId } = await auth();
+
+  if (!userId) {
+    return NextResponse.redirect(new URL("/sign-in", req.url));
+  }
+
+  return NextResponse.next();
+});
 
 export const config = {
   matcher: [
-    '/((?!.+\\.[\\w]+$|_next).*)', // Everything except static files and _next
-    '/',
-    '/(api|trpc)(.*)',             // API & tRPC routes
+    "/((?!.+\\.[\\w]+$|_next).*)",
+    "/",
+    "/(api|trpc)(.*)",
   ],
-}
+};
