@@ -70,7 +70,7 @@ export async function PATCH(
     if (is_approved !== undefined) updateData.is_approved = is_approved
     if (processing_notes !== undefined) updateData.processing_notes = processing_notes
     if (is_approved !== undefined) {
-      updateData.reviewed_by = userId
+      updateData.reviewed_by = user.id
     }
     
     const { data, error } = await supabase

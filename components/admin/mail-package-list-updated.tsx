@@ -41,6 +41,36 @@ interface PaginationInfo {
   hasPrev: boolean
 }
 
+// Helper functions for status and approval badges
+const getStatusBadge = (status: string) => {
+  const statusConfig = {
+    pending: { color: 'bg-yellow-100 text-yellow-800', icon: Clock },
+    processing: { color: 'bg-blue-100 text-blue-800', icon: Eye },
+    completed: { color: 'bg-green-100 text-green-800', icon: CheckCircle },
+    rejected: { color: 'bg-red-100 text-red-800', icon: XCircle }
+  }
+  
+  const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending
+  const Icon = config.icon
+  
+  return (
+    <Badge className={config.color}>
+      <Icon className="w-3 h-3 mr-1" />
+      {status}
+    </Badge>
+  )
+}
+
+const getApprovalBadge = (isApproved: boolean | null) => {
+  if (isApproved === null) {
+    return <Badge variant="secondary">Pending</Badge>
+  } else if (isApproved) {
+    return <Badge className="bg-green-100 text-green-800"><CheckCircle className="w-3 h-3 mr-1" />Approved</Badge>
+  } else {
+    return <Badge className="bg-red-100 text-red-800"><XCircle className="w-3 h-3 mr-1" />Rejected</Badge>
+  }
+}
+
 // Component for thumbnail with proper error handling
 function ThumbnailImage({ s3Key }: { s3Key: string | null }) {
   const [imageError, setImageError] = useState(false)

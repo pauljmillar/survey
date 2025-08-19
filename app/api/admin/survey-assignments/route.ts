@@ -39,9 +39,9 @@ export async function GET(request: NextRequest) {
     const transformedAssignments = assignments?.map(assignment => ({
       id: assignment.id,
       survey_id: assignment.survey_id,
-      survey_title: assignment.surveys?.title,
+      survey_title: assignment.surveys?.[0]?.title,
       audience_preset_id: assignment.audience_preset_id,
-      audience_preset_name: assignment.audience_presets?.name,
+      audience_preset_name: assignment.audience_presets?.[0]?.name,
       assigned_by: assignment.assigned_by,
       assigned_at: assignment.assigned_at,
       assignment_metadata: assignment.assignment_metadata

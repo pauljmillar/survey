@@ -390,8 +390,8 @@ export default function SettingsPage() {
                   <SelectContent>
                     <SelectItem value="high-school">High School</SelectItem>
                     <SelectItem value="some-college">Some College</SelectItem>
-                    <SelectItem value="bachelors">Bachelor's Degree</SelectItem>
-                    <SelectItem value="masters">Master's Degree</SelectItem>
+                    <SelectItem value="bachelors">Bachelor&apos;s Degree</SelectItem>
+                    <SelectItem value="masters">Master&apos;s Degree</SelectItem>
                     <SelectItem value="doctorate">Doctorate</SelectItem>
                   </SelectContent>
                 </Select>
@@ -424,7 +424,7 @@ export default function SettingsPage() {
               <div>
                 <h2 className="text-xl font-semibold text-foreground">Research Programs</h2>
                 <p className="text-sm text-muted-foreground">
-                  Choose which types of research opportunities you'd like to participate in
+                  Choose which types of research opportunities you&apos;d like to participate in
                 </p>
               </div>
               <Badge variant="outline">

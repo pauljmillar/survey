@@ -57,11 +57,8 @@ export async function GET(request: NextRequest) {
     query = query.order(sortBy, { ascending: sortOrder === 'asc' })
     
     // Get total count for pagination
-    let countQuery = supabase
-      .from('mail_packages')
-      .select('id', { count: 'exact', head: true })
+    let countQuery: any
     
-    // Apply the same filters to count query
     if (search) {
       // For search, we need to join with panelist_profiles
       countQuery = supabase
@@ -74,6 +71,11 @@ export async function GET(request: NextRequest) {
           )
         `, { count: 'exact', head: true })
         .or(`panelist_profiles.profile_data->>'first_name'.ilike.%${search}%,panelist_profiles.profile_data->>'last_name'.ilike.%${search}%`)
+    } else {
+      // Simple count query when no search
+      countQuery = supabase
+        .from('mail_packages')
+        .select('id', { count: 'exact', head: true })
     }
     
     if (status) {
