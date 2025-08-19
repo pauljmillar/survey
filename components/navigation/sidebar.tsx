@@ -30,7 +30,8 @@ import {
   PlayCircle,
   Users2,
   Settings2,
-  LogOut
+  LogOut,
+  DollarSign
 } from "lucide-react"
 
 interface SidebarProps {
@@ -140,6 +141,7 @@ export function Sidebar({ className }: SidebarProps) {
       items: [
         { label: "Offers", href: "/admin/offers", icon: Gift },
         { label: "Redemptions", href: "/admin/redemptions", icon: ShoppingCart },
+        { label: "Point Ledger", href: "/admin/point-ledger", icon: DollarSign },
         { label: "Analytics", href: "/admin/analytics", icon: BarChart3 }
       ]
     },
