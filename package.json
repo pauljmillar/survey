@@ -12,6 +12,8 @@
     "db:generate-types": "supabase gen types typescript --local > types/database.types.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.864.0",
+    "@aws-sdk/s3-request-presigner": "^3.864.0",
     "@clerk/nextjs": "^6.28.1",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",

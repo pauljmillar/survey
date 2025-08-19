@@ -1,28 +1,16 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { MailPackageList } from '@/components/admin/mail-package-list'
 
 export default function AdminPanelsPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-12">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Panel Management</h1>
-        <p className="text-muted-foreground">
-          Create and manage specialized survey panels.
+        <h1 className="text-3xl font-bold tracking-tight">Mail Scanning Panel</h1>
+        <p className="text-muted-foreground mt-3">
+          Review and manage mail scanning submissions from panelists.
         </p>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Coming Soon</CardTitle>
-          <CardDescription>
-            Panel management functionality will be available in a future update.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            This feature will allow administrators to create and manage specialized survey panels, assign panelists, and track panel performance.
-          </p>
-        </CardContent>
-      </Card>
+      
+      <MailPackageList />
     </div>
   )
 } 
