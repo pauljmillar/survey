@@ -14,9 +14,17 @@ export default clerkMiddleware(async (auth, req) => {
   // Get user ID from auth
   const { userId } = await auth()
   
+  // Check if this is an admin route that requires authentication
+  const isAdminRoute = req.nextUrl.pathname.startsWith('/admin')
+  
   // If user is not authenticated and trying to access protected route
   if (!userId && !isPublicRoute(req)) {
-    return NextResponse.redirect(new URL('/', req.url))
+    return NextResponse.redirect(new URL('/sign-in', req.url))
+  }
+
+  // If user is not authenticated and trying to access admin routes
+  if (!userId && isAdminRoute) {
+    return NextResponse.redirect(new URL('/sign-in', req.url))
   }
 
   // If user is authenticated but trying to access auth pages, redirect to dashboard
