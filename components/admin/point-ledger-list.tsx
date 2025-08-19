@@ -131,9 +131,9 @@ export function PointLedgerList({
                           )}
                         </div>
                       </td>
-                      <td className="py-3 px-4">
-                        {entry.awarded_by_user?.email || 'System'}
-                      </td>
+                                             <td className="py-3 px-4">
+                         {entry.awarded_by || 'System'}
+                       </td>
                       <td className="py-3 px-4">
                         <div>
                           <div className="text-sm">{formatDate(entry.created_at)}</div>

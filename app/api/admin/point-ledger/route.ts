@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
+import { currentUser } from '@clerk/nextjs/server'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -94,7 +95,12 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Require authentication
-    const { user } = await requireAuth()
+    await requireAuth()
+    const user = await currentUser()
+    
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
     
     const body = await request.json()
     const {
@@ -120,17 +126,17 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
     
-    // Use the award_points function to create the ledger entry
-    const { data, error } = await supabase.rpc('award_points', {
-      p_panelist_id: panelistId,
-      p_points: points,
-      p_transaction_type: transactionType,
-      p_title: title,
-      p_description: description || null,
-      p_metadata: metadata,
-      p_awarded_by: user.id,
-      p_effective_date: effectiveDate || new Date().toISOString().split('T')[0]
-    })
+         // Use the award_points function to create the ledger entry
+     const { data, error } = await supabase.rpc('award_points', {
+       p_panelist_id: panelistId,
+       p_points: points,
+       p_transaction_type: transactionType,
+       p_title: title,
+       p_description: description || null,
+       p_metadata: metadata,
+       p_awarded_by: user.id,
+       p_effective_date: effectiveDate || new Date().toISOString().split('T')[0]
+     })
     
     if (error) {
       console.error('Error creating point ledger entry:', error)

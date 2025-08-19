@@ -22,15 +22,6 @@ interface PointLedgerEntry {
   awarded_by: string | null
   created_at: string
   effective_date: string
-  panelist_profiles: {
-    profile_data: {
-      first_name: string
-      last_name: string
-    }
-  }
-  awarded_by_user: {
-    email: string
-  } | null
 }
 
 interface PaginationInfo {
