@@ -1,17 +1,6 @@
 import { clerkMiddleware } from '@clerk/nextjs/server'
-import { NextResponse } from 'next/server'
 
-// Clerk will handle skipping auth for these routes automatically
-export default clerkMiddleware({
-  publicRoutes: [
-    '/',                // Home page
-    '/panels',          // Public panels route
-    '/sign-in(.*)',     // Sign-in page + subroutes
-    '/sign-up(.*)',     // Sign-up page + subroutes
-    '/api/offers(.*)',  // Public API route(s)
-    '/api/auth/user-role(.*)', // Public API route(s)
-  ],
-})
+export default clerkMiddleware()
 
 export const config = {
   matcher: [
