@@ -58,6 +58,8 @@ export function TopNavBar() {
     try {
       await signOut()
       setProfileDropdownOpen(false)
+      // Redirect to home page after sign out
+      router.push('/')
     } catch (error) {
       console.error('Error signing out:', error)
     }

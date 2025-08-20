@@ -72,6 +72,8 @@ export function Sidebar({ className }: SidebarProps) {
   const handleSignOut = async () => {
     try {
       await signOut()
+      // Redirect to home page after sign out
+      router.push('/')
     } catch (error) {
       console.error('Error signing out:', error)
     }
