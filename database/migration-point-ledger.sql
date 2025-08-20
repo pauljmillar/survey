@@ -412,6 +412,28 @@ GRANT SELECT ON panelist_balances TO authenticated;
 GRANT SELECT, INSERT ON point_ledger TO authenticated;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO authenticated;
 
+-- Create trigger to keep panelist_profiles.points_balance in sync with ledger
+CREATE OR REPLACE FUNCTION update_panelist_balance_from_ledger()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Update panelist_profiles.points_balance to match the latest ledger balance
+  UPDATE panelist_profiles 
+  SET 
+    points_balance = NEW.balance_after,
+    updated_at = NOW()
+  WHERE user_id = NEW.panelist_id;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Create the trigger
+DROP TRIGGER IF EXISTS trigger_update_panelist_balance ON point_ledger;
+CREATE TRIGGER trigger_update_panelist_balance
+  AFTER INSERT ON point_ledger
+  FOR EACH ROW
+  EXECUTE FUNCTION update_panelist_balance_from_ledger();
+
 -- Add comments for documentation
 COMMENT ON TABLE point_ledger IS 'Tracks all point transactions for panelists including awards, redemptions, and adjustments';
 COMMENT ON COLUMN point_ledger.points IS 'Positive values for awards, negative values for redemptions';
@@ -419,4 +441,5 @@ COMMENT ON COLUMN point_ledger.balance_after IS 'Running balance after this tran
 COMMENT ON COLUMN point_ledger.metadata IS 'JSON object for storing additional transaction-specific data';
 COMMENT ON FUNCTION award_points IS 'Awards positive points to a panelist and creates a ledger entry';
 COMMENT ON FUNCTION redeem_points IS 'Redeems points from a panelist and creates a ledger entry';
-COMMENT ON FUNCTION get_panelist_balance IS 'Returns the current point balance for a panelist'; 
+COMMENT ON FUNCTION get_panelist_balance IS 'Returns the current point balance for a panelist';
+COMMENT ON FUNCTION update_panelist_balance_from_ledger IS 'Trigger function to keep panelist_profiles.points_balance in sync with ledger'; 

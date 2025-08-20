@@ -129,22 +129,40 @@ export async function POST(request: NextRequest) {
     // The survey_responses table is not part of the main schema
     console.log('Survey responses stored in completion record')
 
-    // Update panelist's points balance and survey count
+    // Award points through the ledger system
+    const { data: ledgerEntry, error: ledgerError } = await supabase.rpc('award_points', {
+      p_panelist_id: user.id,
+      p_points: survey.points_reward,
+      p_transaction_type: 'survey_completion',
+      p_title: `Survey completion: ${survey.title}`,
+      p_description: `Completed survey with ${responses.length} questions`,
+      p_metadata: { 
+        survey_id, 
+        completion_id: completion.id,
+        question_count: responses.length 
+      },
+      p_awarded_by: null // System-awarded
+    })
+
+    if (ledgerError) {
+      console.error('Error creating ledger entry:', ledgerError)
+      return NextResponse.json({ error: 'Failed to award points' }, { status: 500 })
+    }
+
+    // Update survey count (points balance is now handled by the ledger trigger)
     const { data: updatedProfile, error: updateError } = await supabase
       .from('panelist_profiles')
       .update({
-        points_balance: (profile.points_balance || 0) + survey.points_reward,
-        total_points_earned: (profile.total_points_earned || 0) + survey.points_reward,
         surveys_completed: (profile.surveys_completed || 0) + 1,
         updated_at: new Date().toISOString()
       })
       .eq('id', profile.id)
-      .select('points_balance, total_points_earned, surveys_completed')
+      .select('points_balance, surveys_completed')
       .single()
 
     if (updateError) {
       console.error('Error updating panelist profile:', updateError)
-      return NextResponse.json({ error: 'Failed to update points balance' }, { status: 500 })
+      return NextResponse.json({ error: 'Failed to update survey count' }, { status: 500 })
     }
 
     console.log('Points updated successfully')
@@ -173,7 +191,7 @@ export async function POST(request: NextRequest) {
       points_earned: survey.points_reward,
       completion_id: completion.id,
       new_balance: updatedProfile.points_balance,
-      total_earned: updatedProfile.total_points_earned
+      ledger_entry_id: ledgerEntry
     })
   } catch (error) {
     if (error instanceof Error && error.message === 'Insufficient permissions') {

@@ -105,31 +105,29 @@ export async function PATCH(
       return NextResponse.json({ error: 'Failed to update mail package' }, { status: 500 })
     }
     
-    // If points are awarded, update panelist's points balance
+    // If points are awarded, create a ledger entry
     if (points_awarded && points_awarded > 0) {
-      // First get the current points balance
-      const { data: currentProfile, error: fetchError } = await supabase
-        .from('panelist_profiles')
-        .select('points_balance')
-        .eq('id', data.panelist_id)
-        .single()
-      
-      if (fetchError) {
-        console.error('Error fetching current points balance:', fetchError)
-      } else {
-        // Then update with the new balance
-        const newBalance = (currentProfile.points_balance || 0) + points_awarded
-        const { error: pointsError } = await supabase
-          .from('panelist_profiles')
-          .update({
-            points_balance: newBalance
-          })
-          .eq('id', data.panelist_id)
-        
-        if (pointsError) {
-          console.error('Error updating panelist points:', pointsError)
+      try {
+        const { data: ledgerEntry, error: ledgerError } = await supabase.rpc('award_points', {
+          p_panelist_id: data.panelist_id,
+          p_points: points_awarded,
+          p_transaction_type: 'manual_award',
+          p_title: `Mail package approval: ${data.package_name || 'Package'}`,
+          p_description: `Points awarded for approved mail package`,
+          p_metadata: { 
+            mail_package_id: params.packageId,
+            package_name: data.package_name
+          },
+          p_awarded_by: user.id
+        })
+
+        if (ledgerError) {
+          console.error('Error creating ledger entry for mail package points:', ledgerError)
           // Don't fail the request, just log the error
         }
+      } catch (ledgerError) {
+        console.error('Error in ledger transaction for mail package:', ledgerError)
+        // Don't fail the request, just log the error
       }
     }
     

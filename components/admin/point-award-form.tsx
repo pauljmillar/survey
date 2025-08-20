@@ -128,7 +128,7 @@ export function PointAwardForm({ onClose, onAwardCreated }: PointAwardFormProps)
                 </SelectTrigger>
                 <SelectContent>
                   {loading ? (
-                    <SelectItem value="" disabled>
+                    <SelectItem value="loading" disabled>
                       <div className="flex items-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin" />
                         Loading panelists...

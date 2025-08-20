@@ -145,22 +145,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create redemption' }, { status: 500 })
     }
 
-    // Deduct points using the database function
+    // Redeem points through the ledger system
     try {
-      const { error: pointsError } = await supabase.rpc('update_panelist_points', {
-        p_panelist_id: profile.id,
-        p_points_change: -offer.points_required,
-        p_activity_description: `Redeemed offer: ${offer.title}`
+      const { data: ledgerEntry, error: ledgerError } = await supabase.rpc('redeem_points', {
+        p_panelist_id: user.id,
+        p_points: offer.points_required,
+        p_title: `Redemption: ${offer.title}`,
+        p_transaction_type: 'redemption',
+        p_description: `Redeemed offer for ${offer.points_required} points`,
+        p_metadata: { 
+          offer_id: offer.id,
+          redemption_id: redemption.id
+        }
       })
 
-      if (pointsError) {
-        console.error('Error deducting points:', pointsError)
+      if (ledgerError) {
+        console.error('Error creating ledger entry:', ledgerError)
         // Rollback redemption if points deduction fails
         await supabase.from('redemptions').delete().eq('id', redemption.id)
         return NextResponse.json({ error: 'Failed to process redemption' }, { status: 500 })
       }
-    } catch (pointsError) {
-      console.error('Error in points transaction:', pointsError)
+    } catch (ledgerError) {
+      console.error('Error in ledger transaction:', ledgerError)
       // Rollback redemption
       await supabase.from('redemptions').delete().eq('id', redemption.id)
       return NextResponse.json({ error: 'Failed to process point deduction' }, { status: 500 })
