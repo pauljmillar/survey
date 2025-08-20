@@ -2,8 +2,6 @@
 
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton, useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
-
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -12,12 +10,7 @@ export default function PanelsLandingPage() {
   const { isSignedIn, isLoaded } = useAuth()
   const router = useRouter()
 
-  // Redirect authenticated users to dashboard
-  useEffect(() => {
-    if (isLoaded && isSignedIn) {
-      router.push('/dashboard')
-    }
-  }, [isLoaded, isSignedIn, router])
+  // Note: No auto-redirect. Authenticated users can also view this page.
 
   // Show loading state while auth is loading
   if (!isLoaded) {
@@ -479,11 +472,11 @@ export default function PanelsLandingPage() {
         </SignedOut>
 
         <SignedIn>
-          {/* Redirect authenticated users - this shouldn't show due to useEffect redirect */}
+          {/* Signed-in view (no auto-redirect) */}
           <div className="min-h-screen flex items-center justify-center">
             <div className="text-center">
               <h1 className="text-2xl font-bold text-foreground mb-4">Welcome back!</h1>
-              <p className="text-muted-foreground mb-4">Redirecting you to your dashboard...</p>
+              <p className="text-muted-foreground mb-4">You’re signed in. You can browse this page or head to your dashboard.</p>
               <Button onClick={() => router.push('/dashboard')}>
                 Go to Dashboard
               </Button>
