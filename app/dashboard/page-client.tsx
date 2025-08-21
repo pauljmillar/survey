@@ -6,18 +6,216 @@ import { useAuth } from '@/hooks/use-auth'
 
 import { CompactSurveyList } from '@/components/panelist/survey-list'
 import { ProgramStatus } from '@/components/panelist/program-status'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Users, ClipboardList, Gift, BarChart3 } from 'lucide-react'
+import { Users, ClipboardList, Gift, BarChart3, Award, Camera } from 'lucide-react'
 
 interface PanelistProfile {
   id: string
   points_balance: number
   total_points_earned: number
   total_points_redeemed: number
+  total_scans: number
+  surveys_completed: number
   profile_data: any
   is_active: boolean
+}
+
+interface AdminStats {
+  totalSurveysCompleted: number
+  totalUsers: number
+  totalPointsAwarded: number
+  totalScans: number
+}
+
+interface DailyScanData {
+  date: string
+  scans: number
+}
+
+function AdminStatsCards() {
+  const [stats, setStats] = useState<AdminStats | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchAdminStats()
+  }, [])
+
+  const fetchAdminStats = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/admin/stats')
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch admin stats')
+      }
+      
+      const data = await response.json()
+      setStats(data)
+    } catch (error) {
+      console.error('Error fetching admin stats:', error)
+      setError('Failed to load admin statistics')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i} className="p-4">
+            <div className="animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+              <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="p-4">
+          <div className="text-center text-red-500">
+            <p className="text-sm">Error loading stats</p>
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Total Surveys Completed */}
+      <Card className="p-4">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Surveys Completed</CardTitle>
+          <ClipboardList className="h-4 w-4 text-blue-600" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-blue-600">
+            {stats?.totalSurveysCompleted?.toLocaleString() || '0'}
+          </div>
+          <p className="text-xs text-muted-foreground">Total completed surveys</p>
+        </CardContent>
+      </Card>
+
+      {/* Total Users */}
+      <Card className="p-4">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+          <Users className="h-4 w-4 text-green-600" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-green-600">
+            {stats?.totalUsers?.toLocaleString() || '0'}
+          </div>
+          <p className="text-xs text-muted-foreground">Registered panelists</p>
+        </CardContent>
+      </Card>
+
+      {/* Total Points Awarded */}
+      <Card className="p-4">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Points Awarded</CardTitle>
+          <Award className="h-4 w-4 text-orange-600" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-orange-600">
+            {stats?.totalPointsAwarded?.toLocaleString() || '0'}
+          </div>
+          <p className="text-xs text-muted-foreground">Total points distributed</p>
+        </CardContent>
+      </Card>
+
+      {/* Total Scans */}
+      <Card className="p-4">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total Scans</CardTitle>
+          <Camera className="h-4 w-4 text-purple-600" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-purple-600">
+            {stats?.totalScans?.toLocaleString() || '0'}
+          </div>
+          <p className="text-xs text-muted-foreground">Mail images scanned</p>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+function DailyScansChart() {
+  const [chartData, setChartData] = useState<DailyScanData[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchDailyScans()
+  }, [])
+
+  const fetchDailyScans = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/admin/daily-scans')
+      
+      if (response.ok) {
+        const data = await response.json()
+        setChartData(data)
+      }
+    } catch (error) {
+      console.error('Error fetching daily scans:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <Card className="p-6">
+        <div className="animate-pulse">
+          <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
+        </div>
+      </Card>
+    )
+  }
+
+  return (
+    <Card className="p-6">
+      <CardHeader>
+        <CardTitle>Daily Scans - Last 14 Days</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {chartData.length > 0 ? (
+          <div className="h-64 flex items-end justify-between gap-2">
+            {chartData.map((day, index) => (
+              <div key={day.date} className="flex flex-col items-center flex-1">
+                <div 
+                  className="bg-purple-600 rounded-t w-full transition-all duration-300 hover:bg-purple-700"
+                  style={{ 
+                    height: `${Math.max((day.scans / Math.max(...chartData.map(d => d.scans))) * 200, 4)}px` 
+                  }}
+                  title={`${day.date}: ${day.scans} scans`}
+                ></div>
+                <div className="text-xs text-muted-foreground mt-2 transform -rotate-45 origin-left">
+                  {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="h-64 flex items-center justify-center text-muted-foreground">
+            No scan data available
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
 }
 
 export default function DashboardClient() {
@@ -112,7 +310,7 @@ export default function DashboardClient() {
           // Panelist Dashboard
           <div className="space-y-6">
             {/* Summary Boxes - Show above surveys on mobile */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 order-1 lg:order-2">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 order-1 lg:order-2">
               {/* Available Points */}
               <Card className="p-4">
                 <div className="text-center">
@@ -147,9 +345,19 @@ export default function DashboardClient() {
               <Card className="p-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-foreground mb-1">
-                    {profile ? Math.floor(profile.total_points_earned / 100) : 0}
+                    {profile ? (profile.surveys_completed || 0) : '0'}
                   </div>
                   <div className="text-sm text-muted-foreground">Surveys Completed</div>
+                </div>
+              </Card>
+
+              {/* Total Scans */}
+              <Card className="p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-foreground mb-1">
+                    {profile ? (profile.total_scans || 0) : '0'}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Total Scans</div>
                 </div>
               </Card>
             </div>
@@ -164,54 +372,12 @@ export default function DashboardClient() {
           </div>
         ) : (
           // Admin Dashboard
-          <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-            <Card className="p-4 sm:p-6">
-              <h2 className="text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
-              <div className="space-y-3">
-                <Link href="/admin/panelists">
-                  <Button className="w-full justify-start">
-                    <Users className="w-4 h-4 mr-2" />
-                    Manage Panelists
-                  </Button>
-                </Link>
-                <Link href="/admin/surveys">
-                  <Button className="w-full justify-start">
-                    <ClipboardList className="w-4 h-4 mr-2" />
-                    Manage Surveys
-                  </Button>
-                </Link>
-                <Link href="/admin/offers">
-                  <Button className="w-full justify-start">
-                    <Gift className="w-4 h-4 mr-2" />
-                    Manage Rewards
-                  </Button>
-                </Link>
-                <Link href="/admin/analytics">
-                  <Button className="w-full justify-start">
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    View Analytics
-                  </Button>
-                </Link>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold text-foreground mb-4">System Overview</h2>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Role:</span>
-                  <span className="font-medium text-foreground capitalize">{userRole?.replace('_', ' ')}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Email:</span>
-                  <span className="font-medium text-foreground">{user?.emailAddress}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Status:</span>
-                  <span className="text-green-600 dark:text-green-400 font-medium">Active</span>
-                </div>
-              </div>
-            </Card>
+          <div className="space-y-6">
+            {/* Admin Stats Cards */}
+            <AdminStatsCards />
+            
+            {/* Daily Scans Chart */}
+            <DailyScansChart />
           </div>
         )}
       </div>

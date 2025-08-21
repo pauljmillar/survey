@@ -109,7 +109,9 @@ export default function PointLedgerPage() {
       manual_award: { color: 'bg-orange-100 text-orange-800', label: 'Manual' },
       system_adjustment: { color: 'bg-gray-100 text-gray-800', label: 'Adjustment' },
       referral_bonus: { color: 'bg-pink-100 text-pink-800', label: 'Referral' },
-      weekly_bonus: { color: 'bg-indigo-100 text-indigo-800', label: 'Weekly' }
+      weekly_bonus: { color: 'bg-indigo-100 text-indigo-800', label: 'Weekly' },
+      account_signup_bonus: { color: 'bg-emerald-100 text-emerald-800', label: 'Signup' },
+      app_download_bonus: { color: 'bg-cyan-100 text-cyan-800', label: 'App Download' }
     }
 
     const config = typeConfig[type as keyof typeof typeConfig] || typeConfig.award
@@ -165,6 +167,8 @@ export default function PointLedgerPage() {
                   <SelectItem value="system_adjustment">System Adjustment</SelectItem>
                   <SelectItem value="referral_bonus">Referral Bonus</SelectItem>
                   <SelectItem value="weekly_bonus">Weekly Bonus</SelectItem>
+                  <SelectItem value="account_signup_bonus">Account Signup Bonus</SelectItem>
+                  <SelectItem value="app_download_bonus">App Download Bonus</SelectItem>
                 </SelectContent>
               </Select>
             </div>

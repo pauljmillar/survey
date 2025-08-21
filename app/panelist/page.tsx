@@ -10,7 +10,8 @@ import {
   Users, 
   Calendar,
   CheckCircle,
-  Play
+  Play,
+  Camera
 } from 'lucide-react'
 
 interface Survey {
@@ -30,6 +31,8 @@ interface PanelistProfile {
   points_balance: number
   total_points_earned: number
   total_points_redeemed: number
+  total_scans: number
+  surveys_completed: number
   profile_data: any
   is_active: boolean
   created_at: string
@@ -66,7 +69,7 @@ export default function PanelistDashboard() {
       const profileData = await profileResponse.json()
 
       setSurveys(surveysData.surveys || [])
-      setProfile(profileData.profile)
+      setProfile(profileData)
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
       setError('Failed to load dashboard')
@@ -130,32 +133,69 @@ export default function PanelistDashboard() {
         </p>
       </div>
 
-      {/* Points Balance */}
+      {/* Stats Cards */}
       {profile && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Award className="h-5 w-5 text-blue-600" />
-              Your Points Balance
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-blue-600">{profile.points_balance}</p>
-                <p className="text-sm text-muted-foreground">Current Balance</p>
-              </div>
-              <div className="text-center">
-                <p className="text-lg font-semibold text-green-600">{profile.total_points_earned}</p>
-                <p className="text-sm text-muted-foreground">Total Earned</p>
-              </div>
-              <div className="text-center">
-                <p className="text-lg font-semibold text-orange-600">{profile.total_points_redeemed}</p>
-                <p className="text-sm text-muted-foreground">Total Redeemed</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          {/* Current Balance */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Current Balance</CardTitle>
+              <Award className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">{profile.points_balance}</div>
+              <p className="text-xs text-muted-foreground">Available Points</p>
+            </CardContent>
+          </Card>
+
+          {/* Total Earned */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Earned</CardTitle>
+              <Award className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">{profile.total_points_earned}</div>
+              <p className="text-xs text-muted-foreground">Lifetime Points</p>
+            </CardContent>
+          </Card>
+
+          {/* Total Redeemed */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Redeemed</CardTitle>
+              <Award className="h-4 w-4 text-orange-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-orange-600">{profile.total_points_redeemed}</div>
+              <p className="text-xs text-muted-foreground">Points Used</p>
+            </CardContent>
+          </Card>
+
+          {/* Surveys Completed */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Surveys Completed</CardTitle>
+              <CheckCircle className="h-4 w-4 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-600">{profile.surveys_completed || 0}</div>
+              <p className="text-xs text-muted-foreground">Completed Surveys</p>
+            </CardContent>
+          </Card>
+
+          {/* Total Scans */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Scans</CardTitle>
+              <Camera className="h-4 w-4 text-cyan-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-cyan-600">{profile.total_scans || 0}</div>
+              <p className="text-xs text-muted-foreground">Mail Images Scanned</p>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Surveys */}
@@ -229,4 +269,4 @@ export default function PanelistDashboard() {
       </Card>
     </div>
   )
-} 
+}

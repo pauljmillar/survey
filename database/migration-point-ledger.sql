@@ -51,7 +51,7 @@ END $$;
 -- Add check constraint for valid transaction types
 DO $$ BEGIN
   ALTER TABLE point_ledger ADD CONSTRAINT point_ledger_valid_transaction_type 
-    CHECK (transaction_type IN ('award', 'redemption', 'bonus', 'survey_completion', 'manual_award', 'system_adjustment', 'referral_bonus', 'weekly_bonus'));
+    CHECK (transaction_type IN ('award', 'redemption', 'bonus', 'survey_completion', 'manual_award', 'system_adjustment', 'referral_bonus', 'weekly_bonus', 'account_signup_bonus', 'app_download_bonus'));
 EXCEPTION
   WHEN duplicate_object THEN null;
 END $$;

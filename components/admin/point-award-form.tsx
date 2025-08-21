@@ -187,6 +187,8 @@ export function PointAwardForm({ onClose, onAwardCreated }: PointAwardFormProps)
                   <SelectItem value="referral_bonus">Referral Bonus</SelectItem>
                   <SelectItem value="weekly_bonus">Weekly Bonus</SelectItem>
                   <SelectItem value="system_adjustment">System Adjustment</SelectItem>
+                  <SelectItem value="account_signup_bonus">Account Signup Bonus</SelectItem>
+                  <SelectItem value="app_download_bonus">App Download Bonus</SelectItem>
                 </SelectContent>
               </Select>
             </div>
