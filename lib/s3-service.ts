@@ -1,10 +1,27 @@
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
+// Validate and set region with better error handling
+const region = process.env.S3_REGION || 'us-west-2'
+
+// Debug logging to see what's happening
+console.log('S3 Configuration Debug:', {
+  S3_REGION_env: process.env.S3_REGION,
+  region_final: region,
+  bucketName: process.env.S3_BUCKET_NAME || 'andyscan',
+  hasAccessKey: !!process.env.S3_ACCESS_KEY_ID,
+  hasSecretKey: !!process.env.S3_SECRET_ACCESS_KEY
+})
+
+// Validate region
+if (!region || region === 'undefined' || region === 'null' || region.trim() === '') {
+  console.error('❌ Invalid S3_REGION:', process.env.S3_REGION)
+  throw new Error(`S3_REGION environment variable is invalid: "${process.env.S3_REGION}"`)
+}
+
 // Initialize S3 client with credentials
-// If explicit credentials are provided, use them; otherwise, let AWS SDK use default credential chain
 const s3ClientConfig: any = {
-  region: process.env.S3_REGION || 'us-west-2',
+  region: region,
 }
 
 // Only add explicit credentials if they are provided
@@ -14,6 +31,11 @@ if (process.env.S3_ACCESS_KEY_ID && process.env.S3_SECRET_ACCESS_KEY) {
     secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
   }
 }
+
+console.log('✅ S3 Client Config:', {
+  region: s3ClientConfig.region,
+  hasCredentials: !!s3ClientConfig.credentials
+})
 
 const s3Client = new S3Client(s3ClientConfig)
 

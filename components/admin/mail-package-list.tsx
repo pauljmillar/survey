@@ -86,8 +86,12 @@ function ThumbnailImage({ s3Key }: { s3Key: string | null }) {
 
   const imageUrl = getThumbnailUrl(s3Key, 60, 60)
   
-  // Debug logging
-  console.log('ThumbnailImage - s3Key:', s3Key, 'URL:', imageUrl)
+  // Enhanced debug logging
+  console.log('ThumbnailImage Debug:', {
+    s3Key,
+    imageUrl,
+    timestamp: new Date().toISOString()
+  })
 
   if (imageError) {
     return (
@@ -103,11 +107,16 @@ function ThumbnailImage({ s3Key }: { s3Key: string | null }) {
       alt="Mail package thumbnail"
       className={`w-12 h-12 object-cover rounded border ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
       onLoad={() => {
-        console.log('Image loaded successfully:', imageUrl)
+        console.log('✅ Image loaded successfully:', imageUrl)
         setImageLoaded(true)
       }}
       onError={(e) => {
-        console.error('Image failed to load:', imageUrl, e)
+        console.error('❌ Image failed to load:', {
+          s3Key,
+          imageUrl,
+          error: e,
+          timestamp: new Date().toISOString()
+        })
         setImageError(true)
       }}
     />
