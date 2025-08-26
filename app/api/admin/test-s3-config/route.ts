@@ -1,25 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
-import { getS3Config } from '@/lib/s3-service'
+import { generateSignedUrl, objectExists, getS3Config } from '@/lib/s3-service'
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth()
+    // Require authentication
+    await requireAuth()
     
-    // Get S3 configuration
     const s3Config = getS3Config()
     
-    // Check environment variables
-    const envVars = {
-      S3_REGION: process.env.S3_REGION,
-      S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
-      S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID ? 'SET' : 'NOT SET',
-      S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY ? 'SET' : 'NOT SET',
+    // Test with a sample s3_key if available
+    let testResult = null
+    try {
+      const testKey = '20250818_082603_1.jpg' // Sample key from your data
+      const exists = await objectExists(testKey)
+      const signedUrl = await generateSignedUrl(testKey, 3600)
+      
+      testResult = {
+        testKey,
+        objectExists: exists,
+        signedUrl: signedUrl.substring(0, 100) + '...',
+        success: exists
+      }
+    } catch (error) {
+      testResult = {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        success: false
+      }
     }
     
     return NextResponse.json({
       s3Config,
-      envVars,
+      testResult,
       message: 'S3 configuration test'
     })
     

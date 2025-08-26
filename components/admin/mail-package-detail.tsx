@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
-import { ArrowLeft, CheckCircle, XCircle, Clock, Eye, Download, Save, RotateCcw } from 'lucide-react'
+import { ArrowLeft, CheckCircle, XCircle, Clock, Eye, Download, Save, RotateCcw, Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
 import { getImageUrl, formatFileSize } from '@/lib/s3-utils'
 
@@ -30,12 +30,19 @@ interface MailScan {
 interface MailPackage {
   id: string
   panelist_id: string
+  package_name: string
+  package_description: string | null
   total_images: number
   submission_date: string
   status: string
   points_awarded: number
   is_approved: boolean | null
+  reviewed_by: string | null
+  review_date: string | null
+  processing_notes: string | null
+  s3_key: string | null
   created_at: string
+  updated_at: string
   panelist_profiles: {
     user_id: string
     profile_data: {
@@ -49,6 +56,76 @@ interface MailPackage {
 
 interface MailPackageDetailProps {
   packageId: string
+}
+
+// Component for authenticated image display
+function AuthenticatedImage({ s3Key, alt, className, onClick }: { s3Key: string; alt: string; className?: string; onClick?: () => void }) {
+  const [imageError, setImageError] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const [imageUrl, setImageUrl] = useState<string>('')
+
+  useEffect(() => {
+    const fetchImage = async () => {
+      try {
+        // Fetch the image with authentication
+        const response = await fetch(`/api/admin/s3-image/${encodeURIComponent(s3Key)}`, {
+          credentials: 'include', // Include cookies for authentication
+        })
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        }
+
+        // Convert response to blob
+        const blob = await response.blob()
+        
+        // Create blob URL
+        const blobUrl = URL.createObjectURL(blob)
+        setImageUrl(blobUrl)
+        
+        console.log('✅ Detail image fetched successfully:', s3Key)
+      } catch (error) {
+        console.error('❌ Failed to fetch detail image:', s3Key, error)
+        setImageError(true)
+      }
+    }
+
+    fetchImage()
+
+    // Cleanup blob URL on unmount
+    return () => {
+      if (imageUrl) {
+        URL.revokeObjectURL(imageUrl)
+      }
+    }
+  }, [s3Key])
+
+  if (imageError) {
+    return (
+      <div className={`bg-muted rounded border flex items-center justify-center ${className}`}>
+        <ImageIcon className="w-8 h-8 text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (!imageUrl) {
+    return (
+      <div className={`bg-muted rounded border flex items-center justify-center ${className}`}>
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 dark:border-gray-100"></div>
+      </div>
+    )
+  }
+
+  return (
+    <img
+      src={imageUrl}
+      alt={alt}
+      className={`object-cover rounded-lg border cursor-pointer hover:opacity-80 transition-opacity ${imageLoaded ? 'opacity-100' : 'opacity-0'} ${className}`}
+      onLoad={() => setImageLoaded(true)}
+      onError={() => setImageError(true)}
+      onClick={onClick}
+    />
+  )
 }
 
 export function MailPackageDetail({ packageId }: MailPackageDetailProps) {
@@ -330,8 +407,8 @@ export function MailPackageDetail({ packageId }: MailPackageDetailProps) {
                   .map((scan) => (
                     <div key={scan.id} className="space-y-2">
                       <div className="relative group">
-                        <img
-                          src={getImageUrl(scan.s3_key)}
+                        <AuthenticatedImage
+                          s3Key={scan.s3_key}
                           alt={scan.image_filename}
                           className="w-full h-32 object-cover rounded-lg border cursor-pointer hover:opacity-80 transition-opacity"
                           onClick={() => setSelectedImage(scan.s3_key)}
@@ -375,8 +452,8 @@ export function MailPackageDetail({ packageId }: MailPackageDetailProps) {
               </Button>
             </div>
             <div className="p-4">
-              <img
-                src={getImageUrl(selectedImage)}
+              <AuthenticatedImage
+                s3Key={selectedImage}
                 alt="Full size"
                 className="max-w-full max-h-[70vh] object-contain"
               />

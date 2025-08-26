@@ -71,10 +71,52 @@ const getApprovalBadge = (isApproved: boolean | null) => {
   }
 }
 
-// Component for thumbnail with proper error handling
+// Component for thumbnail with proper error handling and authenticated requests
 function ThumbnailImage({ s3Key }: { s3Key: string | null }) {
   const [imageError, setImageError] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
+  const [imageUrl, setImageUrl] = useState<string>('')
+
+  useEffect(() => {
+    if (!s3Key) {
+      setImageError(true)
+      return
+    }
+
+    const fetchImage = async () => {
+      try {
+        // Fetch the image with authentication
+        const response = await fetch(`/api/admin/s3-image/${encodeURIComponent(s3Key)}`, {
+          credentials: 'include', // Include cookies for authentication
+        })
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        }
+
+        // Convert response to blob
+        const blob = await response.blob()
+        
+        // Create blob URL
+        const blobUrl = URL.createObjectURL(blob)
+        setImageUrl(blobUrl)
+        
+        console.log('✅ Image fetched successfully:', s3Key)
+      } catch (error) {
+        console.error('❌ Failed to fetch image:', s3Key, error)
+        setImageError(true)
+      }
+    }
+
+    fetchImage()
+
+    // Cleanup blob URL on unmount
+    return () => {
+      if (imageUrl) {
+        URL.revokeObjectURL(imageUrl)
+      }
+    }
+  }, [s3Key])
 
   if (!s3Key) {
     return (
@@ -84,19 +126,18 @@ function ThumbnailImage({ s3Key }: { s3Key: string | null }) {
     )
   }
 
-  const imageUrl = getThumbnailUrl(s3Key, 60, 60)
-  
-  // Enhanced debug logging
-  console.log('ThumbnailImage Debug:', {
-    s3Key,
-    imageUrl,
-    timestamp: new Date().toISOString()
-  })
-
   if (imageError) {
     return (
       <div className="w-12 h-12 bg-muted rounded border flex items-center justify-center">
         <Image className="w-4 h-4 text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (!imageUrl) {
+    return (
+      <div className="w-12 h-12 bg-muted rounded border flex items-center justify-center">
+        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 dark:border-gray-100"></div>
       </div>
     )
   }
@@ -107,7 +148,7 @@ function ThumbnailImage({ s3Key }: { s3Key: string | null }) {
       alt="Mail package thumbnail"
       className={`w-12 h-12 object-cover rounded border ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
       onLoad={() => {
-        console.log('✅ Image loaded successfully:', imageUrl)
+        console.log('✅ Image loaded successfully:', s3Key)
         setImageLoaded(true)
       }}
       onError={(e) => {

@@ -23,19 +23,12 @@ export function getSignedUrl(s3Key: string, expiresIn: number = 3600): string {
 
 export function getThumbnailUrl(s3Key: string, width: number = 100, height: number = 100): string {
   if (!s3Key) {
-    console.log('getThumbnailUrl: No s3Key provided, returning placeholder')
     return getPlaceholderImageUrl()
   }
   
   // Use our secure proxy API route that generates signed URLs
   const encodedKey = encodeURIComponent(s3Key)
   const proxyUrl = `/api/admin/s3-image/${encodedKey}`
-  
-  console.log('getThumbnailUrl:', {
-    s3Key,
-    encodedKey,
-    proxyUrl
-  })
   
   return proxyUrl
 }
