@@ -41,6 +41,11 @@ interface MailPackage {
   review_date: string | null
   processing_notes: string | null
   s3_key: string | null
+  industry: string | null
+  brand_name: string | null
+  company_validated: boolean | null
+  response_intention: string | null
+  name_check: string | null
   created_at: string
   updated_at: string
   panelist_profiles: {
@@ -139,6 +144,11 @@ export function MailPackageDetail({ packageId }: MailPackageDetailProps) {
   const [pointsAwarded, setPointsAwarded] = useState(0)
   const [isApproved, setIsApproved] = useState<boolean | null>(null)
   const [processingNotes, setProcessingNotes] = useState('')
+  const [industry, setIndustry] = useState('')
+  const [brandName, setBrandName] = useState('')
+  const [companyValidated, setCompanyValidated] = useState(false)
+  const [responseIntention, setResponseIntention] = useState('')
+  const [nameCheck, setNameCheck] = useState('')
   
   useEffect(() => {
     fetchMailPackage()
@@ -156,6 +166,11 @@ export function MailPackageDetail({ packageId }: MailPackageDetailProps) {
         setPointsAwarded(data.data.points_awarded)
         setIsApproved(data.data.is_approved)
         setProcessingNotes(data.data.processing_notes || '')
+        setIndustry(data.data.industry || '')
+        setBrandName(data.data.brand_name || '')
+        setCompanyValidated(data.data.company_validated || false)
+        setResponseIntention(data.data.response_intention || '')
+        setNameCheck(data.data.name_check || '')
       } else {
         console.error('Failed to fetch mail package:', data.error)
       }
@@ -178,7 +193,12 @@ export function MailPackageDetail({ packageId }: MailPackageDetailProps) {
           status,
           points_awarded: pointsAwarded,
           is_approved: isApproved,
-          processing_notes: processingNotes
+          processing_notes: processingNotes,
+          industry,
+          brand_name: brandName,
+          company_validated: companyValidated,
+          response_intention: responseIntention,
+          name_check: nameCheck
         })
       })
       
@@ -370,6 +390,57 @@ export function MailPackageDetail({ packageId }: MailPackageDetailProps) {
                   onChange={(e) => setProcessingNotes(e.target.value)}
                   placeholder="Add notes about this mail package..."
                   rows={3}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="industry">Industry</Label>
+                <Input
+                  id="industry"
+                  value={industry}
+                  onChange={(e) => setIndustry(e.target.value)}
+                  placeholder="e.g., banking, retail, insurance"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="brand">Brand Name</Label>
+                <Input
+                  id="brand"
+                  value={brandName}
+                  onChange={(e) => setBrandName(e.target.value)}
+                  placeholder="e.g., Citibank, Walmart"
+                />
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="company_validated"
+                  checked={companyValidated}
+                  onChange={(e) => setCompanyValidated(e.target.checked)}
+                  className="rounded border-gray-300"
+                />
+                <Label htmlFor="company_validated">Company Validated</Label>
+              </div>
+              
+              <div>
+                <Label htmlFor="response_intention">Response Intention</Label>
+                <Input
+                  id="response_intention"
+                  value={responseIntention}
+                  onChange={(e) => setResponseIntention(e.target.value)}
+                  placeholder="e.g., interested, not interested, maybe"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="name_check">Name Check</Label>
+                <Input
+                  id="name_check"
+                  value={nameCheck}
+                  onChange={(e) => setNameCheck(e.target.value)}
+                  placeholder="Name validation result"
                 />
               </div>
               

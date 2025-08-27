@@ -61,7 +61,17 @@ export async function PATCH(
     const user = await requireAuth()
     
     const body = await request.json()
-    const { status, points_awarded, is_approved, processing_notes } = body
+    const { 
+      status, 
+      points_awarded, 
+      is_approved, 
+      processing_notes,
+      industry,
+      brand_name,
+      company_validated,
+      response_intention,
+      name_check
+    } = body
     
     const updateData: any = {}
     
@@ -69,6 +79,11 @@ export async function PATCH(
     if (points_awarded !== undefined) updateData.points_awarded = points_awarded
     if (is_approved !== undefined) updateData.is_approved = is_approved
     if (processing_notes !== undefined) updateData.processing_notes = processing_notes
+    if (industry !== undefined) updateData.industry = industry
+    if (brand_name !== undefined) updateData.brand_name = brand_name
+    if (company_validated !== undefined) updateData.company_validated = company_validated
+    if (response_intention !== undefined) updateData.response_intention = response_intention
+    if (name_check !== undefined) updateData.name_check = name_check
     if (is_approved !== undefined) {
       updateData.reviewed_by = user.id
     }

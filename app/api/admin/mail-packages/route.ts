@@ -133,7 +133,17 @@ export async function POST(request: NextRequest) {
     const user = await requireAuth()
     
     const body = await request.json()
-    const { panelist_id, total_images, status = 'incomplete' } = body
+    const { 
+      panelist_id, 
+      total_images, 
+      status = 'incomplete',
+      industry,
+      brand_name,
+      company_validated = false,
+      response_intention,
+      name_check,
+      s3_key
+    } = body
     
     if (!panelist_id || !total_images) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -144,7 +154,13 @@ export async function POST(request: NextRequest) {
       .insert({
         panelist_id,
         total_images,
-        status
+        status,
+        industry,
+        brand_name,
+        company_validated,
+        response_intention,
+        name_check,
+        s3_key
       })
       .select()
       .single()

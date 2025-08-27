@@ -21,6 +21,11 @@ interface MailPackage {
   points_awarded: number
   is_approved: boolean | null
   s3_key: string | null
+  industry: string | null
+  brand_name: string | null
+  company_validated: boolean | null
+  response_intention: string | null
+  name_check: string | null
   created_at: string
   panelist_profiles: {
     user_id: string
@@ -321,6 +326,8 @@ export function MailPackageList() {
                     Panelist
                   </div>
                 </TableHead>
+                <TableHead>Industry</TableHead>
+                <TableHead>Brand</TableHead>
                 <TableHead>Images</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Approval</TableHead>
@@ -331,19 +338,23 @@ export function MailPackageList() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
+                  <TableCell colSpan={9} className="text-center py-8">
                     Loading...
                   </TableCell>
                 </TableRow>
               ) : mailPackages.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                     No mail packages found
                   </TableCell>
                 </TableRow>
               ) : (
                 mailPackages.map((pkg) => (
-                  <TableRow key={pkg.id}>
+                  <TableRow 
+                    key={pkg.id} 
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => window.open(`/admin/panels/${pkg.id}`, '_blank')}
+                  >
                     <TableCell className="font-medium">
                       {formatDate(pkg.submission_date)}
                     </TableCell>
@@ -357,6 +368,12 @@ export function MailPackageList() {
                          </div>
                        </div>
                      </TableCell>
+                    <TableCell>
+                      <span className="text-sm">{pkg.industry || '-'}</span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm">{pkg.brand_name || '-'}</span>
+                    </TableCell>
                     <TableCell>
                       <Badge variant="outline">{pkg.total_images} images</Badge>
                     </TableCell>
@@ -372,27 +389,38 @@ export function MailPackageList() {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
+                          <Button 
+                            variant="ghost" 
+                            className="h-8 w-8 p-0"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <span className="sr-only">Open menu</span>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link href={`/admin/panels/${pkg.id}`}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View
-                            </Link>
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              window.open(`/admin/panels/${pkg.id}`, '_blank')
+                            }}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View
                           </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link href={`/admin/panels/${pkg.id}?edit=true`}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit
-                            </Link>
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              window.open(`/admin/panels/${pkg.id}?edit=true`, '_blank')
+                            }}
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
                           </DropdownMenuItem>
                                                      {!pkg.is_approved && (
                              <DropdownMenuItem 
-                               onClick={async () => {
+                               onClick={async (e) => {
+                                 e.stopPropagation()
                                  try {
                                    const response = await fetch(`/api/admin/mail-packages/${pkg.id}`, {
                                      method: 'PATCH',
