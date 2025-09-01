@@ -191,7 +191,9 @@ export async function POST(request: NextRequest) {
       points_earned: survey.points_reward,
       completion_id: completion.id,
       new_balance: updatedProfile.points_balance,
-      ledger_entry_id: ledgerEntry
+      newBalance: updatedProfile.points_balance,
+      ledger_entry_id: ledgerEntry,
+      message: 'Survey completed successfully'
     })
   } catch (error) {
     if (error instanceof Error && error.message === 'Insufficient permissions') {
