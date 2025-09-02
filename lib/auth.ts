@@ -13,6 +13,9 @@ export const PERMISSIONS = {
   'read_survey_questions': ['panelist', 'survey_admin', 'system_admin'] as UserRole[],
   'redeem_points': ['panelist'] as UserRole[],
   'view_own_activity': ['panelist', 'survey_admin', 'system_admin'] as UserRole[],
+  'create_mail_packages': ['panelist'] as UserRole[],
+  'update_mail_packages': ['panelist'] as UserRole[],
+  'upload_mail_scans': ['panelist'] as UserRole[],
   
   // Survey Admin permissions
   'create_surveys': ['survey_admin', 'system_admin'] as UserRole[],
