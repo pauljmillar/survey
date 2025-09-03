@@ -229,7 +229,7 @@ export default function TestUploadPage() {
         <CardContent className="space-y-2 text-sm">
           <p><strong>Test 1:</strong> Creates a new mail package with <code>mail_package_id: null</code></p>
           <p><strong>Test 2:</strong> Uses the created package ID to upload additional documents</p>
-          <p><strong>File Data:</strong> Uses a simple base64 encoded "Hello World" string</p>
+          <p><strong>File Data:</strong> Uses a simple base64 encoded &quot;Hello World&quot; string</p>
           <p><strong>Authentication:</strong> Requires you to be logged in to the application</p>
         </CardContent>
       </Card>
