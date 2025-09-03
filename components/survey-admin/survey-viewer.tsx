@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -55,7 +55,7 @@ export function SurveyViewer({ surveyId, onBack, onEdit }: SurveyViewerProps) {
     fetchSurvey()
   }, [surveyId])
 
-  const fetchSurvey = async () => {
+  const fetchSurvey = useCallback(async () => {
     try {
       setLoading(true)
       const [surveyResponse, questionsResponse] = await Promise.all([
@@ -80,7 +80,7 @@ export function SurveyViewer({ surveyId, onBack, onEdit }: SurveyViewerProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [surveyId])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {

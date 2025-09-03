@@ -310,10 +310,12 @@ export const realtimeUtils = {
   },
 }
 
-export default {
+const realtimeModule = {
   RealtimeConnectionManager,
   RealtimePerformanceOptimizer,
   RealtimeErrorHandler,
   RealtimeMemoryManager,
   realtimeUtils,
-} 
+}
+
+export default realtimeModule 

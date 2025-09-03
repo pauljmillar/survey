@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuth } from '@/hooks/use-auth'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
@@ -31,7 +31,7 @@ export function AuthDebug() {
     }
   }
 
-  const refreshDebugInfo = async () => {
+  const refreshDebugInfo = useCallback(async () => {
     const info = {
       user: user,
       userRole: userRole,
@@ -42,7 +42,7 @@ export function AuthDebug() {
       timestamp: new Date().toISOString()
     }
     setDebugInfo(info)
-  }
+  }, [user, userRole, isSignedIn, loading, error, profileStatus])
 
   useEffect(() => {
     refreshDebugInfo()

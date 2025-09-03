@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -89,7 +89,7 @@ export function SurveyEditor({ surveyId, onBack, onSave }: SurveyEditorProps) {
     fetchSurvey()
   }, [surveyId])
 
-  const fetchSurvey = async () => {
+  const fetchSurvey = useCallback(async () => {
     try {
       setLoading(true)
       const [surveyResponse, questionsResponse] = await Promise.all([
@@ -122,7 +122,7 @@ export function SurveyEditor({ surveyId, onBack, onSave }: SurveyEditorProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [surveyId])
 
   const handleSurveyUpdate = (field: keyof Survey, value: any) => {
     if (!survey) return

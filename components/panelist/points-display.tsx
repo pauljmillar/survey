@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -34,7 +34,7 @@ export function PointsDisplay({
   const [error, setError] = useState<string | null>(null)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
-  const fetchPointsData = async () => {
+  const fetchPointsData = useCallback(async () => {
     if (!isSignedIn) return
 
     try {
@@ -54,7 +54,7 @@ export function PointsDisplay({
     } finally {
       setLoading(false)
     }
-  }
+  }, [isSignedIn])
 
   // Real-time subscription for points balance updates
   const { isConnected: isRealtimeConnected } = useRealtime(

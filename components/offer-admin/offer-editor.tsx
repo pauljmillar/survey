@@ -51,7 +51,7 @@ export function OfferEditor({ offerId, onBack, onSave }: OfferEditorProps) {
       }
       resolveOfferId()
     }
-  }, [offerId])
+  }, [offerId, isEditMode])
 
   const fetchOffer = async (id: string) => {
     try {
