@@ -21,7 +21,7 @@ const s3Client = new S3Client({
 
 // Validation schema for file uploads
 const uploadFileSchema = z.object({
-  mail_package_id: z.string().uuid("Invalid mail package ID format"),
+  mail_package_id: z.string().uuid("Invalid mail package ID format").nullable().optional(),
   document_type: z.enum(["scan", "ocr_text", "supporting_document", "metadata"]),
   image_sequence: z.number().min(1).optional(), // only for scans
   file_data: z.string().min(1, "File data is required"),
@@ -73,16 +73,43 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Panelist profile not found" }, { status: 404 })
     }
 
-    // Verify the mail package exists and belongs to this panelist
-    const { data: mailPackage, error: packageError } = await supabase
-      .from("mail_packages")
-      .select("id, panelist_id")
-      .eq("id", mail_package_id)
-      .eq("panelist_id", profile.id)
-      .single()
+    let mailPackageId: string
+    let mailPackage: any = null
 
-    if (packageError || !mailPackage) {
-      return NextResponse.json({ error: "Mail package not found or access denied" }, { status: 404 })
+    if (mail_package_id) {
+      // Use existing mail package - verify it exists and belongs to this panelist
+      const { data: existingPackage, error: packageError } = await supabase
+        .from("mail_packages")
+        .select("id, panelist_id")
+        .eq("id", mail_package_id)
+        .eq("panelist_id", profile.id)
+        .single()
+
+      if (packageError || !existingPackage) {
+        return NextResponse.json({ error: "Mail package not found or access denied" }, { status: 404 })
+      }
+      
+      mailPackage = existingPackage
+      mailPackageId = existingPackage.id
+    } else {
+      // Create new mail package when mail_package_id is null
+      const { data: newPackage, error: createError } = await supabase
+        .from("mail_packages")
+        .insert({
+          panelist_id: profile.id,
+          package_name: `Mail Package ${new Date().toISOString().split('T')[0]}`,
+          status: "pending"
+        })
+        .select("id, panelist_id")
+        .single()
+
+      if (createError || !newPackage) {
+        console.error("Error creating mail package:", createError)
+        return NextResponse.json({ error: "Failed to create mail package" }, { status: 500 })
+      }
+
+      mailPackage = newPackage
+      mailPackageId = newPackage.id
     }
 
     // Generate unique S3 key
@@ -102,7 +129,7 @@ export async function POST(request: NextRequest) {
         ContentType: mime_type || "application/octet-stream",
         Metadata: {
           uploaded_by: user.id,
-          mail_package_id: mail_package_id,
+          mail_package_id: mailPackageId,
           document_type: document_type
         }
       })
@@ -118,7 +145,7 @@ export async function POST(request: NextRequest) {
           .from("mail_scans")
           .insert({
             panelist_id: profile.id,
-            mailpack_id: mail_package_id,
+            mailpack_id: mailPackageId,
             image_filename: filename,
             s3_bucket_name: process.env.S3_BUCKET_NAME!,
             s3_key: s3Key,
@@ -152,7 +179,7 @@ export async function POST(request: NextRequest) {
         const { data: document, error: documentError } = await supabase
           .from("mail_package_documents")
           .insert({
-            mail_package_id: mail_package_id,
+            mail_package_id: mailPackageId,
             document_type: document_type,
             s3_key: s3Key,
             filename: filename,
@@ -180,12 +207,25 @@ export async function POST(request: NextRequest) {
         uploadType = "document"
       }
 
-      return NextResponse.json({
+      // Return response with appropriate information based on whether a new package was created
+      const responseData: any = {
         success: true,
         upload_type: uploadType,
         ...result,
         message: "File uploaded successfully"
-      }, { status: 201 })
+      }
+
+      // Include mail package info if a new one was created
+      if (!mail_package_id) {
+        responseData.mail_package = {
+          id: mailPackage.id,
+          panelist_id: mailPackage.panelist_id,
+          status: mailPackage.status
+        }
+        responseData.message = "New mail package created and file uploaded successfully"
+      }
+
+      return NextResponse.json(responseData, { status: 201 })
 
     } catch (s3Error) {
       return NextResponse.json({ error: "Failed to upload file to S3" }, { status: 500 })
