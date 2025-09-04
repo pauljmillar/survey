@@ -29,9 +29,9 @@ export async function PATCH(
     } = body
     
     // Validate status if provided
-    if (status && !['pending', 'processing', 'completed', 'rejected'].includes(status)) {
+    if (status && !['pending', 'incomplete', 'processing', 'completed', 'rejected'].includes(status)) {
       return NextResponse.json({ 
-        error: 'Invalid status. Must be one of: pending, processing, completed, rejected' 
+        error: 'Invalid status. Must be one of: pending, incomplete, processing, completed, rejected' 
       }, { status: 400 })
     }
     
