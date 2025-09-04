@@ -109,6 +109,57 @@ export default function TestUploadPage() {
     }
   }
 
+  const testPatchMailPackage = async () => {
+    if (!result?.mail_package?.id) {
+      setError('No mail package ID available. Run the first test first.')
+      return
+    }
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const patchData = {
+        brand_name: "Test Brand",
+        industry: "Technology",
+        company_validated: true,
+        response_intention: "interested",
+        name_check: "verified",
+        notes: "Test update from iOS app",
+        status: "processing",
+        is_approved: false,
+        processing_notes: "Updated via PATCH API test"
+      }
+
+      console.log('🔧 Testing PATCH mail package:', patchData)
+      
+      const response = await fetch(`/api/panelist/mail-packages/${result.mail_package.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(patchData)
+      })
+      
+      const data = await response.json()
+      
+      if (response.ok) {
+        setResult({ ...result, patchResult: data })
+        console.log('✅ PATCH successful:', data)
+      } else {
+        setError(data.error || `HTTP ${response.status}: ${response.statusText}`)
+        console.error('❌ PATCH failed:', data)
+      }
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      setError(errorMessage)
+      console.error('💥 PATCH request failed:', err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="container mx-auto py-8 space-y-6">
       <div>
@@ -152,6 +203,20 @@ export default function TestUploadPage() {
               </Button>
               <p className="text-sm text-muted-foreground mt-1">
                 Uses existing mail package to upload a document
+              </p>
+            </div>
+
+            <div>
+              <Button 
+                onClick={testPatchMailPackage} 
+                disabled={isLoading || !result?.mail_package?.id}
+                variant="outline"
+                className="w-full"
+              >
+                {isLoading ? 'Testing...' : 'Test PATCH Mail Package'}
+              </Button>
+              <p className="text-sm text-muted-foreground mt-1">
+                Tests the PATCH API to update mail package details
               </p>
             </div>
           </CardContent>
@@ -208,6 +273,17 @@ export default function TestUploadPage() {
                   </div>
                 </div>
               )}
+
+              {result.patchResult && (
+                <div>
+                  <h4 className="font-semibold mb-2">PATCH Update Result</h4>
+                  <div className="bg-muted p-3 rounded-md">
+                    <pre className="text-sm overflow-auto">
+                      {JSON.stringify(result.patchResult, null, 2)}
+                    </pre>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -229,6 +305,7 @@ export default function TestUploadPage() {
         <CardContent className="space-y-2 text-sm">
           <p><strong>Test 1:</strong> Creates a new mail package with <code>mail_package_id: null</code></p>
           <p><strong>Test 2:</strong> Uses the created package ID to upload additional documents</p>
+          <p><strong>Test 3:</strong> Tests the PATCH API to update mail package details</p>
           <p><strong>File Data:</strong> Uses a simple base64 encoded &quot;Hello World&quot; string</p>
           <p><strong>Authentication:</strong> Requires you to be logged in to the application</p>
         </CardContent>
