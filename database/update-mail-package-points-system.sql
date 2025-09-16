@@ -10,7 +10,8 @@
 -- Step 1: Add missing columns to mail_packages table
 ALTER TABLE mail_packages 
 ADD COLUMN IF NOT EXISTS package_name TEXT,
-ADD COLUMN IF NOT EXISTS package_description TEXT;
+ADD COLUMN IF NOT EXISTS package_description TEXT,
+ADD COLUMN IF NOT EXISTS review_date TIMESTAMP WITH TIME ZONE;
 
 -- Step 2: Remove the existing mail scan points trigger
 DROP TRIGGER IF EXISTS trigger_mail_scan_points ON mail_scans;
@@ -110,7 +111,7 @@ BEGIN
         'package_id', NEW.id,
         'package_name', COALESCE(NEW.package_name, 'Unnamed Package'),
         'reviewed_by', NEW.reviewed_by,
-        'review_date', NEW.review_date,
+        'review_date', COALESCE(NEW.review_date, NOW()),
         'bonus_type', 'mail_package_review',
         'amount', 5
       ),

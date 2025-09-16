@@ -7,12 +7,14 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Upload, CheckCircle, AlertCircle, FileText } from 'lucide-react'
 
 export default function TestUploadPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
+  const [testStatus, setTestStatus] = useState('completed')
 
   const testData = {
     mail_package_id: null,
@@ -128,8 +130,8 @@ export default function TestUploadPage() {
         response_intention: "interested",
         name_check: "verified",
         notes: "Test update from iOS app",
-        status: "processing",
-        is_approved: false,
+        status: testStatus, // Use the selected test status
+        is_approved: true,   // Changed to true to match iOS payload
         processing_notes: "Updated via PATCH API test"
       }
 
@@ -209,7 +211,25 @@ export default function TestUploadPage() {
               </p>
             </div>
 
-            <div>
+            <div className="space-y-2">
+              <div>
+                <Label htmlFor="testStatus">Test Status</Label>
+                <Select value={testStatus} onValueChange={setTestStatus}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="processing">Processing</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Select status to test different trigger behaviors
+                </p>
+              </div>
+              
               <Button 
                 onClick={testPatchMailPackage} 
                 disabled={isLoading || !result?.mail_package?.id}
