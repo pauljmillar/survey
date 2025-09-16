@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
 
     // Apply transaction type filter if specified
-    if (activityType && ['redemption', 'bonus', 'survey_completion', 'manual_award', 'account_signup_bonus', 'app_download_bonus'].includes(activityType)) {
+    if (activityType && ['redemption', 'bonus', 'survey_completion', 'manual_award', 'account_signup_bonus', 'app_download_bonus', 'mail_package_scan', 'mail_package_review'].includes(activityType)) {
       pointLedgerQuery = pointLedgerQuery.eq('transaction_type', activityType)
     }
 
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
 
     // Apply activity type filter if specified (for non-point activities)
-    if (activityType && !['redemption', 'bonus', 'survey_completion', 'manual_award', 'account_signup_bonus', 'app_download_bonus'].includes(activityType)) {
+    if (activityType && !['redemption', 'bonus', 'survey_completion', 'manual_award', 'account_signup_bonus', 'app_download_bonus', 'mail_package_scan', 'mail_package_review'].includes(activityType)) {
       activityLogQuery = activityLogQuery.eq('activity_type', activityType)
     }
 

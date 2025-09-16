@@ -108,6 +108,8 @@ export default function TestApiPage() {
                   <SelectItem value="redemption">Redemption</SelectItem>
                   <SelectItem value="account_signup_bonus">Signup Bonus</SelectItem>
                   <SelectItem value="app_download_bonus">App Download Bonus</SelectItem>
+                  <SelectItem value="mail_package_scan">Mail Package Scan</SelectItem>
+                  <SelectItem value="mail_package_review">Mail Package Review</SelectItem>
                 </SelectContent>
               </Select>
             </div>

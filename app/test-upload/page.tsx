@@ -40,6 +40,7 @@ export default function TestUploadPage() {
         headers: {
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(testData)
       })
       
@@ -87,6 +88,7 @@ export default function TestUploadPage() {
         headers: {
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(testDataWithPackage)
       })
       
@@ -138,6 +140,7 @@ export default function TestUploadPage() {
         headers: {
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(patchData)
       })
       
