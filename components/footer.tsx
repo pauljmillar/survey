@@ -36,7 +36,13 @@ export function Footer(props: {
             >
               GitHub
             </a>
-            .
+            .{" "}
+            <Link
+              href="/privacy"
+              className="font-medium underline underline-offset-4"
+            >
+              Privacy Policy
+            </Link>
           </p>
         </div>
 
