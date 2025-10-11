@@ -10,8 +10,8 @@ import { Menu, X, Settings, LogOut, User, Sun, Moon, Home, ClipboardList, Users,
 import { useAuth } from "@/hooks/use-auth"
 
 const MENU_OPTIONS: { label: string; href: string }[] = [
-  { label: "Earn", href: "/surveys" },
-  { label: "Redeem", href: "/offers" },
+  { label: "Earn", href: "/#more-ways-to-earn" },
+  { label: "Redeem", href: "/#program-summary" },
   { label: "How it Works", href: "/how-it-works" },
 ]
 
