@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Search, Filter, Eye, CheckCircle, XCircle, Clock, ChevronUp, ChevronDown, Image, MoreHorizontal, Edit } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { formatFileSize, getThumbnailUrl, getPlaceholderImageUrl } from '@/lib/s3-utils'
 
 interface MailPackage {
@@ -121,7 +122,7 @@ function ThumbnailImage({ s3Key }: { s3Key: string | null }) {
         URL.revokeObjectURL(imageUrl)
       }
     }
-  }, [s3Key])
+  }, [s3Key, imageUrl])
 
   if (!s3Key) {
     return (
@@ -148,9 +149,11 @@ function ThumbnailImage({ s3Key }: { s3Key: string | null }) {
   }
 
   return (
-    <img
+    <Image
       src={imageUrl}
       alt="Mail package thumbnail"
+      width={60}
+      height={60}
       className={`w-12 h-12 object-cover rounded border ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
       onLoad={() => {
         console.log('✅ Image loaded successfully:', s3Key)
@@ -198,9 +201,9 @@ export function MailPackageList() {
   
   useEffect(() => {
     fetchMailPackages()
-  }, [debouncedSearch, statusFilter, approvalFilter, sortBy, sortOrder])
+  }, [fetchMailPackages])
   
-  const fetchMailPackages = async (page: number = 1) => {
+  const fetchMailPackages = useCallback(async (page: number = 1) => {
     setLoading(true)
     try {
       const params = new URLSearchParams({
@@ -227,7 +230,7 @@ export function MailPackageList() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [debouncedSearch, statusFilter, approvalFilter, sortBy, sortOrder])
   
   const handleSort = (column: string) => {
     if (sortBy === column) {

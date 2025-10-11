@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
 import { ArrowLeft, CheckCircle, XCircle, Clock, Eye, Download, Save, RotateCcw, Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { getImageUrl, formatFileSize } from '@/lib/s3-utils'
 
 interface MailScan {
@@ -103,7 +104,7 @@ function AuthenticatedImage({ s3Key, alt, className, onClick }: { s3Key: string;
         URL.revokeObjectURL(imageUrl)
       }
     }
-  }, [s3Key])
+  }, [s3Key, imageUrl])
 
   if (imageError) {
     return (
@@ -122,9 +123,11 @@ function AuthenticatedImage({ s3Key, alt, className, onClick }: { s3Key: string;
   }
 
   return (
-    <img
+    <Image
       src={imageUrl}
       alt={alt}
+      width={400}
+      height={300}
       className={`object-cover rounded-lg border cursor-pointer hover:opacity-80 transition-opacity ${imageLoaded ? 'opacity-100' : 'opacity-0'} ${className}`}
       onLoad={() => setImageLoaded(true)}
       onError={() => setImageError(true)}
@@ -152,9 +155,9 @@ export function MailPackageDetail({ packageId }: MailPackageDetailProps) {
   
   useEffect(() => {
     fetchMailPackage()
-  }, [packageId])
+  }, [fetchMailPackage])
   
-  const fetchMailPackage = async () => {
+  const fetchMailPackage = useCallback(async () => {
     setLoading(true)
     try {
       const response = await fetch(`/api/admin/mail-packages/${packageId}`)
@@ -179,7 +182,7 @@ export function MailPackageDetail({ packageId }: MailPackageDetailProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [packageId])
   
   const handleSave = async () => {
     setSaving(true)
