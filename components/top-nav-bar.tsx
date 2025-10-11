@@ -80,7 +80,7 @@ export function TopNavBar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
         {/* Logo */}
         <Link href="/" className="font-bold text-xl tracking-tight text-black dark:text-white" aria-label="Home">
-          SurveyApp
+          PanelPro
         </Link>
 
         {/* Desktop Menu - Only show for non-signed in users */}
