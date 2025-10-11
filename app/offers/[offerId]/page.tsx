@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -29,11 +29,7 @@ export default function OfferDetailsPage({ params }: { params: Promise<{ offerId
   const [redeemError, setRedeemError] = useState<string | null>(null)
   const { isSignedIn } = useAuth()
 
-  useEffect(() => {
-    fetchOffer()
-  }, [])
-
-  const fetchOffer = async () => {
+  const fetchOffer = useCallback(async () => {
     try {
       setLoading(true)
       const { offerId } = await params
@@ -51,7 +47,11 @@ export default function OfferDetailsPage({ params }: { params: Promise<{ offerId
     } finally {
       setLoading(false)
     }
-  }
+  }, [params])
+
+  useEffect(() => {
+    fetchOffer()
+  }, [fetchOffer])
 
   const handleRedeem = async () => {
     if (!offer) return

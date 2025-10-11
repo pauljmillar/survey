@@ -85,10 +85,6 @@ export function SurveyEditor({ surveyId, onBack, onSave }: SurveyEditorProps) {
   const [error, setError] = useState<string | null>(null)
   const [questions, setQuestions] = useState<Question[]>([])
 
-  useEffect(() => {
-    fetchSurvey()
-  }, [fetchSurvey])
-
   const fetchSurvey = useCallback(async () => {
     try {
       setLoading(true)
@@ -123,6 +119,10 @@ export function SurveyEditor({ surveyId, onBack, onSave }: SurveyEditorProps) {
       setLoading(false)
     }
   }, [surveyId])
+
+  useEffect(() => {
+    fetchSurvey()
+  }, [fetchSurvey])
 
   const handleSurveyUpdate = (field: keyof Survey, value: any) => {
     if (!survey) return

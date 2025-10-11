@@ -153,10 +153,6 @@ export function MailPackageDetail({ packageId }: MailPackageDetailProps) {
   const [responseIntention, setResponseIntention] = useState('')
   const [nameCheck, setNameCheck] = useState('')
   
-  useEffect(() => {
-    fetchMailPackage()
-  }, [fetchMailPackage])
-  
   const fetchMailPackage = useCallback(async () => {
     setLoading(true)
     try {
@@ -183,6 +179,10 @@ export function MailPackageDetail({ packageId }: MailPackageDetailProps) {
       setLoading(false)
     }
   }, [packageId])
+  
+  useEffect(() => {
+    fetchMailPackage()
+  }, [fetchMailPackage])
   
   const handleSave = async () => {
     setSaving(true)

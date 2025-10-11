@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -49,12 +49,7 @@ export function AudienceBuilder() {
   const [selectedSurveyId, setSelectedSurveyId] = useState('')
   const [assigning, setAssigning] = useState(false)
 
-  useEffect(() => {
-    fetchPrograms()
-    fetchSurveys()
-  }, [])
-
-  const fetchPrograms = async () => {
+  const fetchPrograms = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/programs')
       if (response.ok) {
@@ -71,7 +66,7 @@ export function AudienceBuilder() {
       console.error('Error fetching programs:', error)
       setError('Failed to load programs')
     }
-  }
+  }, [selectedProgram])
 
   const fetchSurveys = async () => {
     try {
@@ -86,6 +81,11 @@ export function AudienceBuilder() {
       console.error('Error fetching surveys:', error)
     }
   }
+
+  useEffect(() => {
+    fetchPrograms()
+    fetchSurveys()
+  }, [fetchPrograms])
 
   const filterAudience = async () => {
     if (!selectedProgram) return

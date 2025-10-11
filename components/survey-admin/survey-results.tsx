@@ -55,10 +55,6 @@ export function SurveyResults({ surveyId, onBack }: SurveyResultsProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchResults()
-  }, [fetchResults])
-
   const fetchResults = useCallback(async () => {
     try {
       setLoading(true)
@@ -78,6 +74,10 @@ export function SurveyResults({ surveyId, onBack }: SurveyResultsProps) {
       setLoading(false)
     }
   }, [surveyId])
+
+  useEffect(() => {
+    fetchResults()
+  }, [fetchResults])
 
   const exportCSV = () => {
     if (!data) return

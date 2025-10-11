@@ -22,7 +22,7 @@ export default function PrivacyPolicyPage() {
             <ul className="space-y-3 text-muted-foreground">
               <li className="flex items-start">
                 <span className="text-foreground font-medium mr-2">•</span>
-                We use your device's camera to scan mail documents
+                We use your device&apos;s camera to scan mail documents
               </li>
               <li className="flex items-start">
                 <span className="text-foreground font-medium mr-2">•</span>
@@ -52,7 +52,7 @@ export default function PrivacyPolicyPage() {
               </li>
               <li className="flex items-start">
                 <span className="text-foreground font-medium mr-2">•</span>
-                We use OpenAI's API to analyze mail content for research purposes
+                We use OpenAI&apos;s API to analyze mail content for research purposes
               </li>
             </ul>
           </CardContent>

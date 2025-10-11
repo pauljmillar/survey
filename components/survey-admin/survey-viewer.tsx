@@ -51,10 +51,6 @@ export function SurveyViewer({ surveyId, onBack, onEdit }: SurveyViewerProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchSurvey()
-  }, [fetchSurvey])
-
   const fetchSurvey = useCallback(async () => {
     try {
       setLoading(true)
@@ -81,6 +77,10 @@ export function SurveyViewer({ surveyId, onBack, onEdit }: SurveyViewerProps) {
       setLoading(false)
     }
   }, [surveyId])
+
+  useEffect(() => {
+    fetchSurvey()
+  }, [fetchSurvey])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {

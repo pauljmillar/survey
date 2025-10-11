@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -58,11 +58,7 @@ export default function SurveyTakingPage({ params }: { params: { surveyId: strin
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
-  useEffect(() => {
-    fetchSurvey()
-  }, [params.surveyId])
-
-  const fetchSurvey = async () => {
+  const fetchSurvey = useCallback(async () => {
     try {
       setLoading(true)
       console.log('Fetching survey:', params.surveyId)
@@ -111,7 +107,11 @@ export default function SurveyTakingPage({ params }: { params: { surveyId: strin
     } finally {
       setLoading(false)
     }
-  }
+  }, [params.surveyId])
+
+  useEffect(() => {
+    fetchSurvey()
+  }, [fetchSurvey])
 
   const handleResponseChange = (questionId: string, value: any) => {
     setResponses(prev => ({

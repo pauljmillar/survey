@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -45,7 +45,7 @@ export default function PointLedgerPage() {
   const [panelistId, setPanelistId] = useState('all')
   const [showAwardForm, setShowAwardForm] = useState(false)
 
-  const fetchLedgerEntries = async () => {
+  const fetchLedgerEntries = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams({
@@ -70,11 +70,11 @@ export default function PointLedgerPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [pagination.page, pagination.limit, search, transactionType, panelistId])
 
   useEffect(() => {
     fetchLedgerEntries()
-  }, [pagination.page, search, transactionType, panelistId])
+  }, [fetchLedgerEntries])
 
   const handlePageChange = (newPage: number) => {
     setPagination(prev => ({ ...prev, page: newPage }))

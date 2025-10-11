@@ -199,10 +199,6 @@ export function MailPackageList() {
     return () => clearTimeout(timer)
   }, [search])
   
-  useEffect(() => {
-    fetchMailPackages()
-  }, [fetchMailPackages])
-  
   const fetchMailPackages = useCallback(async (page: number = 1) => {
     setLoading(true)
     try {
@@ -231,6 +227,10 @@ export function MailPackageList() {
       setLoading(false)
     }
   }, [debouncedSearch, statusFilter, approvalFilter, sortBy, sortOrder])
+  
+  useEffect(() => {
+    fetchMailPackages()
+  }, [fetchMailPackages])
   
   const handleSort = (column: string) => {
     if (sortBy === column) {

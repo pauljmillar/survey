@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { 
@@ -16,11 +16,7 @@ export default function SurveyCompletionPage({ params }: { params: { surveyId: s
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  useEffect(() => {
-    fetchSurveyDetails()
-  }, [params.surveyId])
-
-  const fetchSurveyDetails = async () => {
+  const fetchSurveyDetails = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch(`/api/surveys/${params.surveyId}`)
@@ -36,7 +32,11 @@ export default function SurveyCompletionPage({ params }: { params: { surveyId: s
     } finally {
       setLoading(false)
     }
-  }
+  }, [params.surveyId])
+
+  useEffect(() => {
+    fetchSurveyDetails()
+  }, [fetchSurveyDetails])
 
   if (loading) {
     return (
