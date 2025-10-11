@@ -39,7 +39,7 @@ const appearance = {
 };
 
 export const metadata: Metadata = {
-  title: "Panelist Rewards Platform",
+  title: "PanelPro",
   description: "Earn points by completing surveys and redeem them for rewards",
 };
 

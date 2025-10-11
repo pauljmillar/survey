@@ -1,6 +1,6 @@
-# Next.js Multi-tenant Starter Template
+# PanelPro
 
-A minimalistic multi-tenant Next.js starter template with minimal setup and a modular design. Bring your own backend and database.
+A comprehensive panelist rewards platform built with Next.js, featuring survey management, points system, and reward redemption.
 
 [Demo](https://stack-template.vercel.app/)
 
