@@ -85,6 +85,10 @@ export default function PrivacyPolicyPage() {
               If you have any questions about this Privacy Policy or would like to exercise your rights, 
               please contact us through our support channels.
             </p>
+            <p className="text-muted-foreground mt-4">
+              To request deletion of your data, please email us with your request and we will process it 
+              within 30 days of receiving your request.
+            </p>
           </CardContent>
         </Card>
       </div>
