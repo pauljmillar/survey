@@ -53,7 +53,7 @@ export function SurveyViewer({ surveyId, onBack, onEdit }: SurveyViewerProps) {
 
   useEffect(() => {
     fetchSurvey()
-  }, [surveyId])
+  }, [fetchSurvey])
 
   const fetchSurvey = useCallback(async () => {
     try {

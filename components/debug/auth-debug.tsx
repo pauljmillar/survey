@@ -46,7 +46,7 @@ export function AuthDebug() {
 
   useEffect(() => {
     refreshDebugInfo()
-  }, [user, userRole, isSignedIn, loading, error, profileStatus])
+  }, [refreshDebugInfo])
 
   if (!isSignedIn) {
     return (

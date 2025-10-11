@@ -76,7 +76,7 @@ export function PointsDisplay({
   // Initial load
   useEffect(() => {
     fetchPointsData()
-  }, [isSignedIn])
+  }, [fetchPointsData])
 
   // Fallback polling if real-time connection fails
   useEffect(() => {
@@ -84,7 +84,7 @@ export function PointsDisplay({
 
     const interval = setInterval(fetchPointsData, refreshInterval)
     return () => clearInterval(interval)
-  }, [isSignedIn, refreshInterval, isRealtimeConnected])
+  }, [isSignedIn, refreshInterval, isRealtimeConnected, fetchPointsData])
 
   // Format points with commas and currency symbol
   const formatPoints = (points: number): string => {

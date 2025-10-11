@@ -87,7 +87,7 @@ export function SurveyEditor({ surveyId, onBack, onSave }: SurveyEditorProps) {
 
   useEffect(() => {
     fetchSurvey()
-  }, [surveyId])
+  }, [fetchSurvey])
 
   const fetchSurvey = useCallback(async () => {
     try {

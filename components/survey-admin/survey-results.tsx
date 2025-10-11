@@ -57,7 +57,7 @@ export function SurveyResults({ surveyId, onBack }: SurveyResultsProps) {
 
   useEffect(() => {
     fetchResults()
-  }, [surveyId])
+  }, [fetchResults])
 
   const fetchResults = useCallback(async () => {
     try {
