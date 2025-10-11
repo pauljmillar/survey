@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/types/database.types'
+import { filterAudience } from '@/lib/audience-filter'
 
 export async function POST(
   request: NextRequest,
@@ -40,26 +41,15 @@ export async function POST(
     }
 
     // Apply the filter criteria to get panelist IDs
-    const filterResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/admin/audiences/filter`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${user.id}` // This is a simplified approach
-      },
-      body: JSON.stringify({
-        filters
-      })
-    })
-
-    if (!filterResponse.ok) {
-      const filterError = await filterResponse.json()
+    let panelistIds: string[] = []
+    try {
+      const filterData = await filterAudience(filters)
+      panelistIds = filterData.panelist_ids || []
+    } catch (filterError) {
       return NextResponse.json({ 
-        error: `Failed to filter audience: ${filterError.error}` 
+        error: `Failed to filter audience: ${filterError instanceof Error ? filterError.message : 'Unknown error'}` 
       }, { status: 400 })
     }
-
-    const filterData = await filterResponse.json()
-    const panelistIds = filterData.panelist_ids || []
 
     if (panelistIds.length === 0) {
       return NextResponse.json({ 
