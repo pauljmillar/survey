@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Search, Filter, Eye, CheckCircle, XCircle, Clock, ChevronUp, ChevronDown, Image, MoreHorizontal, Edit } from 'lucide-react'
+import { Search, Filter, Eye, CheckCircle, XCircle, Clock, ChevronUp, ChevronDown, Image as ImageIcon, MoreHorizontal, Edit } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { formatFileSize, getThumbnailUrl, getPlaceholderImageUrl } from '@/lib/s3-utils'
@@ -88,7 +88,7 @@ function ThumbnailImage({ s3Key }: { s3Key: string | null }) {
   if (imageError) {
     return (
       <div className="w-12 h-12 bg-muted rounded border flex items-center justify-center">
-        <Image className="w-4 h-4 text-muted-foreground" />
+        <ImageIcon className="w-4 h-4 text-muted-foreground" />
       </div>
     )
   }
