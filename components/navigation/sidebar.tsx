@@ -31,7 +31,8 @@ import {
   Users2,
   Settings2,
   LogOut,
-  DollarSign
+  DollarSign,
+  Trophy
 } from "lucide-react"
 
 interface SidebarProps {
@@ -103,7 +104,8 @@ export function Sidebar({ className }: SidebarProps) {
       items: [
         { label: "Surveys", href: "/surveys", icon: ClipboardList },
         { label: "Live Surveys", href: "/surveys/live", icon: PlayCircle },
-        { label: "Panels", href: "/panels", icon: Users2 }
+        { label: "Panels", href: "/panels", icon: Users2 },
+        { label: "Contests", href: "/contests", icon: Trophy }
       ]
     },
     {
@@ -135,7 +137,8 @@ export function Sidebar({ className }: SidebarProps) {
         { label: "Audiences", href: "/admin/audiences", icon: Target },
         { label: "Surveys", href: "/admin/surveys", icon: ClipboardList },
         { label: "Live Surveys", href: "/admin/surveys/live", icon: PlayCircle },
-        { label: "Panels", href: "/admin/panels", icon: Users2 }
+        { label: "Panels", href: "/admin/panels", icon: Users2 },
+        { label: "Contests", href: "/admin/contests", icon: Trophy }
       ]
     },
     {

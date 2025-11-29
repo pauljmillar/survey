@@ -22,6 +22,7 @@ export const PERMISSIONS = {
   'manage_qualifications': ['survey_admin', 'system_admin'] as UserRole[],
   'view_survey_analytics': ['survey_admin', 'system_admin'] as UserRole[],
   'manage_panelists': ['survey_admin', 'system_admin'] as UserRole[],
+  'manage_contests': ['survey_admin', 'system_admin'] as UserRole[],
   
   // System Admin permissions
   'view_all_users': ['system_admin'] as UserRole[],

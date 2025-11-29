@@ -311,6 +311,134 @@ export interface Database {
           created_at?: string
         }
       }
+      contests: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          start_date: string
+          end_date: string
+          prize_points: number
+          status: 'draft' | 'active' | 'ended' | 'cancelled'
+          invite_type: 'all_panelists' | 'selected_panelists'
+          created_by: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string | null
+          start_date: string
+          end_date: string
+          prize_points: number
+          status?: 'draft' | 'active' | 'ended' | 'cancelled'
+          invite_type?: 'all_panelists' | 'selected_panelists'
+          created_by: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string | null
+          start_date?: string
+          end_date?: string
+          prize_points?: number
+          status?: 'draft' | 'active' | 'ended' | 'cancelled'
+          invite_type?: 'all_panelists' | 'selected_panelists'
+          created_by?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      contest_invitations: {
+        Row: {
+          id: string
+          contest_id: string
+          panelist_id: string
+          invited_at: string
+          invited_by: string
+        }
+        Insert: {
+          id?: string
+          contest_id: string
+          panelist_id: string
+          invited_at?: string
+          invited_by: string
+        }
+        Update: {
+          id?: string
+          contest_id?: string
+          panelist_id?: string
+          invited_at?: string
+          invited_by?: string
+        }
+      }
+      contest_participants: {
+        Row: {
+          id: string
+          contest_id: string
+          panelist_id: string
+          joined_at: string
+          points_earned: number
+          rank: number | null
+          prize_awarded: boolean
+          prize_awarded_at: string | null
+          prize_awarded_by: string | null
+        }
+        Insert: {
+          id?: string
+          contest_id: string
+          panelist_id: string
+          joined_at?: string
+          points_earned?: number
+          rank?: number | null
+          prize_awarded?: boolean
+          prize_awarded_at?: string | null
+          prize_awarded_by?: string | null
+        }
+        Update: {
+          id?: string
+          contest_id?: string
+          panelist_id?: string
+          joined_at?: string
+          points_earned?: number
+          rank?: number | null
+          prize_awarded?: boolean
+          prize_awarded_at?: string | null
+          prize_awarded_by?: string | null
+        }
+      }
+      contest_prize_awards: {
+        Row: {
+          id: string
+          contest_id: string
+          panelist_id: string
+          points_awarded: number
+          awarded_at: string
+          awarded_by: string
+          ledger_entry_id: string | null
+        }
+        Insert: {
+          id?: string
+          contest_id: string
+          panelist_id: string
+          points_awarded: number
+          awarded_at?: string
+          awarded_by: string
+          ledger_entry_id?: string | null
+        }
+        Update: {
+          id?: string
+          contest_id?: string
+          panelist_id?: string
+          points_awarded?: number
+          awarded_at?: string
+          awarded_by?: string
+          ledger_entry_id?: string | null
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -323,6 +451,8 @@ export interface Database {
       survey_status: 'draft' | 'active' | 'inactive'
       question_type: 'multiple_choice' | 'text' | 'rating' | 'checkbox' | 'yes_no' | 'date_time'
       redemption_status: 'pending' | 'completed' | 'cancelled'
+      contest_status: 'draft' | 'active' | 'ended' | 'cancelled'
+      contest_invite_type: 'all_panelists' | 'selected_panelists'
     }
   }
 }
@@ -411,6 +541,8 @@ export type Enums<
 export type UserRole = Database["public"]["Enums"]["user_role"]
 export type SurveyStatus = Database["public"]["Enums"]["survey_status"]
 export type RedemptionStatus = Database["public"]["Enums"]["redemption_status"]
+export type ContestStatus = Database["public"]["Enums"]["contest_status"]
+export type ContestInviteType = Database["public"]["Enums"]["contest_invite_type"]
 
 export type User = Tables<"users">
 export type PanelistProfile = Tables<"panelist_profiles">
@@ -419,4 +551,8 @@ export type SurveyQualification = Tables<"survey_qualifications">
 export type SurveyCompletion = Tables<"survey_completions">
 export type MerchantOffer = Tables<"merchant_offers">
 export type Redemption = Tables<"redemptions">
-export type ActivityLog = Tables<"activity_log"> 
+export type ActivityLog = Tables<"activity_log">
+export type Contest = Tables<"contests">
+export type ContestInvitation = Tables<"contest_invitations">
+export type ContestParticipant = Tables<"contest_participants">
+export type ContestPrizeAward = Tables<"contest_prize_awards"> 
