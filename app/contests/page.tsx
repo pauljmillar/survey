@@ -5,7 +5,16 @@ import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Trophy, Calendar, Users, ArrowRight } from 'lucide-react'
+import { Trophy, Calendar, Users, ArrowRight, Award } from 'lucide-react'
+import Link from 'next/link'
+
+interface LeaderboardEntry {
+  rank: number | null
+  points_earned: number
+  panelist: {
+    users: Array<{ email: string }>
+  }
+}
 
 interface Contest {
   id: string
@@ -16,6 +25,11 @@ interface Contest {
   prize_points: number
   status: 'draft' | 'active' | 'ended' | 'cancelled'
   has_joined: boolean
+  // Leaderboard data (only for joined contests)
+  user_rank?: number | null
+  user_points?: number
+  total_participants?: number
+  leaderboard?: LeaderboardEntry[]
 }
 
 export default function ContestsPage() {
@@ -43,7 +57,38 @@ export default function ContestsPage() {
           filtered = filtered.filter((c: Contest) => c.has_joined)
         }
         
-        setContests(filtered)
+        // For joined active contests, fetch leaderboard data
+        const contestsWithLeaderboards = await Promise.all(
+          filtered.map(async (contest: Contest) => {
+            if (contest.has_joined && contest.status === 'active') {
+              try {
+                // Fetch both contest details and leaderboard
+                const [contestResponse, leaderboardResponse] = await Promise.all([
+                  fetch(`/api/contests/${contest.id}`),
+                  fetch(`/api/contests/${contest.id}/leaderboard?limit=5`)
+                ])
+                
+                if (contestResponse.ok && leaderboardResponse.ok) {
+                  const contestData = await contestResponse.json()
+                  const leaderboardData = await leaderboardResponse.json()
+                  
+                  return {
+                    ...contest,
+                    user_rank: contestData.participation?.rank || leaderboardData.user_rank || null,
+                    user_points: contestData.participation?.points_earned || leaderboardData.user_points || 0,
+                    total_participants: leaderboardData.total_participants || 0,
+                    leaderboard: (leaderboardData.leaderboard || []).slice(0, 5) // Top 5
+                  }
+                }
+              } catch (error) {
+                console.error(`Error fetching leaderboard for contest ${contest.id}:`, error)
+              }
+            }
+            return contest
+          })
+        )
+        
+        setContests(contestsWithLeaderboards)
       } else {
         console.error('Failed to fetch contests')
       }
@@ -138,7 +183,7 @@ export default function ContestsPage() {
                     {contest.description && (
                       <p className="text-sm text-muted-foreground mb-4">{contest.description}</p>
                     )}
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-4">
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-muted-foreground" />
                         <div>
@@ -161,6 +206,99 @@ export default function ContestsPage() {
                         </div>
                       </div>
                     </div>
+
+                    {/* Leaderboard Section for Joined Contests */}
+                    {contest.has_joined && contest.status === 'active' && (
+                      <div className="mt-4 pt-4 border-t">
+                        {/* User's Position */}
+                        {(contest.user_rank !== undefined || contest.user_points !== undefined) && (
+                          <div className="mb-3 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="text-xs text-muted-foreground mb-1">Your Position</div>
+                                <div className="flex items-center gap-2">
+                                  {contest.user_rank ? (
+                                    <>
+                                      <span className="text-xl font-bold text-primary">
+                                        #{contest.user_rank}
+                                      </span>
+                                      {contest.total_participants && (
+                                        <span className="text-sm text-muted-foreground">
+                                          of {contest.total_participants}
+                                        </span>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <span className="text-sm text-muted-foreground">Not ranked yet</span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-xs text-muted-foreground mb-1">Your Points</div>
+                                <div className="text-xl font-bold text-primary">
+                                  {contest.user_points?.toLocaleString() || 0}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Top Leaderboard */}
+                        {contest.leaderboard && contest.leaderboard.length > 0 && (
+                          <div className="mb-3">
+                            <div className="text-xs font-medium text-muted-foreground mb-2">
+                              Top Participants
+                            </div>
+                            <div className="space-y-1">
+                              {contest.leaderboard.map((entry, index) => {
+                                const isCurrentUser = entry.rank === contest.user_rank
+                                return (
+                                  <div
+                                    key={index}
+                                    className={`flex items-center justify-between p-2 rounded text-sm ${
+                                      isCurrentUser
+                                        ? 'bg-primary/10 border border-primary/20'
+                                        : 'hover:bg-muted/50'
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-6 text-center">
+                                        {entry.rank === 1 ? (
+                                          <Trophy className="w-4 h-4 text-yellow-500 mx-auto" />
+                                        ) : (
+                                          <span className="font-semibold text-xs">
+                                            {entry.rank || '-'}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div className="text-xs">
+                                        <span className="font-medium">
+                                          {entry.panelist.users[0]?.email || 'Unknown'}
+                                        </span>
+                                        {isCurrentUser && (
+                                          <Badge variant="default" className="ml-1 text-xs">You</Badge>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="text-xs font-semibold">
+                                      {entry.points_earned.toLocaleString()} pts
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* View Full Leaderboard Link */}
+                        <Link href={`/contests/${contest.id}`}>
+                          <Button variant="outline" size="sm" className="w-full">
+                            View Full Leaderboard
+                            <ArrowRight className="w-3 h-3 ml-2" />
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
                   </div>
                   <div className="ml-4">
                     <Button

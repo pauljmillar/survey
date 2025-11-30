@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/use-auth'
 
 import { CompactSurveyList } from '@/components/panelist/survey-list'
 import { ProgramStatus } from '@/components/panelist/program-status'
+import { ContestLeaderboards } from '@/components/panelist/contest-leaderboards'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -361,6 +362,9 @@ export default function DashboardClient() {
                 </div>
               </Card>
             </div>
+
+            {/* Active Contest Leaderboards */}
+            <ContestLeaderboards />
 
             {/* Survey Lists - Full width, no outer card */}
             <div className="order-2 lg:order-1 space-y-6">
