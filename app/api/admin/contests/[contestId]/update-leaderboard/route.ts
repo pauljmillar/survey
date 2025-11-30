@@ -45,7 +45,7 @@ export async function POST(
       .from('contest_participants')
       .select('*')
       .eq('contest_id', contestId)
-      .order('rank', { ascending: true, nullsLast: true })
+      .order('rank', { ascending: true })
 
     if (participantsError) {
       console.error('Error fetching updated leaderboard:', participantsError)

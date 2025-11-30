@@ -80,7 +80,7 @@ export async function GET(
         )
       `)
       .eq('contest_id', contestId)
-      .order('rank', { ascending: true, nullsLast: true })
+      .order('rank', { ascending: true })
       .limit(actualLimit)
 
     if (leaderboardError) {
@@ -89,7 +89,11 @@ export async function GET(
     }
 
     // Fetch user emails separately and merge
-    const userIds = leaderboard?.map(entry => entry.panelist?.user_id).filter(Boolean) || []
+    // Note: panelist is returned as an array by Supabase even for one-to-one relationships
+    const userIds = leaderboard?.map(entry => {
+      const panelist = Array.isArray(entry.panelist) ? entry.panelist[0] : entry.panelist
+      return panelist?.user_id
+    }).filter(Boolean) as string[] || []
     const userEmailsMap: Record<string, string> = {}
     
     if (userIds.length > 0) {
@@ -106,13 +110,16 @@ export async function GET(
     }
 
     // Transform leaderboard to include user emails in expected format
-    const transformedLeaderboard = leaderboard?.map(entry => ({
-      ...entry,
-      panelist: {
-        ...entry.panelist,
-        users: entry.panelist?.user_id ? [{ email: userEmailsMap[entry.panelist.user_id] || 'Unknown' }] : []
+    const transformedLeaderboard = leaderboard?.map(entry => {
+      const panelist = Array.isArray(entry.panelist) ? entry.panelist[0] : entry.panelist
+      return {
+        ...entry,
+        panelist: {
+          ...panelist,
+          users: panelist?.user_id ? [{ email: userEmailsMap[panelist.user_id] || 'Unknown' }] : []
+        }
       }
-    })) || []
+    }) || []
 
     // Get total participant count
     const { count: totalParticipants } = await supabase

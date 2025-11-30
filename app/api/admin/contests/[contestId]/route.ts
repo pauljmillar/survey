@@ -52,7 +52,7 @@ export async function GET(
         )
       `)
       .eq('contest_id', contestId)
-      .order('rank', { ascending: true, nullsLast: true })
+      .order('rank', { ascending: true })
 
     if (participantsError) {
       console.error('Error fetching participants:', participantsError)
